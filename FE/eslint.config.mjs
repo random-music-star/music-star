@@ -1,0 +1,42 @@
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
+import { FlatCompat } from '@eslint/eslintrc';
+import eslint from '@eslint/js';
+import tseslint from 'typescript-eslint';
+import unusedImports from 'eslint-plugin-unused-imports';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const compat = new FlatCompat({
+  baseDirectory: __dirname,
+  recommendedConfig: eslint.configs.recommended,
+  allConfig: eslint.configs.all,
+});
+
+/** @type {import('eslint').Linter.Config[]} */
+export default tseslint.config(
+  { files: ['**/*.{js,mjs,cjs,ts,jsx,tsx}'] },
+  eslint.configs.recommended,
+  ...tseslint.configs.recommended,
+  {
+    plugins: {
+      'unused-imports': unusedImports,
+    },
+    rules: {
+      'no-var': 'warn',
+    },
+  },
+  {
+    rules: {
+      'react/react-in-jsx-scope': 'off',
+      'no-var': 'warn',
+    },
+  },
+  ...compat.config({
+    extends: ['next', 'next/core-web-vitals'],
+    rules: {
+      'no-var': 'warn',
+    },
+  }),
+);
