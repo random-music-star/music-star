@@ -7,7 +7,24 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
   gameMode: null,
   songUrl: null,
   gameChattings: [],
-  publicChattings: [],
+  publicChattings: [
+    { sender: '달송이', messageType: 'CHAT', message: '안녕하세요! 반가워요~' },
+    { sender: '퐁퐁이', messageType: 'CHAT', message: '오늘 방 만들 사람?' },
+    { sender: '알송이', messageType: 'CHAT', message: '저요! 같이 게임해요' },
+    {
+      sender: '운영자',
+      messageType: 'NOTICE',
+      message: '게임 서버가 점검 중입니다. 잠시만 기다려주세요.',
+    },
+    { sender: '구름이', messageType: 'CHAT', message: '언제 끝나나요?' },
+    { sender: '별님이', messageType: 'CHAT', message: '30분 정도 걸린대요' },
+    {
+      sender: '알송이',
+      messageType: 'CHAT',
+      message: '그럼 조금 있다 다시 올게요!',
+    },
+    { sender: '달송이', messageType: 'CHAT', message: '네~ 다음에 봐요~' },
+  ],
   boardInfo: null,
   skipInfo: null,
   gameResult: null,
@@ -41,12 +58,44 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
     Object.values(subscriptions).forEach(sub => sub?.unsubscribe());
 
     set({
-      // 상태 초기화
       remainTime: null,
       gameMode: null,
       songUrl: null,
       gameChattings: [],
-      publicChattings: [],
+      publicChattings: [
+        {
+          sender: '달송이',
+          messageType: 'CHAT',
+          message: '안녕하세요! 반가워요~',
+        },
+        {
+          sender: '퐁퐁이',
+          messageType: 'CHAT',
+          message: '오늘 방 만들 사람?',
+        },
+        {
+          sender: '알송이',
+          messageType: 'CHAT',
+          message: '저요! 같이 게임해요',
+        },
+        {
+          sender: '운영자',
+          messageType: 'NOTICE',
+          message: '게임 서버가 점검 중입니다. 잠시만 기다려주세요.',
+        },
+        { sender: '구름이', messageType: 'CHAT', message: '언제 끝나나요?' },
+        {
+          sender: '별님이',
+          messageType: 'CHAT',
+          message: '30분 정도 걸린대요',
+        },
+        {
+          sender: '알송이',
+          messageType: 'CHAT',
+          message: '그럼 조금 있다 다시 올게요!',
+        },
+        { sender: '달송이', messageType: 'CHAT', message: '네~ 다음에 봐요~' },
+      ],
       boardInfo: null,
       skipInfo: null,
       gameResult: null,
@@ -67,12 +116,44 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
     Object.values(subscriptions).forEach(sub => sub?.unsubscribe());
 
     set({
-      // 상태 초기화
       remainTime: null,
       gameMode: null,
       songUrl: null,
       gameChattings: [],
-      publicChattings: [],
+      publicChattings: [
+        {
+          sender: '달송이',
+          messageType: 'CHAT',
+          message: '안녕하세요! 반가워요~',
+        },
+        {
+          sender: '퐁퐁이',
+          messageType: 'CHAT',
+          message: '오늘 방 만들 사람?',
+        },
+        {
+          sender: '알송이',
+          messageType: 'CHAT',
+          message: '저요! 같이 게임해요',
+        },
+        {
+          sender: '운영자',
+          messageType: 'NOTICE',
+          message: '게임 서버가 점검 중입니다. 잠시만 기다려주세요.',
+        },
+        { sender: '구름이', messageType: 'CHAT', message: '언제 끝나나요?' },
+        {
+          sender: '별님이',
+          messageType: 'CHAT',
+          message: '30분 정도 걸린대요',
+        },
+        {
+          sender: '알송이',
+          messageType: 'CHAT',
+          message: '그럼 조금 있다 다시 올게요!',
+        },
+        { sender: '달송이', messageType: 'CHAT', message: '네~ 다음에 봐요~' },
+      ],
       boardInfo: null,
       skipInfo: null,
       gameResult: null,

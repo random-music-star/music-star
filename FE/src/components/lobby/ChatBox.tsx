@@ -1,103 +1,110 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import ChatMessage from "./ChatMessage";
+import { useEffect, useState, useRef } from 'react';
+import { Button } from '@/components/ui/button';
+import { useWebSocketStore } from '@/stores/useWebsocketStore';
 
-// 채팅 메시지 타입 정의
-interface Message {
-  id: string;
-  userId: string;
-  text: string;
-  timestamp: string;
+export interface Chatting {
+  sender: string;
+  messageType: string;
+  message: string;
 }
 
-interface ChatBoxProps {
-  userId: string;
-}
+export default function ChatBox() {
+  const userNickname = '알송이';
 
-export default function ChatBox({ userId }: ChatBoxProps) {
-  // 메시지 목록 상태 (UI 테스트용 초기 데이터)
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      userId: 'user1',
-      text: '안녕하세요!',
-      timestamp: new Date().toISOString()
-    },
-    {
-      id: '2',
-      userId: userId, // 현재 사용자
-      text: '반갑습니다.',
-      timestamp: new Date().toISOString()
+  const [newMessage, setNewMessage] = useState<string>('');
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+
+  const { sendMessage, updateSubscription, isConnected, publicChattings } =
+    useWebSocketStore();
+
+  useEffect(() => {
+    if (isConnected) {
+      updateSubscription('channel');
     }
-  ]);
+  }, [isConnected, updateSubscription]);
 
-  // 새 메시지 입력 상태
-  const [newMessage, setNewMessage] = useState<string>("");
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop =
+        chatContainerRef.current.scrollHeight;
+    }
+  }, [publicChattings]);
 
-  // 메시지 전송 함수 (UI만 업데이트)
-  const sendMessage = () => {
+  const handleSendMessage = () => {
     if (!newMessage.trim()) return;
 
-    const newMsg: Message = {
-      id: `${Date.now()}`,
-      userId,
-      text: newMessage,
-      timestamp: new Date().toISOString()
+    const newChatting: Chatting = {
+      sender: userNickname,
+      messageType: 'CHAT',
+      message: newMessage,
     };
 
-    setMessages([...messages, newMsg]);
-    setNewMessage("");
+    sendMessage('/app/channel/1', {
+      type: 'chatting',
+      request: newChatting,
+    });
+
+    setNewMessage('');
   };
 
-  // Enter 키와 Shift+Enter 키 처리
   const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter") {
+    if (e.key === 'Enter') {
       if (!e.shiftKey) {
-        e.preventDefault(); // 줄바꿈 기본 동작 방지
-        sendMessage();
+        e.preventDefault();
+        handleSendMessage();
       }
-      // Shift+Enter인 경우 기본 동작(줄바꿈) 유지
     }
   };
 
   return (
-    <div className="flex flex-col h-full border rounded-lg">
-      <div className="bg-[hsl(var(--color-chat-header-bg))] text-[hsl(var(--color-chat-header-text))] p-3 rounded-t-lg">
-        <h2 className="text-lg font-semibold">로비 채팅</h2>
+    <div className='flex flex-col h-full border border-gray-200 rounded-lg shadow-sm bg-white overflow-hidden'>
+      <div className='bg-blue-600 text-white px-4 py-3 rounded-t-lg shadow-sm'>
+        <h2 className='text-lg font-semibold'>로비 채팅</h2>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-3 space-y-2">
-        {messages.length === 0 ? (
-          <div className="text-center text-[hsl(var(--color-text-secondary))] py-4">
+      <div
+        ref={chatContainerRef}
+        className='flex-1 overflow-y-auto p-4 space-y-2 bg-white'
+      >
+        {publicChattings.length === 0 ? (
+          <div className='text-center text-gray-500 py-6'>
             채팅 메시지가 없습니다.
           </div>
         ) : (
-          messages.map((message) => (
-            <ChatMessage
-              key={message.id}
-              message={message}
-              isCurrentUser={message.userId === userId}
-            />
+          publicChattings.map((chat, index) => (
+            <div key={index} className='text-sm leading-relaxed'>
+              {chat.messageType === 'NOTICE' ? (
+                <div className='bg-gray-100 text-gray-700 py-1 px-3 rounded text-center my-2'>
+                  <span className='text-red-500 font-semibold'>[공지]</span>{' '}
+                  {chat.message}
+                </div>
+              ) : (
+                <div className='flex'>
+                  <span className='font-medium mr-1'>{chat.sender}:</span>
+                  <span>{chat.message}</span>
+                </div>
+              )}
+            </div>
           ))
         )}
       </div>
 
-      <div className="p-3 border-t border-[hsl(var(--color-room-border))]">
-        <div className="flex gap-2">
-          <div className="flex-1">
+      <div className='p-3 border-t border-gray-200 bg-white'>
+        <div className='flex gap-2'>
+          <div className='flex-1'>
             <textarea
               value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
+              onChange={e => setNewMessage(e.target.value)}
               onKeyDown={handleKeyPress}
-              placeholder="메시지 입력... (Enter: 전송, Shift+Enter: 줄바꿈)"
-              className="w-full resize-none border rounded-md p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--color-primary))] focus:border-transparent"
+              placeholder='메시지를 입력하세요... (Enter: 전송, Shift+Enter: 줄바꿈)'
+              className='w-full resize-none border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
               rows={2}
             />
           </div>
           <Button
-            onClick={sendMessage}
+            onClick={handleSendMessage}
             disabled={!newMessage.trim()}
-            className="bg-[hsl(var(--color-primary))] hover:bg-[hsl(var(--color-primary-hover))] self-end h-10"
+            className='self-end h-10 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors'
           >
             전송
           </Button>
