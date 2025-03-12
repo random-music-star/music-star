@@ -12,7 +12,7 @@ import SocketLayout from '@/components/layouts/SocketLayout';
 import { useWebSocketStore } from '@/stores/useWebsocketStore';
 
 export default function GameRoom() {
-  const { updateSubscription } = useWebSocketStore();
+  const { isConnected, updateSubscription } = useWebSocketStore();
 
   const currentUserId = 'user1'; // 현재 접속한 사용자 ID
   const [isGameStarted, setIsGameStarted] = useState(false);
@@ -43,8 +43,10 @@ export default function GameRoom() {
   };
 
   useEffect(() => {
-    updateSubscription('game-room');
-  }, []);
+    if (isConnected) {
+      updateSubscription('game-room');
+    }
+  }, [isConnected]);
 
   const handleStartGame = () => {
     setIsGameStarted(true);

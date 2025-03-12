@@ -9,7 +9,7 @@ export interface Chatting {
 export interface BoardInfo {
   sender: string;
   messageType: string;
-  message: string;
+  message: 'default' | 'notice' | 'error';
 }
 
 export type BoardUser = {
