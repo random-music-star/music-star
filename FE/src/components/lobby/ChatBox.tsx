@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { useWebSocketStore } from '@/stores/useWebsocketStore';
+import { useWebSocketStore } from '@/stores/websocket/useWebsocketStore';
+import { usePublicChatStore } from '@/stores/websocket/usePublicChatStore';
 
 export interface Chatting {
   sender: string;
@@ -14,14 +15,14 @@ export default function ChatBox() {
   const [newMessage, setNewMessage] = useState<string>('');
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
-  const { sendMessage, updateSubscription, isConnected, publicChattings } =
-    useWebSocketStore();
+  const { sendMessage, updateSubscription, isConnected } = useWebSocketStore();
+  const { publicChattings } = usePublicChatStore();
 
   useEffect(() => {
     if (isConnected) {
       updateSubscription('channel');
     }
-  }, [isConnected, updateSubscription]);
+  }, [isConnected]);
 
   useEffect(() => {
     if (chatContainerRef.current) {

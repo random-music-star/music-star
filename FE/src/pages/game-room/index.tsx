@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import GameBoard from '../../components/game-room/GameBoard';
 import ReadyPanel from '../../components/game-room/ReadyPannel';
 import SocketLayout from '@/components/layouts/SocketLayout';
-import { useWebSocketStore } from '@/stores/useWebsocketStore';
+import { useWebSocketStore } from '@/stores/websocket/useWebsocketStore';
 
 export default function GameRoom() {
   const { isConnected, updateSubscription } = useWebSocketStore();

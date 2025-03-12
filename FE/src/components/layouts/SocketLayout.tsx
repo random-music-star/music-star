@@ -1,4 +1,4 @@
-import { useWebSocketStore } from '@/stores/useWebsocketStore';
+import { useWebSocketStore } from '@/stores/websocket/useWebsocketStore';
 import { ReactNode, useEffect } from 'react';
 
 interface SocketLayoutProps {

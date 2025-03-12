@@ -42,14 +42,30 @@ export interface WebSocketState {
   disconnectWebSocket: () => void;
   updateSubscription: (subscriptionType: string) => void;
   sendMessage: (destination: string, payload?: unknown) => void;
+  isConnected: boolean;
+}
+
+export interface GameChatState {
+  gameChattings: Chatting[];
+  setGameChattings: (gameChatting: Chatting) => void;
+  skipInfo: SkipUser[];
+  setSkipInfo: (skipUser: SkipUser) => void;
+  resetGameChatStore: () => void;
+}
+
+export interface GameScreenState {
   remainTime: number | null;
   gameMode: GameMode | null;
   songUrl: string | null;
-  gameChattings: Chatting[] | [];
-  publicChattings: Chatting[] | [];
-  boardInfo: BoardUser[] | null;
-  skipInfo: SkipUser[] | null;
+  boardInfo: BoardUser[];
+  score: BoardUser[];
   gameResult: GameResult | null;
   gameHint: GameHint | null;
-  isConnected: boolean;
+  resetGameScreenStore: () => void;
+}
+
+export interface PublicChatState {
+  publicChattings: Chatting[];
+  setPublicChattings: (publicChatting?: Chatting) => void;
+  resetPublicChatStore: () => void;
 }
