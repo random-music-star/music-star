@@ -42,7 +42,9 @@ const LobbyPage = () => {
       </form>
       <div>
         {publicChattings.map(chat => (
-          <p>{`[${chat.messageType}] ${chat.sender}: ${chat.message}`}</p>
+          <p
+            key={`${chat.messageType} - ${chat.message}`}
+          >{`[${chat.messageType}] ${chat.sender}: ${chat.message}`}</p>
         ))}
       </div>
     </SocketLayout>
