@@ -96,7 +96,7 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
 
     if (subscriptionType === 'game-room') {
       newSubscriptions['game-room'] = client.subscribe(
-        `topic/channel/1/room/1`,
+        `/topic/channel/1/room/1`,
         message => {
           const { type, response } = JSON.parse(message.body);
 
@@ -120,7 +120,9 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
           }
 
           if (type === 'gameChat') {
-            console.log('gameChat');
+            set({
+              gameChattings: [...get().gameChattings, response],
+            });
           }
 
           if (type === 'boardInfo') {
