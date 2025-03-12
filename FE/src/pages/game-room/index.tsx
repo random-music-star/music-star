@@ -1,5 +1,5 @@
 // pages/game-room/index.tsx
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Head from 'next/head';
 import ChatBox from '../../components/game-room/ChatBox';
 import RoomInfo from '../../components/game-room/RoomInfo';
@@ -9,8 +9,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import GameBoard from '../../components/game-room/GameBoard';
 import ReadyPanel from '../../components/game-room/ReadyPannel';
 import SocketLayout from '@/components/layouts/SocketLayout';
+import { useWebSocketStore } from '@/stores/useWebsocketStore';
 
 export default function GameRoom() {
+  const { updateSubscription } = useWebSocketStore();
+
   const currentUserId = 'user1'; // 현재 접속한 사용자 ID
   const [isGameStarted, setIsGameStarted] = useState(false);
   const [readyStatus, setReadyStatus] = useState<{ [key: string]: boolean }>(
@@ -38,6 +41,10 @@ export default function GameRoom() {
       [userId]: !prev[userId],
     }));
   };
+
+  useEffect(() => {
+    updateSubscription('game-room');
+  }, []);
 
   const handleStartGame = () => {
     setIsGameStarted(true);

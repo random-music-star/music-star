@@ -31,6 +31,10 @@ export interface GameHint {
   singer: string | null;
 }
 
+export interface GameMode {
+  mode: string;
+  round: number;
+}
 export interface WebSocketState {
   client: Client | null;
   subscriptions: Record<string, StompSubscription | null>;
@@ -39,7 +43,7 @@ export interface WebSocketState {
   updateSubscription: (subscriptionType: string) => void;
   sendMessage: (destination: string, payload?: unknown) => void;
   remainTime: number | null;
-  mode: string | null; // 유니온으로 추후 변경
+  gameMode: GameMode | null;
   songUrl: string | null;
   gameChattings: Chatting[] | [];
   publicChattings: Chatting[] | [];

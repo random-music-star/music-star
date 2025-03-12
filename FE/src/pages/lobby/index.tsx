@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import SocketLayout from '@/components/layouts/SocketLayout';
 import { useWebSocketStore } from '@/stores/useWebsocketStore';
+import Link from 'next/link';
 
 const LobbyPage = () => {
   const { sendMessage, updateSubscription, isConnected, publicChattings } =
@@ -47,6 +48,7 @@ const LobbyPage = () => {
           >{`[${chat.messageType}] ${chat.sender}: ${chat.message}`}</p>
         ))}
       </div>
+      <Link href='/game-room'>게임</Link>
     </SocketLayout>
   );
 };
