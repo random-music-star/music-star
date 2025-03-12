@@ -2,7 +2,8 @@ import { useState, useRef, useEffect } from 'react';
 import { Send } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { useWebSocketStore } from '@/stores/useWebsocketStore';
+import { useWebSocketStore } from '@/stores/websocket/useWebsocketStore';
+import { useGameChatStore } from '@/stores/websocket/useGameChatStore';
 
 interface ChatBoxProps {
   currentUserId: string;
@@ -11,7 +12,8 @@ interface ChatBoxProps {
 export default function ChatBox({ currentUserId }: ChatBoxProps) {
   const [inputValue, setInputValue] = useState('');
   const chatContainerRef = useRef<HTMLDivElement>(null);
-  const { sendMessage, gameChattings } = useWebSocketStore();
+  const { sendMessage } = useWebSocketStore();
+  const { gameChattings } = useGameChatStore();
 
   useEffect(() => {
     if (chatContainerRef.current) {
