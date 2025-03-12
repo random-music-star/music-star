@@ -41,9 +41,11 @@ export interface WebSocketState {
   remainTime: number | null;
   mode: string | null; // 유니온으로 추후 변경
   songUrl: string | null;
-  gameChattings: Chatting[] | null;
+  gameChattings: Chatting[] | [];
+  publicChattings: Chatting[] | [];
   boardInfo: BoardUser[] | null;
   skipInfo: SkipUser[] | null;
   gameResult: GameResult | null;
   gameHint: GameHint | null;
+  isConnected: boolean;
 }

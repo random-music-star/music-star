@@ -1,14 +1,19 @@
-import { ReactNode } from 'react';
+import { useWebSocketStore } from '@/stores/useWebsocketStore';
+import { ReactNode, useEffect } from 'react';
 
 interface SocketLayoutProps {
   children: ReactNode;
 }
 const SocketLayout = ({ children }: SocketLayoutProps) => {
-  return (
-    <div className='flex flex-col h-screen w-screen flex-col bg-indigo-400'>
-      {children}
-    </div>
-  );
+  const { connectWebSocket, disconnectWebSocket } = useWebSocketStore();
+
+  useEffect(() => {
+    connectWebSocket();
+
+    return () => disconnectWebSocket();
+  }, []);
+
+  return <div className='flex flex-col min-h-screen w-screen'>{children}</div>;
 };
 
 export default SocketLayout;

@@ -6,11 +6,13 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
   remainTime: null,
   mode: null,
   songUrl: null,
-  gameChattings: null,
+  gameChattings: [],
+  publicChattings: [],
   boardInfo: null,
   skipInfo: null,
   gameResult: null,
   gameHint: null,
+  isConnected: false,
 
   client: null,
   subscriptions: {},
@@ -18,10 +20,14 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
     if (get().client) return;
 
     const client = new Client({
-      webSocketFactory: () => new WebSocket(`${process.env.WEBSOCKET_URL}`),
+      webSocketFactory: () => new WebSocket(`ws://localhost:8080/ws`),
       reconnectDelay: 5000,
       heartbeatIncoming: 4000,
       heartbeatOutgoing: 4000,
+
+      onConnect: () => {
+        set({ isConnected: true });
+      },
     });
 
     client.activate();
@@ -39,12 +45,13 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
 
     if (client) {
       client.deactivate();
-      set({ client: null, subscriptions: {} });
+      set({ client: null, subscriptions: {}, isConnected: false });
     }
   },
 
   updateSubscription: (subscriptionType: string) => {
     const { client, subscriptions } = get();
+
     if (!client || !client.connected) return;
 
     Object.values(subscriptions).forEach(sub => sub?.unsubscribe());
@@ -55,23 +62,17 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
 
     const newSubscriptions: Record<string, StompSubscription> = {};
 
-    if (subscriptionType === 'status') {
-      newSubscriptions['status'] = client.subscribe(
-        `/topic/game/status`,
+    if (subscriptionType === 'channel') {
+      newSubscriptions['channel'] = client.subscribe(
+        `/topic/channel/1`,
         message => {
-          const data = JSON.parse(message.body);
-          console.log(data);
-          // 상태 업데이트
+          const { _type, response } = JSON.parse(message.body);
+
+          set({
+            publicChattings: [...get().publicChattings, response],
+          });
         },
       );
-    }
-
-    if (subscriptionType === 'game') {
-      newSubscriptions['room'] = client.subscribe(`/topic/game`, message => {
-        const data = JSON.parse(message.body);
-        console.log(data);
-        // 상태 업데이트
-      });
     }
 
     set({ subscriptions: newSubscriptions });
