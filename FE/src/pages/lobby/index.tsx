@@ -1,4 +1,4 @@
-import SocketLayout from '@/layouts/SocketLayout';
+import SocketLayout from '@/components/layouts/SocketLayout';
 
 const LobbyPage = () => {
   return <SocketLayout>lobby</SocketLayout>;

@@ -8,7 +8,7 @@ import { roomData, userData } from './_data/game-data';
 import { motion, AnimatePresence } from 'framer-motion';
 import GameBoard from './_components/GameBoard';
 import ReadyPanel from './_components/ReadyPannel';
-import SocketLayout from '@/layouts/SocketLayout';
+import SocketLayout from '@/components/layouts/SocketLayout';
 
 export default function GameRoom() {
   const currentUserId = 'user1'; // 현재 접속한 사용자 ID
