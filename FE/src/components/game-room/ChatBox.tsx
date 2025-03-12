@@ -3,7 +3,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Send } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { chatMessages } from '../_data/game-data';
+import { chatMessages } from '../../_data/game-data';
 
 interface ChatBoxProps {
   currentUserId: string;

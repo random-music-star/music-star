@@ -1,6 +1,6 @@
 // pages/game-room/_components/EditRoomModal.tsx
 import { useState } from 'react';
-import { Room } from '../_types/game';
+import { Room } from '../../_types/game';
 import {
   Dialog,
   DialogContent,

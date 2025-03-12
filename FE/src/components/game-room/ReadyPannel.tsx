@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Crown, CheckCircle, Clock, PlayCircle } from 'lucide-react';
-import { User } from '../_types/game';
+import { User } from '../../_types/game';
 import { motion } from 'framer-motion';
 
 interface ReadyPanelProps {

@@ -1,5 +1,5 @@
 // pages/game-room/_components/RoomInfo.tsx
-import { Room } from '../_types/game';
+import { Room } from '../../_types/game';
 import { Lock, Unlock, Users } from 'lucide-react';
 
 interface RoomInfoProps {
