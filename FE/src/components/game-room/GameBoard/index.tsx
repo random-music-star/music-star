@@ -10,7 +10,8 @@ export default function GameBoard() {
     <div className='h-full flex flex-col p-4'>
       {gameState === 'gameWait' && <GameWait />}
       {gameState === 'gameQuizOpened' && <GameQuiz />}
-      {gameState === 'gameResultOpened' && <GameResult />}
+      {(gameState === 'gameResultOpened' ||
+        gameState === 'gameScoreUpdate') && <GameResult />}
     </div>
   );
 }

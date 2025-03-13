@@ -1,6 +1,11 @@
 import { create } from 'zustand';
 
-type GameStateType = 'gameWait' | 'gameQuizOpened' | 'gameResultOpened' | null;
+type GameStateType =
+  | 'gameWait'
+  | 'gameQuizOpened'
+  | 'gameResultOpened'
+  | 'gameScoreUpdate'
+  | null;
 
 interface GameState {
   gameState: GameStateType | null;
