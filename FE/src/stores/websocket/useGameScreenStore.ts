@@ -1,4 +1,5 @@
 import {
+  Board,
   BoardUser,
   GameHint,
   GameMode,
@@ -11,7 +12,7 @@ const initialState = {
   remainTime: null,
   gameMode: null,
   songUrl: null,
-  boardInfo: [],
+  boardInfo: null,
   score: [],
   gameResult: null,
   gameHint: null,
@@ -27,8 +28,8 @@ export const useGameScreenStore = create<GameScreenState>(set => ({
   songUrl: null,
   setSongUrl: (songUrl: string | null) => set({ songUrl }),
 
-  boardInfo: [],
-  setBoardInfo: (boardInfo: BoardUser[] | []) => set({ boardInfo }),
+  boardInfo: null,
+  setBoardInfo: (boardInfo: Board | null) => set({ boardInfo }),
 
   score: [],
   setScore: (score: BoardUser[] | []) => set({ score }),

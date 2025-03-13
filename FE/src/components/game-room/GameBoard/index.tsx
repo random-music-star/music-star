@@ -1,21 +1,10 @@
-import { useGameScreenStore } from '@/stores/websocket/useGameScreenStore';
-import { useEffect, useState } from 'react';
 import GameWait from './GameWait';
 import GameQuiz from './GameQuiz';
 import GameResult from './GameResult';
-
-type GameState = 'gameWait' | 'gameQuizOpened' | 'gameResultOpened' | null;
+import { useGameStateStore } from '@/stores/websocket/useGameStateStore';
 
 export default function GameBoard() {
-  const { remainTime, songUrl, gameResult } = useGameScreenStore();
-  const [gameState, setGameState] = useState<GameState>(null);
-
-  useEffect(() => {
-    if (songUrl) setGameState('gameQuizOpened');
-    else if (gameResult) setGameState('gameResultOpened');
-    else if (remainTime) setGameState('gameWait');
-    else setGameState(null);
-  }, [remainTime, songUrl, gameResult]);
+  const { gameState } = useGameStateStore();
 
   return (
     <div className='h-full flex flex-col p-4'>
