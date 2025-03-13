@@ -19,11 +19,14 @@ export default function Header() {
     }
   }, []);
 
-  const handleGuestLogin = () => {
+  const handleGuestLogin = async () => {
     // 추후 로그인정보 fetch로 수정
-    const guestNickname = `게스트${Math.floor(1000 + Math.random() * 9000)}`;
-    localStorage.setItem('userNickname', guestNickname);
-    setNickname(guestNickname);
+    const { token } = await fetch('http://localhost:8080/member/guest/login')
+      .then(res => res.json())
+      .then(data => data as { token: string });
+
+    localStorage.setItem('userNickname', token);
+    setNickname(token);
   };
 
   const handleLogout = () => {
