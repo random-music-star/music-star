@@ -55,12 +55,19 @@ export interface GameChatState {
 
 export interface GameScreenState {
   remainTime: number | null;
+  setRemainTime: (remainTime: number | null) => void;
   gameMode: GameMode | null;
+  setGameMode: (gameMode: GameMode | null) => void;
   songUrl: string | null;
+  setSongUrl: (songUrl: string | null) => void;
   boardInfo: BoardUser[];
+  setBoardInfo: (boardInfo: BoardUser[] | []) => void;
   score: BoardUser[];
+  setScore: (score: BoardUser[] | []) => void;
   gameResult: GameResult | null;
+  setGameResult: (gameResult: GameResult | null) => void;
   gameHint: GameHint | null;
+  setGameHint: (gameHint: GameHint | null) => void;
   resetGameScreenStore: () => void;
 }
 

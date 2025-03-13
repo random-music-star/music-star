@@ -19,25 +19,25 @@ const initialState = {
 
 export const useGameScreenStore = create<GameScreenState>(set => ({
   remainTime: null,
-  setRemainTime: (remainTime: number) => set({ remainTime }),
+  setRemainTime: (remainTime: number | null) => set({ remainTime }),
 
   gameMode: null,
-  setGameMode: (gameMode: GameMode) => set({ gameMode }),
+  setGameMode: (gameMode: GameMode | null) => set({ gameMode }),
 
   songUrl: null,
-  setSongUrl: (songUrl: string) => set({ songUrl }),
+  setSongUrl: (songUrl: string | null) => set({ songUrl }),
 
   boardInfo: [],
-  setBoardInfo: (boardInfo: BoardUser[]) => set({ boardInfo }),
+  setBoardInfo: (boardInfo: BoardUser[] | []) => set({ boardInfo }),
 
   score: [],
-  setScore: (score: BoardUser[]) => set({ score }),
+  setScore: (score: BoardUser[] | []) => set({ score }),
 
   gameResult: null,
-  setGameResult: (gameResult: GameResult) => set({ gameResult }),
+  setGameResult: (gameResult: GameResult | null) => set({ gameResult }),
 
   gameHint: null,
-  setGameHint: (gameHint: GameHint) => set({ gameHint }),
+  setGameHint: (gameHint: GameHint | null) => set({ gameHint }),
 
   resetGameScreenStore: () => set(initialState),
 }));
