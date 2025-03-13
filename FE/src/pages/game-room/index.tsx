@@ -1,8 +1,6 @@
-// pages/game-room/index.tsx
 import { useEffect, useState } from 'react';
 import ChatBox from '../../components/game-room/ChatBox';
 import RoomInfo from '../../components/game-room/RoomInfo';
-import { userData } from '../../_data/game-data';
 import { motion, AnimatePresence } from 'framer-motion';
 import GameBoard from '../../components/game-room/GameBoard';
 import ReadyPanel from '../../components/game-room/ReadyPannel';
@@ -11,12 +9,16 @@ import { useWebSocketStore } from '@/stores/websocket/useWebsocketStore';
 
 export default function GameRoom() {
   const { isConnected, updateSubscription, sendMessage } = useWebSocketStore();
+  const [currentUserId, setCurrentUserId] = useState('');
 
-  const currentUserId = 'user1';
+  useEffect(() => {
+    const userName = localStorage.getItem('userNickname') as string;
+    if (userName) {
+      setCurrentUserId(userName);
+    }
+  }, []);
+
   const [isGameStarted, setIsGameStarted] = useState(false);
-
-  const isHost =
-    userData.find(user => user.id === currentUserId)?.role === 'host';
 
   useEffect(() => {
     if (isConnected) {
@@ -49,7 +51,6 @@ export default function GameRoom() {
                 >
                   <ReadyPanel
                     currentUserId={currentUserId}
-                    isHost={isHost}
                     handleStartGame={handleStartGame}
                   />
                 </motion.div>

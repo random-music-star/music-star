@@ -6,13 +6,11 @@ import { useParticipantInfoStore } from '@/stores/websocket/useGameParticipantSt
 
 interface ReadyPanelProps {
   currentUserId: string;
-  isHost: boolean;
   handleStartGame: () => void;
 }
 
 export default function ReadyPanel({
   currentUserId,
-  isHost,
   handleStartGame,
 }: ReadyPanelProps) {
   const { participantInfo, setParticipantInfo } = useParticipantInfoStore();
@@ -78,7 +76,7 @@ export default function ReadyPanel({
             {readyPlayers.map(user => {
               const isCurrentUser = user.userName === currentUserId;
               // 방장 여부는 예시로 첫 번째 사용자를 방장으로 가정
-              const isUserHost = isHost && user.userName === currentUserId;
+              const isUserHost = user.userName === currentUserId;
               const isTransitioning =
                 transitioning === user.userName && direction;
 
@@ -143,7 +141,7 @@ export default function ReadyPanel({
           <div className='grid grid-cols-3 gap-2 max-h-[220px] overflow-y-auto pr-1'>
             {notReadyPlayers.map(user => {
               const isCurrentUser = user.userName === currentUserId;
-              const isUserHost = isHost && user.userName === currentUserId;
+              const isUserHost = user.userName === currentUserId;
               const isTransitioning =
                 transitioning === user.userName && !direction;
 
@@ -206,11 +204,11 @@ export default function ReadyPanel({
               >
                 {currentUserId.charAt(0).toUpperCase()}
               </div>
-              {isHost && (
+              {/* {isHost && (
                 <div className='absolute -top-1 -right-1 bg-yellow-400 rounded-full p-0.5'>
                   <Crown size={12} className='text-yellow-800' />
                 </div>
-              )}
+              )} */}
             </div>
             <div className='ml-3'>
               <p className='font-medium text-gray-800'>{currentUserId}</p>
@@ -218,7 +216,7 @@ export default function ReadyPanel({
                 {isCurrentUserReady
                   ? '준비 완료 상태입니다'
                   : '아직 준비하지 않았습니다'}
-                {isHost && ' (방장)'}
+                {/* {isHost && ' (방장)'} */}
               </p>
             </div>
           </div>
@@ -235,7 +233,7 @@ export default function ReadyPanel({
               {isCurrentUserReady ? '준비 취소' : '준비 완료'}
             </Button>
 
-            {isHost && allPlayersReady && (
+            {allPlayersReady && (
               <Button
                 onClick={handleStartGame}
                 className='bg-yellow-500 hover:bg-yellow-600 text-white ml-2 flex items-center gap-1'
@@ -248,7 +246,7 @@ export default function ReadyPanel({
         </div>
       </div>
 
-      {isHost && !allPlayersReady && (
+      {!allPlayersReady && (
         <div className='mt-4'>
           <Button
             className='w-full bg-gray-400 text-white font-bold py-2 cursor-not-allowed'

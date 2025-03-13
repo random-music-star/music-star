@@ -10,13 +10,18 @@ export interface Chatting {
 }
 
 export default function ChatBox() {
-  const userNickname = '알송이';
+  const [userNickname, setUserNickname] = useState('');
 
   const [newMessage, setNewMessage] = useState<string>('');
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
   const { sendMessage, updateSubscription, isConnected } = useWebSocketStore();
   const { publicChattings } = usePublicChatStore();
+
+  useEffect(() => {
+    const nickname = localStorage.getItem('userNickname') || '';
+    setUserNickname(nickname);
+  }, []);
 
   useEffect(() => {
     if (isConnected) {
