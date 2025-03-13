@@ -1,4 +1,3 @@
-// pages/game-room/_components/ReadyPanel.tsx
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Crown, CheckCircle, Clock, PlayCircle } from 'lucide-react';
@@ -24,35 +23,26 @@ export default function ReadyPanel({
   handleStartGame,
   allPlayersReady,
 }: ReadyPanelProps) {
-  // 준비 상태 전환 중인 사용자 ID (애니메이션용)
   const [transitioning, setTransitioning] = useState<string | null>(null);
-  // 전환 방향 (true: 준비 → 대기, false: 대기 → 준비)
   const [direction, setDirection] = useState<boolean>(false);
 
-  // 현재 사용자
   const currentUser = users.find(user => user.id === currentUserId);
 
-  // 준비된 플레이어와 준비되지 않은 플레이어로 분류
   const readyPlayers = users.filter(user => readyStatus[user.id]);
   const notReadyPlayers = users.filter(user => !readyStatus[user.id]);
 
-  // 준비 완료 수 계산
   const readyCount = readyPlayers.length;
   const totalCount = users.length;
 
-  // 준비 상태 토글 및 애니메이션 처리
   const handleToggleReady = (userId: string) => {
-    // 현재 전환 중이면 무시
     if (transitioning) return;
 
     const isReady = readyStatus[userId];
     setTransitioning(userId);
-    setDirection(isReady); // true: 준비 → 대기, false: 대기 → 준비
+    setDirection(isReady);
 
-    // 애니메이션 후 상태 변경
     setTimeout(() => {
       toggleReady(userId);
-      // 애니메이션 종료 후 전환 상태 초기화
       setTimeout(() => {
         setTransitioning(null);
       }, 300);
@@ -61,7 +51,6 @@ export default function ReadyPanel({
 
   return (
     <div className='p-4 h-full flex flex-col'>
-      {/* 상단 헤더 */}
       <div className='flex justify-between items-center mb-5'>
         <h2 className='text-xl font-bold text-gray-800'>플레이어 준비 상태</h2>
         <div className='bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-sm font-medium'>
@@ -70,7 +59,6 @@ export default function ReadyPanel({
       </div>
 
       <div className='flex flex-1 gap-4 relative'>
-        {/* 준비 완료 섹션 */}
         <div className='flex-1 border border-green-200 rounded-lg p-3 bg-green-50'>
           <div className='flex items-center mb-3'>
             <CheckCircle size={16} className='text-green-600 mr-2' />
@@ -135,7 +123,6 @@ export default function ReadyPanel({
           </div>
         </div>
 
-        {/* 대기 중 섹션 */}
         <div className='flex-1 border border-gray-200 rounded-lg p-3 bg-gray-50'>
           <div className='flex items-center mb-3'>
             <Clock size={16} className='text-gray-500 mr-2' />
@@ -201,7 +188,6 @@ export default function ReadyPanel({
         </div>
       </div>
 
-      {/* 내 준비 상태 */}
       <div className='mt-4 bg-indigo-50 p-3 rounded-lg border border-indigo-100'>
         <div className='flex justify-between items-center'>
           <div className='flex items-center'>
@@ -240,7 +226,6 @@ export default function ReadyPanel({
               {readyStatus[currentUserId] ? '준비 취소' : '준비 완료'}
             </Button>
 
-            {/* 방장이고 모든 사용자가 준비되었을 때 게임 시작 버튼 표시 */}
             {isHost && allPlayersReady && (
               <Button
                 onClick={handleStartGame}
@@ -254,7 +239,6 @@ export default function ReadyPanel({
         </div>
       </div>
 
-      {/* 방장의 게임 시작 버튼 (준비가 안 된 경우만 표시) */}
       {isHost && !allPlayersReady && (
         <div className='mt-4'>
           <Button
