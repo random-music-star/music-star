@@ -4,6 +4,8 @@ import { WebSocketState } from '@/types/websocket';
 import { useGameChatStore } from './useGameChatStore';
 import { usePublicChatStore } from './usePublicChatStore';
 import { useGameScreenStore } from './useGameScreenStore';
+import { useGameInfoStore } from './useGameRoomInfoStore';
+import { useParticipantInfoStore } from './useGameParticipantStore';
 
 export const useWebSocketStore = create<WebSocketState>((set, get) => ({
   isConnected: false,
@@ -52,7 +54,6 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
 
     Object.values(subscriptions).forEach(sub => sub?.unsubscribe());
 
-    // 상태 초기화
     useGameChatStore.getState().resetGameChatStore();
     useGameScreenStore.getState().resetGameScreenStore();
     usePublicChatStore.getState().resetPublicChatStore();
@@ -74,8 +75,6 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
         `/topic/channel/1/room/1`,
         message => {
           const { type, response } = JSON.parse(message.body);
-
-          console.log(response);
 
           if (type === 'timer') {
             console.log('timer');
@@ -115,6 +114,14 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
           }
           if (type === 'hint') {
             console.log('hint');
+          }
+          if (type === 'roomInfo') {
+            useGameInfoStore.getState().setGameInfo(response);
+          }
+          if (type === 'userInfo') {
+            useParticipantInfoStore
+              .getState()
+              .setParticipantInfo(response?.userInfoList);
           }
         },
       );

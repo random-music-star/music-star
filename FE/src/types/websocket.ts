@@ -45,6 +45,24 @@ export interface WebSocketState {
   isConnected: boolean;
 }
 
+export type Mode = 'FULL' | 'ONE_SEC';
+
+export interface GameInfoState {
+  roomTitle: string;
+  password: string;
+  maxPlayer: number;
+  maxGameRound: number;
+  format: 'GENERAL' | 'BOARD';
+  selectedYear: number[];
+  mode: Mode[];
+  status: 'WAITING' | 'FINISHED' | 'IN_PROGRESS';
+}
+
+export interface GameInfoStore {
+  gameRoomInfo: GameInfoState;
+  setGameInfo: (newGameRoomInfo: GameInfoState) => void;
+}
+
 export interface GameChatState {
   gameChattings: Chatting[];
   setGameChattings: (gameChatting: Chatting) => void;
@@ -75,4 +93,14 @@ export interface PublicChatState {
   publicChattings: Chatting[];
   setPublicChattings: (publicChatting?: Chatting) => void;
   resetPublicChatStore: () => void;
+}
+
+export interface PariticpantInfo {
+  userName: string;
+  isReady: boolean;
+}
+
+export interface ParticipantInfoStore {
+  participantInfo: PariticpantInfo[];
+  setParticipantInfo: (newPariticipantInfo: PariticpantInfo[]) => void;
 }

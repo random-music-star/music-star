@@ -47,6 +47,7 @@ declare global {
             fs: number;
             modestbranding: number;
             rel: number;
+            host?: string;
           };
           events: {
             onReady: (event: YouTubeEvent) => void;
@@ -65,16 +66,42 @@ declare global {
   }
 }
 
-const MusicPlayer: React.FC = () => {
+const extractYouTubeVideoId = (url: string): string | null => {
+  if (!url) return null;
+
+  const shortUrlRegex = /youtu\.be\/([a-zA-Z0-9_-]{11})(?:\?|$)/;
+  const shortUrlMatch = url.match(shortUrlRegex);
+  if (shortUrlMatch) return shortUrlMatch[1];
+
+  const standardRegex = /youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})(?:&|$)/;
+  const standardMatch = url.match(standardRegex);
+  if (standardMatch) return standardMatch[1];
+
+  const videoIdRegex = /^[a-zA-Z0-9_-]{11}$/;
+  if (videoIdRegex.test(url)) return url;
+
+  console.error('지원되지 않는 YouTube URL 형식입니다:', url);
+  return null;
+};
+
+const MusicPlayer: React.FC<{ youtubeUrl?: string }> = ({ youtubeUrl }) => {
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [videoId, setVideoId] = useState<string>(GAME_DATA.youtubeId);
+
   console.log(isPlaying);
 
-  // refs
+  useEffect(() => {
+    if (youtubeUrl) {
+      const extractedId = extractYouTubeVideoId(youtubeUrl);
+      if (extractedId) {
+        setVideoId(extractedId);
+      }
+    }
+  }, [youtubeUrl]);
+
   const playerRef = useRef<YouTubePlayer | null>(null);
 
-  // YouTube 플레이어 초기화
   useEffect(() => {
-    // YouTube API 로드
     const tag: HTMLScriptElement = document.createElement('script');
     tag.src = 'https://www.youtube.com/iframe_api';
     const firstScriptTag: HTMLScriptElement | null =
@@ -83,11 +110,16 @@ const MusicPlayer: React.FC = () => {
       firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
     }
 
+    if (playerRef.current) {
+      playerRef.current.destroy();
+      playerRef.current = null;
+    }
+
     window.onYouTubeIframeAPIReady = () => {
       playerRef.current = new window.YT.Player('youtube-player', {
         height: '0',
         width: '0',
-        videoId: GAME_DATA.youtubeId,
+        videoId: videoId,
         playerVars: {
           autoplay: 1,
           controls: 0,
@@ -95,6 +127,7 @@ const MusicPlayer: React.FC = () => {
           fs: 0,
           modestbranding: 1,
           rel: 0,
+          host: 'https://www.youtube-nocookie.com',
         },
         events: {
           onReady: onPlayerReady,
@@ -108,7 +141,7 @@ const MusicPlayer: React.FC = () => {
         playerRef.current.destroy();
       }
     };
-  }, []);
+  }, [videoId]);
 
   const onPlayerReady = (event: YouTubeEvent): void => {
     const defaultVolume = 100;
@@ -120,7 +153,7 @@ const MusicPlayer: React.FC = () => {
 
   const onPlayerStateChange = (event: YouTubeEvent): void => {
     if (event.data === window.YT.PlayerState.ENDED) {
-      console.log(1);
+      console.log('동영상 재생 완료');
     }
   };
 

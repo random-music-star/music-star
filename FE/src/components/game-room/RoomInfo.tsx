@@ -1,95 +1,169 @@
-// pages/game-room/_components/RoomInfo.tsx
-import { Room } from '../../_types/game';
-import { Lock, Unlock, Users } from 'lucide-react';
+// types/websocket.ts
+export type RoomStatus = 'WAITING' | 'FINISHED' | 'IN_PROGRESS';
+export type GameFormat = 'GENERAL' | 'BOARD';
+export type Mode = 'NORMAL' | 'SPEED' | 'HINT' | 'TIME_ATTACK' | string;
 
-interface RoomInfoProps {
-  room: Room;
+export interface GameInfoStore {
+  gameRoomInfo: GameInfoState;
+  setGameInfo: (newGameRoomInfo: GameInfoState) => void;
 }
 
-export default function RoomInfo({ room }: RoomInfoProps) {
+// 상태 구성 인터페이스
+export interface StatusConfig {
+  [key: string]: {
+    text: string;
+    color: string;
+  };
+}
+
+// 게임 형식 텍스트 인터페이스
+export interface FormatText {
+  [key: string]: string;
+}
+
+import { useGameInfoStore } from '@/stores/websocket/useGameRoomInfoStore';
+import { GameInfoState } from '@/types/websocket';
+import { Lock, Unlock, Users, Clock, LayoutGrid, Award } from 'lucide-react';
+
+export default function RoomInfo() {
+  const { gameRoomInfo } = useGameInfoStore();
+
+  const defaultData: GameInfoState = {
+    roomTitle: '즐거운 K-POP 맞추기',
+    password: 'ABC123',
+    maxPlayer: 8,
+    maxGameRound: 10,
+    format: 'GENERAL',
+    selectedYear: [2020, 2021, 2022],
+    mode: ['FULL'],
+    status: 'WAITING',
+  };
+
+  // gameRoomInfo가 비어있는지 확인
+  const isEmpty = !gameRoomInfo || Object.keys(gameRoomInfo).length === 0;
+
+  // 실제 사용할 데이터
+  const {
+    roomTitle,
+    password,
+    maxPlayer,
+    maxGameRound,
+    format,
+    selectedYear,
+    mode,
+    status,
+  } = isEmpty ? defaultData : gameRoomInfo;
+
+  // 방 상태에 따른 스타일 및 텍스트 설정
+  const statusConfig: StatusConfig = {
+    WAITING: { text: '대기 중', color: 'text-blue-600' },
+    IN_PROGRESS: { text: '게임 진행 중', color: 'text-green-600' },
+    FINISHED: { text: '종료됨', color: 'text-gray-600' },
+  };
+
+  // 방 형식 텍스트 변환
+  const formatText: FormatText = {
+    GENERAL: '일반',
+    BOARD: '보드',
+  };
+
+  // 비공개 방 여부 (roomNumber 기준으로 판단)
+  const isPrivate = password && password.length > 0;
+
   return (
-    <div className='flex-1 p-4'>
-      {/* 방 보안 상태 및 방 이름 그룹화 */}
-      <div className='mb-4'>
-        <div className='flex items-center text-lg font-semibold mb-2'>
-          {room.isPrivate ? (
-            <div className='flex items-center text-amber-600'>
-              <Lock className='mr-2' size={18} />
-              <span>비공개 방</span>
-            </div>
+    <div className='p-3 bg-white rounded-lg shadow-sm'>
+      {/* 헤더: 방 이름과 상태 */}
+      <div className='flex justify-between items-center mb-3'>
+        <div className='flex items-center'>
+          {isPrivate ? (
+            <Lock className='text-amber-500 mr-2' size={16} />
           ) : (
-            <div className='flex items-center text-green-600'>
-              <Unlock className='mr-2' size={18} />
-              <span>공개 방</span>
-            </div>
+            <Unlock className='text-green-500 mr-2' size={16} />
           )}
+          <h2 className='font-bold text-gray-800'>
+            {roomTitle || '방 이름 없음'}
+          </h2>
         </div>
-
-        {/* 방 이름 */}
-        <div className='p-3 bg-gray-100 rounded-lg shadow-inner'>
-          <h3 className='text-gray-500 text-xs font-semibold mb-1'>방 이름</h3>
-          <p className='text-lg font-bold text-gray-800'>{room.name}</p>
+        <div
+          className={`px-2 py-0.5 rounded text-xs font-medium ${statusConfig[status]?.color || 'text-gray-600'}`}
+        >
+          {statusConfig[status]?.text || '상태 없음'}
         </div>
       </div>
 
-      {/* 참가자 수 - 콤팩트하게 */}
-      <div className='mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200'>
-        <div className='flex items-center justify-between'>
-          <h3 className='text-blue-600 text-xs font-semibold'>참가자</h3>
-          <div className='flex items-center'>
-            <Users size={16} className='mr-1 text-blue-600' />
-            <span className='text-blue-700 font-bold'>
-              {room.currentPlayers}/{room.maxPlayers}
-            </span>
+      {/* 방 정보 그리드 */}
+      <div className='grid grid-cols-2 gap-2 text-sm mb-2'>
+        {/* 참가자 수 */}
+        <div className='flex items-center'>
+          <Users size={14} className='text-blue-500 mr-1.5' />
+          <span className='text-gray-600'>최대 {maxPlayer || '?'} 명</span>
+        </div>
+
+        {/* 라운드 수 */}
+        <div className='flex items-center'>
+          <Award size={14} className='text-purple-500 mr-1.5' />
+          <span className='text-gray-600'>{maxGameRound || '?'} 라운드</span>
+        </div>
+
+        {/* 게임 형식 */}
+        <div className='flex items-center'>
+          <LayoutGrid size={14} className='text-teal-500 mr-1.5' />
+          <span className='text-gray-600'>
+            {formatText[format] || format || '?'} 모드
+          </span>
+        </div>
+
+        {/* 연도 범위 */}
+        <div className='flex items-center'>
+          <Clock size={14} className='text-indigo-500 mr-1.5' />
+          <span className='text-gray-600'>
+            {selectedYear && selectedYear.length > 0
+              ? `${Math.min(...selectedYear)}~${Math.max(...selectedYear)}`
+              : '모든 연도'}
+          </span>
+        </div>
+      </div>
+
+      {/* 태그 영역 */}
+      <div className='mt-3'>
+        {/* 게임 모드 태그 */}
+        {mode && mode.length > 0 && (
+          <div className='flex flex-wrap gap-1 mb-2'>
+            {mode.map(gameMode => (
+              <span
+                key={gameMode}
+                className='inline-block px-1.5 py-0.5 bg-purple-100 text-purple-700 rounded text-xs'
+              >
+                {gameMode}
+              </span>
+            ))}
           </div>
-        </div>
-      </div>
+        )}
 
-      {/* 게임 정보 */}
-      <div className='mb-4'>
-        <h3 className='text-gray-500 text-xs font-semibold mb-2'>게임 정보</h3>
-
-        {/* 게임 연도 라벨 */}
-        <div className='mb-3'>
-          <p className='text-xs text-gray-600 mb-1'>게임 연도</p>
-          <div className='flex gap-1 flex-wrap'>
-            {room.gameYears.map(year => (
+        {/* 연도 태그 */}
+        {selectedYear && selectedYear.length > 0 && (
+          <div className='flex flex-wrap gap-1'>
+            {selectedYear.map(year => (
               <span
                 key={year}
-                className='inline-block px-2 py-1 bg-blue-500 text-white rounded-md text-xs font-medium'
+                className='inline-block px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded text-xs'
               >
                 {year}
               </span>
             ))}
           </div>
-        </div>
-
-        {/* 게임 모드 라벨 */}
-        <div>
-          <p className='text-xs text-gray-600 mb-1'>게임 모드</p>
-          <div className='flex gap-1 flex-wrap'>
-            {room.gameModes.map(mode => (
-              <span
-                key={mode}
-                className='inline-block px-2 py-1 bg-purple-500 text-white rounded-md text-xs font-medium'
-              >
-                {mode}
-              </span>
-            ))}
-          </div>
-        </div>
+        )}
       </div>
 
       {/* 방 코드 (비공개 방인 경우) */}
-      {room.isPrivate && (
-        <div className='p-3 bg-amber-50 border border-amber-200 rounded-lg'>
-          <h3 className='text-amber-600 text-xs font-semibold mb-1'>방 코드</h3>
-          <p className='text-center font-mono text-xl font-bold tracking-widest text-amber-700'>
-            {room.roomCode}
-          </p>
-          <p className='text-center text-xs text-amber-600 mt-1'>
-            친구들과 공유하세요
-          </p>
+      {isPrivate && (
+        <div className='mt-3 pt-2 border-t border-gray-100'>
+          <div className='flex justify-between items-center'>
+            <span className='text-xs text-amber-600'>방 코드:</span>
+            <span className='font-mono font-medium text-amber-700'>
+              {password}
+            </span>
+          </div>
         </div>
       )}
     </div>

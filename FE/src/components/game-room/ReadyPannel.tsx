@@ -1,48 +1,54 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Crown, CheckCircle, Clock, PlayCircle } from 'lucide-react';
-import { User } from '../../_types/game';
 import { motion } from 'framer-motion';
+import { useParticipantInfoStore } from '@/stores/websocket/useGameParticipantStore';
 
 interface ReadyPanelProps {
-  users: User[];
-  readyStatus: { [key: string]: boolean };
   currentUserId: string;
-  toggleReady: (userId: string) => void;
   isHost: boolean;
   handleStartGame: () => void;
-  allPlayersReady: boolean;
 }
 
 export default function ReadyPanel({
-  users,
-  readyStatus,
   currentUserId,
-  toggleReady,
   isHost,
   handleStartGame,
-  allPlayersReady,
 }: ReadyPanelProps) {
+  const { participantInfo, setParticipantInfo } = useParticipantInfoStore();
+
   const [transitioning, setTransitioning] = useState<string | null>(null);
   const [direction, setDirection] = useState<boolean>(false);
 
-  const currentUser = users.find(user => user.id === currentUserId);
+  const currentUserInfo = participantInfo.find(
+    user => user.userName === currentUserId,
+  );
+  const isCurrentUserReady = currentUserInfo?.isReady || false;
 
-  const readyPlayers = users.filter(user => readyStatus[user.id]);
-  const notReadyPlayers = users.filter(user => !readyStatus[user.id]);
+  const readyPlayers = participantInfo.filter(user => user.isReady);
+  const notReadyPlayers = participantInfo.filter(user => !user.isReady);
 
-  const readyCount = readyPlayers.length;
-  const totalCount = users.length;
+  const allPlayersReady =
+    participantInfo.length > 0 && participantInfo.every(user => user.isReady);
 
-  const handleToggleReady = (userId: string) => {
+  const handleToggleReady = (userName: string) => {
     if (transitioning) return;
 
-    const isReady = readyStatus[userId];
-    setTransitioning(userId);
+    const currentPlayer = participantInfo.find(
+      user => user.userName === userName,
+    );
+    if (!currentPlayer) return;
+
+    const isReady = currentPlayer.isReady;
+    setTransitioning(userName);
     setDirection(isReady);
 
     setTimeout(() => {
-      toggleReady(userId);
+      const updatedParticipants = participantInfo.map(user =>
+        user.userName === userName ? { ...user, isReady: !user.isReady } : user,
+      );
+      setParticipantInfo(updatedParticipants);
+
       setTimeout(() => {
         setTransitioning(null);
       }, 300);
@@ -54,7 +60,7 @@ export default function ReadyPanel({
       <div className='flex justify-between items-center mb-5'>
         <h2 className='text-xl font-bold text-gray-800'>플레이어 준비 상태</h2>
         <div className='bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-sm font-medium'>
-          {readyCount}/{totalCount} 준비 완료
+          {readyPlayers.length}/{participantInfo.length} 준비 완료
         </div>
       </div>
 
@@ -70,13 +76,15 @@ export default function ReadyPanel({
 
           <div className='grid grid-cols-3 gap-2 max-h-[220px] overflow-y-auto pr-1'>
             {readyPlayers.map(user => {
-              const isCurrentUser = user.id === currentUserId;
-              const isUserHost = user.role === 'host';
-              const isTransitioning = transitioning === user.id && direction;
+              const isCurrentUser = user.userName === currentUserId;
+              // 방장 여부는 예시로 첫 번째 사용자를 방장으로 가정
+              const isUserHost = isHost && user.userName === currentUserId;
+              const isTransitioning =
+                transitioning === user.userName && direction;
 
               return (
                 <motion.div
-                  key={user.id}
+                  key={user.userName}
                   initial={{ opacity: 1 }}
                   animate={{
                     opacity: isTransitioning ? 0 : 1,
@@ -87,7 +95,7 @@ export default function ReadyPanel({
                 >
                   <div className='relative'>
                     <div className='w-8 h-8 rounded-full bg-green-600 flex items-center justify-center text-white'>
-                      {user.name.charAt(0).toUpperCase()}
+                      {user.userName.charAt(0).toUpperCase()}
                     </div>
                     {isUserHost && (
                       <div className='absolute -top-1 -right-1 bg-yellow-400 rounded-full p-0.5'>
@@ -98,7 +106,7 @@ export default function ReadyPanel({
 
                   <div className='ml-2 flex-1 min-w-0'>
                     <p className='text-sm font-medium truncate'>
-                      {user.name}
+                      {user.userName}
                       {isCurrentUser && (
                         <span className='text-indigo-600 text-xs ml-1'>
                           (나)
@@ -111,7 +119,7 @@ export default function ReadyPanel({
                     <Button
                       variant='ghost'
                       size='sm'
-                      onClick={() => handleToggleReady(user.id)}
+                      onClick={() => handleToggleReady(user.userName)}
                       className='ml-auto text-xs p-1.5 h-auto text-red-600 hover:text-red-700 hover:bg-red-100'
                     >
                       취소
@@ -134,13 +142,14 @@ export default function ReadyPanel({
 
           <div className='grid grid-cols-3 gap-2 max-h-[220px] overflow-y-auto pr-1'>
             {notReadyPlayers.map(user => {
-              const isCurrentUser = user.id === currentUserId;
-              const isUserHost = user.role === 'host';
-              const isTransitioning = transitioning === user.id && !direction;
+              const isCurrentUser = user.userName === currentUserId;
+              const isUserHost = isHost && user.userName === currentUserId;
+              const isTransitioning =
+                transitioning === user.userName && !direction;
 
               return (
                 <motion.div
-                  key={user.id}
+                  key={user.userName}
                   initial={{ opacity: 1 }}
                   animate={{
                     opacity: isTransitioning ? 0 : 1,
@@ -151,7 +160,7 @@ export default function ReadyPanel({
                 >
                   <div className='relative'>
                     <div className='w-8 h-8 rounded-full bg-gray-400 flex items-center justify-center text-white'>
-                      {user.name.charAt(0).toUpperCase()}
+                      {user.userName.charAt(0).toUpperCase()}
                     </div>
                     {isUserHost && (
                       <div className='absolute -top-1 -right-1 bg-yellow-400 rounded-full p-0.5'>
@@ -162,7 +171,7 @@ export default function ReadyPanel({
 
                   <div className='ml-2 flex-1 min-w-0'>
                     <p className='text-sm font-medium truncate'>
-                      {user.name}
+                      {user.userName}
                       {isCurrentUser && (
                         <span className='text-indigo-600 text-xs ml-1'>
                           (나)
@@ -175,7 +184,7 @@ export default function ReadyPanel({
                     <Button
                       variant='ghost'
                       size='sm'
-                      onClick={() => handleToggleReady(user.id)}
+                      onClick={() => handleToggleReady(user.userName)}
                       className='ml-auto text-xs p-1.5 h-auto text-green-600 hover:text-green-700 hover:bg-green-100'
                     >
                       준비
@@ -193,23 +202,23 @@ export default function ReadyPanel({
           <div className='flex items-center'>
             <div className='relative'>
               <div
-                className={`w-10 h-10 rounded-full ${readyStatus[currentUserId] ? 'bg-green-600' : 'bg-gray-400'} flex items-center justify-center text-white transition-colors duration-300`}
+                className={`w-10 h-10 rounded-full ${isCurrentUserReady ? 'bg-green-600' : 'bg-gray-400'} flex items-center justify-center text-white transition-colors duration-300`}
               >
-                {currentUser?.name.charAt(0).toUpperCase()}
+                {currentUserId.charAt(0).toUpperCase()}
               </div>
-              {currentUser?.role === 'host' && (
+              {isHost && (
                 <div className='absolute -top-1 -right-1 bg-yellow-400 rounded-full p-0.5'>
                   <Crown size={12} className='text-yellow-800' />
                 </div>
               )}
             </div>
             <div className='ml-3'>
-              <p className='font-medium text-gray-800'>{currentUser?.name}</p>
+              <p className='font-medium text-gray-800'>{currentUserId}</p>
               <p className='text-xs text-gray-500'>
-                {readyStatus[currentUserId]
+                {isCurrentUserReady
                   ? '준비 완료 상태입니다'
                   : '아직 준비하지 않았습니다'}
-                {currentUser?.role === 'host' && ' (방장)'}
+                {isHost && ' (방장)'}
               </p>
             </div>
           </div>
@@ -218,12 +227,12 @@ export default function ReadyPanel({
             <Button
               onClick={() => handleToggleReady(currentUserId)}
               className={`${
-                readyStatus[currentUserId]
+                isCurrentUserReady
                   ? 'bg-red-500 hover:bg-red-600'
                   : 'bg-green-500 hover:bg-green-600'
               } text-white transition-colors duration-300`}
             >
-              {readyStatus[currentUserId] ? '준비 취소' : '준비 완료'}
+              {isCurrentUserReady ? '준비 취소' : '준비 완료'}
             </Button>
 
             {isHost && allPlayersReady && (
