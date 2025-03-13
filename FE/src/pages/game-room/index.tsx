@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import ChatBox from '../../components/game-room/ChatBox';
 import RoomInfo from '../../components/game-room/RoomInfo';
-import { roomData, userData } from '../../_data/game-data';
+import { userData } from '../../_data/game-data';
 import { motion, AnimatePresence } from 'framer-motion';
 import GameBoard from '../../components/game-room/GameBoard';
 import ReadyPanel from '../../components/game-room/ReadyPannel';
@@ -14,29 +14,9 @@ export default function GameRoom() {
 
   const currentUserId = 'user1';
   const [isGameStarted, setIsGameStarted] = useState(false);
-  const [readyStatus, setReadyStatus] = useState<{ [key: string]: boolean }>(
-    () => {
-      const initialStatus: { [key: string]: boolean } = {};
-      userData.forEach(user => {
-        initialStatus[user.id] = user.isReady || false;
-      });
-      return initialStatus;
-    },
-  );
 
   const isHost =
     userData.find(user => user.id === currentUserId)?.role === 'host';
-
-  const allPlayersReady = Object.values(readyStatus).every(
-    status => status === true,
-  );
-
-  const toggleReady = (userId: string) => {
-    setReadyStatus(prev => ({
-      ...prev,
-      [userId]: !prev[userId],
-    }));
-  };
 
   useEffect(() => {
     if (isConnected) {
@@ -63,13 +43,9 @@ export default function GameRoom() {
                   transition={{ duration: 0.5 }}
                 >
                   <ReadyPanel
-                    users={userData}
-                    readyStatus={readyStatus}
                     currentUserId={currentUserId}
-                    toggleReady={toggleReady}
                     isHost={isHost}
                     handleStartGame={handleStartGame}
-                    allPlayersReady={allPlayersReady}
                   />
                 </motion.div>
               ) : (
@@ -95,7 +71,7 @@ export default function GameRoom() {
           <div className='p-4 bg-indigo-600 text-white font-bold'>
             <h2>방 정보</h2>
           </div>
-          <RoomInfo room={roomData} />
+          <RoomInfo />
         </div>
       </div>
     </SocketLayout>
