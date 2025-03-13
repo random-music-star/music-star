@@ -26,6 +26,7 @@ export interface GameResult {
   winner: string;
   songTitle: string;
   singer: string;
+  score: number;
 }
 
 export interface GameHint {
@@ -105,4 +106,11 @@ export interface PariticpantInfo {
 export interface ParticipantInfoStore {
   participantInfo: PariticpantInfo[];
   setParticipantInfo: (newPariticipantInfo: PariticpantInfo[]) => void;
+}
+
+export interface GameScoreState {
+  scores: Board | null;
+  setScores: (newScore: Board) => void;
+
+  updateScores: (player: string, score: number) => void;
 }

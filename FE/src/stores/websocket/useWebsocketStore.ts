@@ -1,12 +1,13 @@
 import { create } from 'zustand';
 import { Client, StompSubscription } from '@stomp/stompjs';
-import { WebSocketState } from '@/types/websocket';
+import { Board, WebSocketState } from '@/types/websocket';
 import { useGameChatStore } from './useGameChatStore';
 import { usePublicChatStore } from './usePublicChatStore';
 import { useGameScreenStore } from './useGameScreenStore';
 import { useGameInfoStore } from './useGameRoomInfoStore';
 import { useParticipantInfoStore } from './useGameParticipantStore';
 import { useGameStateStore } from './useGameStateStore';
+import { useGameScoreStore } from './useGameScoreStore';
 
 export const useWebSocketStore = create<WebSocketState>((set, get) => ({
   isConnected: false,
@@ -70,6 +71,8 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
       const gameScreenStore = useGameScreenStore.getState();
       const gameChatStore = useGameChatStore.getState();
       const gameStateStore = useGameStateStore.getState();
+      const gameScoreStore = useGameScoreStore.getState();
+      const participantInfoStore = useParticipantInfoStore.getState();
 
       newSubscriptions['game-room'] = client.subscribe(
         `/topic/channel/1/room/1`,
@@ -83,6 +86,13 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
           if (type === 'gameMode') {
             gameScreenStore.setGameMode(response);
             gameStateStore.setGameState('gameWait');
+
+            gameScoreStore.setScores(
+              participantInfoStore.participantInfo.reduce<Board>((acc, p) => {
+                acc[p.userName] = 0;
+                return acc;
+              }, {}),
+            );
           }
           if (type === 'quiz') {
             gameScreenStore.setSongUrl(response.songUrl);
@@ -98,11 +108,23 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
           }
 
           if (type === ' score') {
-            gameScreenStore.setScore(response.score);
+            gameScreenStore.setScore(response.board);
           }
 
           if (type === 'skip') {
             console.log('skip');
+          }
+
+          if (type === 'next') {
+            // 메세지 추가
+            if (gameScreenStore.gameResult) {
+              gameStateStore.setGameState('gameScoreUpdate');
+
+              gameScoreStore.updateScores(
+                gameScreenStore.gameResult.winner,
+                gameScreenStore.gameResult.score,
+              );
+            }
           }
 
           if (type === 'gameResult') {
