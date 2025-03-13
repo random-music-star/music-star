@@ -6,6 +6,7 @@ import { usePublicChatStore } from './usePublicChatStore';
 import { useGameScreenStore } from './useGameScreenStore';
 import { useGameInfoStore } from './useGameRoomInfoStore';
 import { useParticipantInfoStore } from './useGameParticipantStore';
+import { useGameStateStore } from './useGameStateStore';
 
 export const useWebSocketStore = create<WebSocketState>((set, get) => ({
   isConnected: false,
@@ -35,11 +36,6 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
     const { client, subscriptions } = get();
 
     Object.values(subscriptions).forEach(sub => sub?.unsubscribe());
-
-    // 상태 초기화
-    useGameChatStore.getState().resetGameChatStore();
-    useGameScreenStore.getState().resetGameScreenStore();
-    usePublicChatStore.getState().resetPublicChatStore();
 
     if (client) {
       client.deactivate();
@@ -71,38 +67,38 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
     }
 
     if (subscriptionType === 'game-room') {
+      const gameScreenStore = useGameScreenStore.getState();
+      const gameChatStore = useGameChatStore.getState();
+      const gameStateStore = useGameStateStore.getState();
+
       newSubscriptions['game-room'] = client.subscribe(
         `/topic/channel/1/room/1`,
         message => {
           const { type, response } = JSON.parse(message.body);
 
           if (type === 'timer') {
-            console.log('timer');
+            gameScreenStore.setRemainTime(response.remainTime);
           }
-          if (type === 'gameStart') {
-            console.log('게임 시작');
-          }
+
           if (type === 'gameMode') {
-            console.log('gameMode');
+            gameScreenStore.setGameMode(response);
+            gameStateStore.setGameState('gameWait');
           }
           if (type === 'quiz') {
-            console.log('quiz');
+            gameScreenStore.setSongUrl(response.songUrl);
+            gameStateStore.setGameState('gameQuizOpened');
           }
 
           if (type === 'gameChat') {
-            console.log('gameChat');
+            gameChatStore.setGameChattings(response);
           }
 
           if (type === 'boardInfo') {
-            console.log('boardInfo');
+            gameScreenStore.setBoardInfo(response.board);
           }
 
           if (type === ' score') {
-            console.log('score');
-          }
-
-          if (type === 'score') {
-            console.log('score');
+            gameScreenStore.setScore(response.score);
           }
 
           if (type === 'skip') {
@@ -110,10 +106,11 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
           }
 
           if (type === 'gameResult') {
-            console.log('gameResult');
+            gameScreenStore.setGameResult(response);
+            gameStateStore.setGameState('gameResultOpened');
           }
           if (type === 'hint') {
-            console.log('hint');
+            gameScreenStore.setGameHint(response);
           }
           if (type === 'roomInfo') {
             useGameInfoStore.getState().setGameInfo(response);

@@ -10,7 +10,7 @@ import SocketLayout from '@/components/layouts/SocketLayout';
 import { useWebSocketStore } from '@/stores/websocket/useWebsocketStore';
 
 export default function GameRoom() {
-  const { isConnected, updateSubscription } = useWebSocketStore();
+  const { isConnected, updateSubscription, sendMessage } = useWebSocketStore();
 
   const currentUserId = 'user1';
   const [isGameStarted, setIsGameStarted] = useState(false);
@@ -25,6 +25,11 @@ export default function GameRoom() {
   }, [isConnected]);
 
   const handleStartGame = () => {
+    sendMessage(`/app/channel/1/room/1/start`, {
+      type: 'gameStart',
+      request: null,
+    });
+
     setIsGameStarted(true);
   };
 

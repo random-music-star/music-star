@@ -16,6 +16,8 @@ export type BoardUser = {
   [key: string]: number;
 };
 
+export type Board = Record<string, number>;
+
 export type SkipUser = {
   [key: string]: boolean;
 };
@@ -78,8 +80,8 @@ export interface GameScreenState {
   setGameMode: (gameMode: GameMode | null) => void;
   songUrl: string | null;
   setSongUrl: (songUrl: string | null) => void;
-  boardInfo: BoardUser[];
-  setBoardInfo: (boardInfo: BoardUser[] | []) => void;
+  boardInfo: Board | null;
+  setBoardInfo: (boardInfo: Board | null) => void;
   score: BoardUser[];
   setScore: (score: BoardUser[] | []) => void;
   gameResult: GameResult | null;
