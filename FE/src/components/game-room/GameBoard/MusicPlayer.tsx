@@ -22,8 +22,7 @@ interface YouTubePlayer {
   playVideo: () => void;
   pauseVideo: () => void;
   destroy: () => void;
-  setVolume: (volume: number) => void;
-  getVolume: () => number;
+  getIframe: () => HTMLIFrameElement;
 }
 
 interface YouTubeEvent {
@@ -85,11 +84,12 @@ const extractYouTubeVideoId = (url: string): string | null => {
 };
 
 const MusicPlayer: React.FC<{ youtubeUrl?: string }> = ({ youtubeUrl }) => {
-  const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [videoId, setVideoId] = useState<string>(GAME_DATA.youtubeId);
+  const playerRef = useRef<YouTubePlayer | null>(null);
+  const ytApiLoadedRef = useRef<boolean>(false);
+  const playerContainerRef = useRef<HTMLDivElement>(null);
 
-  console.log(isPlaying);
-
+  // youtubeUrl prop이 변경될 때만 videoId 업데이트
   useEffect(() => {
     if (youtubeUrl) {
       const extractedId = extractYouTubeVideoId(youtubeUrl);
@@ -99,26 +99,32 @@ const MusicPlayer: React.FC<{ youtubeUrl?: string }> = ({ youtubeUrl }) => {
     }
   }, [youtubeUrl]);
 
-  const playerRef = useRef<YouTubePlayer | null>(null);
-
+  // YouTube API 로드 및 플레이어 초기화
   useEffect(() => {
-    const tag: HTMLScriptElement = document.createElement('script');
-    tag.src = 'https://www.youtube.com/iframe_api';
-    const firstScriptTag: HTMLScriptElement | null =
-      document.getElementsByTagName('script')[0];
-    if (firstScriptTag?.parentNode) {
-      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+    // YouTube API가 이미 로드되어 있는지 확인
+    if (!window.YT && !ytApiLoadedRef.current) {
+      ytApiLoadedRef.current = true;
+      const tag: HTMLScriptElement = document.createElement('script');
+      tag.src = 'https://www.youtube.com/iframe_api';
+      const firstScriptTag: HTMLScriptElement | null =
+        document.getElementsByTagName('script')[0];
+      if (firstScriptTag?.parentNode) {
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+      }
     }
 
-    if (playerRef.current) {
-      playerRef.current.destroy();
-      playerRef.current = null;
-    }
+    // YouTube API 사용 준비 함수
+    const initPlayer = () => {
+      // 기존 플레이어 제거
+      if (playerRef.current) {
+        playerRef.current.destroy();
+        playerRef.current = null;
+      }
 
-    window.onYouTubeIframeAPIReady = () => {
+      // YouTube 플레이어 초기화
       playerRef.current = new window.YT.Player('youtube-player', {
-        height: '0',
-        width: '0',
+        height: '1',
+        width: '1',
         videoId: videoId,
         playerVars: {
           autoplay: 1,
@@ -136,19 +142,72 @@ const MusicPlayer: React.FC<{ youtubeUrl?: string }> = ({ youtubeUrl }) => {
       });
     };
 
+    // YT API가 이미 로드되어 있으면 바로 플레이어 초기화
+    if (window.YT && window.YT.Player) {
+      initPlayer();
+    } else {
+      // YT API가 로드되면 플레이어 초기화
+      window.onYouTubeIframeAPIReady = initPlayer;
+    }
+
+    // 컴포넌트 언마운트 시 플레이어 정리
     return () => {
       if (playerRef.current) {
         playerRef.current.destroy();
+        playerRef.current = null;
       }
     };
   }, [videoId]);
 
-  const onPlayerReady = (event: YouTubeEvent): void => {
-    const defaultVolume = 100;
-    event.target.setVolume(defaultVolume);
+  // YouTube 플레이어 iframe을 숨기는 스타일 적용
+  useEffect(() => {
+    const applyStyles = () => {
+      try {
+        const iframe = playerRef.current?.getIframe();
+        if (iframe) {
+          iframe.style.position = 'absolute';
+          iframe.style.opacity = '0.01';
+          iframe.style.pointerEvents = 'none';
+          iframe.style.left = '-1000px';
+          iframe.setAttribute('tabindex', '-1');
+        }
+      } catch (error) {
+        console.error('iframe 스타일링 오류:', error);
+      }
+    };
 
+    // YouTube 플레이어가 로드된 후 스타일 적용을 위한 타이머
+    if (playerRef.current) {
+      const styleTimer = setInterval(() => {
+        try {
+          if (playerRef.current?.getIframe()) {
+            applyStyles();
+            clearInterval(styleTimer);
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      }, 300);
+
+      return () => clearInterval(styleTimer);
+    }
+  }, [playerRef.current]);
+
+  const onPlayerReady = (event: YouTubeEvent): void => {
     event.target.playVideo();
-    setIsPlaying(true);
+
+    try {
+      const iframe = event.target.getIframe();
+      if (iframe) {
+        iframe.style.position = 'absolute';
+        iframe.style.opacity = '0.01';
+        iframe.style.pointerEvents = 'none';
+        iframe.style.left = '-1000px';
+        iframe.setAttribute('tabindex', '-1');
+      }
+    } catch (error) {
+      console.error('iframe 초기 스타일링 오류:', error);
+    }
   };
 
   const onPlayerStateChange = (event: YouTubeEvent): void => {
@@ -159,7 +218,12 @@ const MusicPlayer: React.FC<{ youtubeUrl?: string }> = ({ youtubeUrl }) => {
 
   return (
     <div className='w-full h-full flex flex-col bg-gray-100 rounded-lg overflow-hidden max-w-lg mx-auto'>
-      <div id='youtube-player' className='hidden'></div>
+      <div
+        ref={playerContainerRef}
+        className='absolute w-1 h-1 overflow-hidden opacity-0 pointer-events-none'
+      >
+        <div id='youtube-player'></div>
+      </div>
 
       <div className='bg-gray-700 text-white p-3'>
         <div className='flex justify-center items-center'>

@@ -1,4 +1,3 @@
-// pages/game-room/_components/EditRoomModal.tsx
 import { useState } from 'react';
 import { Room } from '../../_types/game';
 import {
@@ -66,7 +65,6 @@ export default function EditRoomModal({
   };
 
   const handleSubmit = () => {
-    // 여기서 API로 데이터 전송
     const updatedRoomData = {
       ...formData,
       gameYears: selectedYears,
@@ -87,7 +85,6 @@ export default function EditRoomModal({
         </DialogHeader>
 
         <div className='grid gap-4 py-4'>
-          {/* 방 이름 */}
           <div className='grid grid-cols-4 items-center gap-4'>
             <Label htmlFor='room-name' className='text-right'>
               방 이름
@@ -100,7 +97,6 @@ export default function EditRoomModal({
             />
           </div>
 
-          {/* 비공개 방 토글 */}
           <div className='grid grid-cols-4 items-center gap-4'>
             <Label htmlFor='private-room' className='text-right'>
               비공개 방
@@ -119,7 +115,6 @@ export default function EditRoomModal({
             </div>
           </div>
 
-          {/* 최대 참가자 수 */}
           <div className='grid grid-cols-4 items-center gap-4'>
             <Label htmlFor='max-players' className='text-right'>
               최대 인원
@@ -143,7 +138,6 @@ export default function EditRoomModal({
             </Select>
           </div>
 
-          {/* 게임 연도 - 다중 선택 */}
           <div className='grid grid-cols-4 items-start gap-4'>
             <Label className='text-right pt-2'>게임 연도</Label>
             <div className='col-span-3 space-y-2'>

@@ -94,7 +94,7 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
               }, {}),
             );
           }
-          if (type === 'quiz') {
+          if (type === 'quizInfo') {
             gameScreenStore.setSongUrl(response.songUrl);
             gameStateStore.setGameState('gameQuizOpened');
           }

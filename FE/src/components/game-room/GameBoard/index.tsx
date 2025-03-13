@@ -6,6 +6,8 @@ import { useGameStateStore } from '@/stores/websocket/useGameStateStore';
 export default function GameBoard() {
   const { gameState } = useGameStateStore();
 
+  console.log(gameState);
+
   return (
     <div className='h-full flex flex-col p-4'>
       {gameState === 'gameWait' && <GameWait />}
