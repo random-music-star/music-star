@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { useState } from 'react';
+import { useRouter } from 'next/router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -34,7 +35,7 @@ interface CreateRoomRequest {
   title: string;
   password: string;
   format: string;
-  mode: string[];
+  gameModes: string[];
 }
 
 interface CreateRoomResponse {
@@ -63,6 +64,7 @@ const formSchema = z
 type FormValues = z.infer<typeof formSchema>;
 
 export default function CreateRoomForm({ onSuccess }: CreateRoomFormProps) {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
 
   // React Hook Form 설정
@@ -106,19 +108,35 @@ export default function CreateRoomForm({ onSuccess }: CreateRoomFormProps) {
       title: data.title,
       password: data.isLocked ? data.password || '' : '',
       format: data.format,
-      mode: data.modes,
+      gameModes: data.modes,
     };
 
     try {
+      console.log('Sending request data:', JSON.stringify(requestData));
+
+      const username = localStorage.getItem('userNickname') || '';
+      console.log('Current username:', username);
       const response = await axios.post<CreateRoomResponse>(
         `${process.env.NEXT_PUBLIC_BASE_URL}/room`,
         requestData,
+        {
+          headers: {
+            Authorization: username,
+            'Content-Type': 'application/json',
+          },
+        },
       );
-
       console.log('방 생성 완료:', response.data);
+      const roomId = response.data.roomId;
+      router.push(`/game-room?roomId=${roomId}`);
       onSuccess();
     } catch (error) {
       console.error('API 오류:', error);
+      if (axios.isAxiosError(error) && error.response) {
+        console.error('Response data:', error.response.data);
+        console.error('Response status:', error.response.status);
+        console.error('Response headers:', error.response.headers);
+      }
     } finally {
       setLoading(false);
     }
@@ -197,14 +215,14 @@ export default function CreateRoomForm({ onSuccess }: CreateRoomFormProps) {
                   onValueChange={field.onChange}
                   className='flex gap-4'
                 >
-                  {/* <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="GENERAL" id="format-general" />
-                    <Label htmlFor="format-general">점수판 모드</Label>
-                  </div> */}
                   <div className='flex items-center space-x-2'>
                     <RadioGroupItem value='BOARD' id='format-board' />
                     <Label htmlFor='format-board'>보드판 모드</Label>
                   </div>
+                  {/* <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="GENERAL" id="format-general" />
+                    <Label htmlFor="format-general">점수판 모드</Label>
+                  </div> */}
                 </RadioGroup>
               </FormControl>
               <FormMessage />
@@ -225,7 +243,7 @@ export default function CreateRoomForm({ onSuccess }: CreateRoomFormProps) {
                     <SelectValue placeholder='모드 추가' />
                   </SelectTrigger>
                   <SelectContent>
-                    {['FULL', '1SEC']
+                    {['FULL'] // "1SEC"
                       .filter(mode => !selectedModes.includes(mode))
                       .map(mode => (
                         <SelectItem key={mode} value={mode}>
