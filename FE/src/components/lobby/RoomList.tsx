@@ -1,76 +1,335 @@
-import { useState } from "react";
-import { Room } from "@/pages/lobby";
-import RoomItem from "./RoomItem";
-import { Button } from "@/components/ui/button";
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { Room } from '@/pages/lobby';
+import RoomItem from './RoomItem';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import axios from 'axios';
+
+// SSE 엔드포인트 URL 상수 정의 (나중에 env로 빼야 함)
+const SSE_ENDPOINT = `${process.env.NEXT_PUBLIC_SSE_URL}/lobby`;
+const API_URL = process.env.NEXT_PUBLIC_BASE_URL;
+
+// SSE 이벤트 타입 상수 정의
+const SSE_EVENTS = {
+  // 최초 연결 (SSE 연결 메시지 - data 문자열, 방 목록 리스트 전달 - data 배열)
+  CONNECT: 'CONNECT',
+  ROOM_LIST: 'ROOM_LIST',
+  // 방 생성, 방 정보 수정 (actionType, room key 값으로 받음)
+  ROOM_UPDATED: 'ROOM_UPDATED',
+  // 방 삭제 (아직 없음)
+  ROOM_DELETE: 'ROOM_DELETE',
+} as const;
 
 interface RoomListProps {
   rooms: Room[];
+  currentPage?: number;
+  totalPages?: number;
+  pageSize?: number;
 }
 
-export default function RoomList({ rooms }: RoomListProps) {
-  const ITEMS_PER_PAGE = 8; // 2 * 4 그리드
-  const [currentPage, setCurrentPage] = useState(0);
+export default function RoomList({
+  rooms: initialRooms,
+  currentPage: initialCurrentPage = 0,
+  totalPages: initialTotalPages = 1,
+  pageSize = 8,
+}: RoomListProps) {
+  // 상태 관리 : 방 목록, 로딩 상태, SSE 연결 상태, 페이지네이션 정보
+  const [rooms, setRooms] = useState<Room[]>(
+    Array.isArray(initialRooms) ? initialRooms : [],
+  );
+  const [isLoading, setIsLoading] = useState<boolean>(
+    initialRooms.length === 0,
+  );
+  const [sseConnected, setSseConnected] = useState<boolean>(false);
+  const [currentPage, setCurrentPage] = useState<number>(initialCurrentPage);
+  const [totalPages, setTotalPages] = useState<number>(initialTotalPages);
 
-  const totalPages = Math.ceil(rooms.length / ITEMS_PER_PAGE);
-  const startIdx = currentPage * ITEMS_PER_PAGE;
-  const visibleRooms = rooms.slice(startIdx, startIdx + ITEMS_PER_PAGE);
+  // 현재 페이지를 ref로 관리하여 이벤트 핸들러에서 최신 값에 접근할 수 있도록 함
+  const currentPageRef = useRef<number>(initialCurrentPage);
 
-  const goToPrevPage = () => {
-    setCurrentPage((prev) => Math.max(0, prev - 1));
+  // currentPage 상태가 변경될 때마다 ref 값도 업데이트
+  useEffect(() => {
+    currentPageRef.current = currentPage;
+  }, [currentPage]);
+
+  // 페이지 이동 함수
+  const handlePageChange = async (newPage: number) => {
+    try {
+      setIsLoading(true);
+      const response = await axios.get(`${API_URL}/room`, {
+        params: {
+          page: newPage,
+          size: pageSize,
+        },
+      });
+
+      const data = response.data;
+      setRooms(data.content || []);
+      setCurrentPage(data.pageable?.pageNumber || newPage);
+      setTotalPages(data.totalPages || 1);
+      setIsLoading(false);
+    } catch (error) {
+      console.error('방 목록 가져오기 오류:', error);
+      setIsLoading(false);
+    }
   };
 
-  const goToNextPage = () => {
-    setCurrentPage((prev) => Math.min(totalPages - 1, prev + 1));
-  };
+  // 이벤트 데이터 처리 함수
+  const handleEventData = useCallback(
+    (event: MessageEvent, eventName: string) => {
+      try {
+        let data;
 
-  // 서버 통신 필요:
-  // 1. 방 클릭 시 방 상태 확인 API 호출 (/api/rooms/{roomId}/status)
-  // 2. 상태에 따라 비밀번호 입력, 안내 메시지 표시, 또는 입장 처리
+        // CONNECT 이벤트 : data (문자열)
+        if (eventName === SSE_EVENTS.CONNECT) {
+          data = event.data;
+          console.log(`${eventName} 이벤트 수신:`, data);
+          return data;
+        }
+
+        // ROOM_LIST 이벤트 : data (JSON)
+        if (eventName === SSE_EVENTS.ROOM_LIST) {
+          data = JSON.parse(event.data);
+          console.log(`ROOM_LIST 조건 이벤트 수신:`, data);
+          return data;
+        }
+
+        // 기타 이벤트 (ROOM_UPDATE, ROOM_DELETE)
+        data = JSON.parse(event.data);
+        console.log(`${eventName} 이벤트 수신:`, data);
+        return data;
+      } catch (error) {
+        console.error(`${eventName} 이벤트 처리 오류:`, error);
+        return null;
+      }
+    },
+    [],
+  );
+
+  // SSE 연결 설정
+  useEffect(() => {
+    let eventSource: EventSource | null = null;
+
+    // SSE 연결 함수
+    const connectSSE = () => {
+      if (eventSource) {
+        eventSource.close();
+      }
+
+      // SSE 연결 생성
+      eventSource = new EventSource(SSE_ENDPOINT);
+
+      // 기본 이벤트 핸들러
+      eventSource.onopen = () => {
+        console.log('SSE 연결됨');
+        setSseConnected(true);
+        setIsLoading(false);
+      };
+      eventSource.onerror = () => {
+        console.error('SSE 연결 오류 발생');
+        setSseConnected(false);
+        // 초기 데이터가 있으면 로딩 상태 해제
+        if (initialRooms.length > 0) {
+          setIsLoading(false);
+        }
+      };
+
+      // CONNECT 이벤트
+      eventSource.addEventListener(SSE_EVENTS.CONNECT, event => {
+        handleEventData(event, SSE_EVENTS.CONNECT);
+        setSseConnected(true);
+        setIsLoading(false);
+      });
+
+      // ROOM_LIST 이벤트
+      eventSource.addEventListener(SSE_EVENTS.ROOM_LIST, event => {
+        const data = handleEventData(event, SSE_EVENTS.ROOM_LIST);
+        if (data && data.rooms) {
+          const rooms = data.rooms;
+          const totalPages = data.totalPages;
+          const currentPage = data.currentPage;
+
+          console.log(
+            '방 목록',
+            rooms,
+            '전체 페이지 수',
+            totalPages,
+            '현재 페이지 번호',
+            currentPage,
+          );
+
+          setRooms(rooms);
+          setTotalPages(totalPages);
+          setCurrentPage(currentPage);
+          setIsLoading(false);
+        } else {
+          setRooms([]);
+          setIsLoading(false);
+        }
+      });
+
+      // ROOM_UPDATE 이벤트
+      eventSource.addEventListener(SSE_EVENTS.ROOM_UPDATED, event => {
+        const data = handleEventData(event, SSE_EVENTS.ROOM_UPDATED);
+
+        if (data && data.room) {
+          const updatedRoom = data.room;
+          // 최신 currentPage 값을 ref에서 가져옴
+          const pageNow = currentPageRef.current;
+          console.log('현재 페이지 (ref):', pageNow);
+
+          if (pageNow === 0) {
+            // 첫 페이지인 경우: 새로운 방이 생기거나 업데이트된 방을 목록 맨 앞에 추가
+            const roomIndex = rooms.findIndex(
+              room => room.id === updatedRoom.id,
+            );
+
+            if (roomIndex !== -1) {
+              // 이미 있는 방이면 업데이트
+              setRooms(currentRooms => {
+                const newRooms = [...currentRooms];
+                newRooms[roomIndex] = updatedRoom;
+                return newRooms;
+              });
+            } else {
+              // 새로운 방이면 목록 맨 앞에 추가하고, 페이지 크기 유지를 위해 마지막 항목 제거
+              setRooms(currentRooms => {
+                const newRooms = [updatedRoom, ...currentRooms];
+                // 페이지 크기 유지
+                if (newRooms.length > pageSize) {
+                  return newRooms.slice(0, pageSize);
+                }
+                return newRooms;
+              });
+            }
+          } else {
+            // 첫 페이지가 아닌 경우: 현재 방 목록에 있는 방만 업데이트
+            const roomIndex = rooms.findIndex(
+              room => room.id === updatedRoom.id,
+            );
+
+            if (roomIndex !== -1) {
+              // 방이 목록에 있을 경우 해당 방 정보 업데이트
+              setRooms(currentRooms => {
+                const newRooms = [...currentRooms];
+                newRooms[roomIndex] = updatedRoom;
+                return newRooms;
+              });
+            }
+            // 방이 목록에 없을 경우 별도 처리 없음
+          }
+        }
+      });
+
+      // ROOM_DELETE 이벤트
+      eventSource.addEventListener(SSE_EVENTS.ROOM_DELETE, event => {
+        const deletedRoom = handleEventData(event, SSE_EVENTS.ROOM_DELETE);
+        if (deletedRoom) {
+          setRooms(currentRooms =>
+            currentRooms.filter(room => room.id !== deletedRoom.id),
+          );
+        }
+      });
+    };
+
+    // 초기 SSE 연결 시도
+    connectSSE();
+
+    // 클린업 함수
+    return () => {
+      if (eventSource) {
+        eventSource.close();
+      }
+    };
+  }, [handleEventData, initialRooms.length]);
+
+  // props로 전달된 rooms가 변경될 경우, SSE가 연결되지 않았다면 상태 업데이트
+  useEffect(() => {
+    if (!sseConnected) {
+      setRooms(initialRooms);
+      setCurrentPage(initialCurrentPage);
+      setTotalPages(initialTotalPages);
+    }
+  }, [initialRooms, sseConnected, initialCurrentPage, initialTotalPages]);
+
+  // 페이지네이션 관련 상수
+  const isFirstPage = currentPage === 0;
+  const isLastPage = currentPage === totalPages - 1 || totalPages === 0;
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4 flex-1">
-        {visibleRooms.map((room) => (
-          <RoomItem key={room.id} room={room} />
-        ))}
-
-        {/* 빈 방 표시 (8개를 채우기 위함) */}
-        {visibleRooms.length < ITEMS_PER_PAGE &&
-          Array(ITEMS_PER_PAGE - visibleRooms.length)
-            .fill(null)
-            .map((_, idx) => (
-              <div
-                key={`empty-${idx}`}
-                className="border border-dashed border-[hsl(var(--color-room-border))] rounded-lg h-48 flex items-center justify-center"
-              >
-                <span className="text-[hsl(var(--color-text-tertiary))]">빈 방</span>
-              </div>
-            ))
-        }
-      </div>
-
-      {totalPages > 1 && (
-        <div className="flex justify-center gap-4 mt-6">
-          <Button
-            variant="outline"
-            onClick={goToPrevPage}
-            disabled={currentPage === 0}
-            className="border-[hsl(var(--color-room-border))] text-[hsl(var(--color-text-primary))]"
-          >
-            이전
-          </Button>
-          <div className="flex items-center">
-            <span className="text-[hsl(var(--color-text-primary))]">{currentPage + 1} / {totalPages}</span>
-          </div>
-          <Button
-            variant="outline"
-            onClick={goToNextPage}
-            disabled={currentPage === totalPages - 1}
-            className="border-[hsl(var(--color-room-border))] text-[hsl(var(--color-text-primary))]"
-          >
-            다음
-          </Button>
+    <div>
+      {isLoading ? (
+        <div className='flex items-center justify-center py-12'>
+          <div
+            className='animate-spin inline-block w-6 h-6 border-[3px] border-current border-t-transparent text-indigo-500 rounded-full mr-2'
+            aria-hidden='true'
+          ></div>
+          <p className='text-indigo-700 font-medium'>
+            방 목록을 불러오는 중...
+          </p>
         </div>
+      ) : rooms.length === 0 ? (
+        <div className='flex flex-col items-center justify-center py-20 gap-2'>
+          <div className='w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mb-2'>
+            <span className='text-2xl text-indigo-500'>🎵</span>
+          </div>
+          <p className='text-indigo-700 font-medium'>생성된 방이 없습니다</p>
+          <p className='text-gray-500 text-sm'>
+            새로운 노래방을 만들어 보세요!
+          </p>
+        </div>
+      ) : (
+        <>
+          {/* SSE 연결 상태 표시 */}
+          {!sseConnected && initialRooms.length > 0 && (
+            <Alert className='mb-4 bg-amber-50 border-amber-200'>
+              <AlertDescription className='text-amber-700 text-sm'>
+                ⚠️ 실시간 연결이 불가능합니다. 샘플 데이터를 표시합니다.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* 그리드 구조: 화면 크기에 따라 열 개수 조정 */}
+          <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'>
+            {rooms.map(room => (
+              <RoomItem key={room.id} room={room} />
+            ))}
+          </div>
+
+          {/* 페이지네이션 UI */}
+          {totalPages > 0 && (
+            <div className='flex items-center justify-center mt-6 gap-4'>
+              <Button
+                variant='outline'
+                size='sm'
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={isFirstPage || isLoading}
+                className={`${isFirstPage ? 'opacity-50 cursor-not-allowed' : 'hover:bg-indigo-50'} border-indigo-200`}
+              >
+                <ChevronLeft className='h-4 w-4 mr-1' />
+                이전
+              </Button>
+
+              <div className='text-sm font-medium text-gray-700'>
+                {totalPages > 0
+                  ? `${currentPage + 1} / ${totalPages}`
+                  : '0 / 0'}
+              </div>
+
+              <Button
+                variant='outline'
+                size='sm'
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={isLastPage || isLoading}
+                className={`${isLastPage ? 'opacity-50 cursor-not-allowed' : 'hover:bg-indigo-50'} border-indigo-200`}
+              >
+                다음
+                <ChevronRight className='h-4 w-4 ml-1' />
+              </Button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

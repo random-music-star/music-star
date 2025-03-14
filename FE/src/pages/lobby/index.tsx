@@ -10,12 +10,17 @@ import { useEffect } from 'react';
 import { useNicknameStore } from '@/stores/auth/useNicknameStore';
 
 export type Room = {
-  id: string;
-  name: string;
-  isLocked: boolean;
-  currentUsers: number;
-  maxUsers: number;
-  gameModes: string[];
+  id: number;
+  title: string;
+  hostName: string;
+  format: string;
+  maxPlayer: number;
+  currentPlayers: number;
+  maxGameRound: number;
+  playTime: number;
+  status: string;
+  hasPassword: boolean;
+  gameModes: string[] | null;
 };
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
@@ -44,38 +49,91 @@ const LobbyPage = ({ userNickname }: { userNickname: string }) => {
     setNickname(userNickname);
   }, [userNickname]);
 
-  const rooms: Room[] = [
+  const initialRooms: Room[] = [
+    // 1. 일반 열린 방
     {
-      id: '1234',
-      name: '즐거운 노래방',
-      isLocked: false,
-      currentUsers: 3,
-      maxUsers: 8,
+      id: 1234,
+      title: '즐거운 노래방',
+      hostName: 'user_abc123',
+      format: 'GENERAL',
+      maxPlayer: 8,
+      currentPlayers: 3,
+      maxGameRound: 20,
+      playTime: 0,
+      status: 'WAITING',
+      hasPassword: false,
       gameModes: ['전곡 모드'],
     },
+    // 2. 잠금방 (입장 가능)
     {
-      id: '2345',
-      name: '가사 맞추기 대회',
-      isLocked: false,
-      currentUsers: 2,
-      maxUsers: 4,
-      gameModes: ['전곡 모드'],
+      id: 2345,
+      title: '비밀 노래방 파티',
+      hostName: 'user_def456',
+      format: 'GENERAL',
+      maxPlayer: 6,
+      currentPlayers: 2,
+      maxGameRound: 15,
+      playTime: 0,
+      status: 'WAITING',
+      hasPassword: true,
+      gameModes: ['전곡 모드', '1초 모드'],
     },
+    // 3. 인원이 모두 찬 방
     {
-      id: '3456',
-      name: '아이돌 노래 전문',
-      isLocked: true,
-      currentUsers: 4,
-      maxUsers: 6,
-      gameModes: ['전곡 모드'],
+      id: 3456,
+      title: '인기 폭발 노래방',
+      hostName: 'user_ghi789',
+      format: 'GENERAL',
+      maxPlayer: 8,
+      currentPlayers: 8,
+      maxGameRound: 25,
+      playTime: 0,
+      status: 'WAITING',
+      hasPassword: false,
+      gameModes: ['전곡 모드', '1초 모드', 'AI 모드'],
     },
+    // 4. 잠금방이면서 인원이 모두 찬 방
     {
-      id: '4567',
-      name: '트로트만 불러요',
-      isLocked: false,
-      currentUsers: 1,
-      maxUsers: 8,
-      gameModes: ['전곡 모드'],
+      id: 4567,
+      title: 'VIP 클럽 노래방',
+      hostName: 'user_jkl012',
+      format: 'PREMIUM',
+      maxPlayer: 4,
+      currentPlayers: 4,
+      maxGameRound: 30,
+      playTime: 0,
+      status: 'WAITING',
+      hasPassword: true,
+      gameModes: ['전곡 모드', '1초 모드', 'AI 모드'],
+    },
+    // 5. 긴 이름을 가진 방 (UI 테스트용)
+    {
+      id: 8901,
+      title:
+        '매우매우매우매우매우매우매우매우매우매우매우매우매우매우매우 긴 이름의 노래방',
+      hostName: 'user_mno345',
+      format: 'GENERAL',
+      maxPlayer: 6,
+      currentPlayers: 3,
+      maxGameRound: 20,
+      playTime: 0,
+      status: 'WAITING',
+      hasPassword: true,
+      gameModes: ['전곡 모드', '1초 모드', 'AI 모드'],
+    },
+    // 6. 새로운 샘플 - 게임 모드가 null인 경우
+    {
+      id: 5678,
+      title: '신규 노래방',
+      hostName: 'user_pqr678',
+      format: 'GENERAL',
+      maxPlayer: 10,
+      currentPlayers: 1,
+      maxGameRound: 20,
+      playTime: 0,
+      status: 'WAITING',
+      hasPassword: false,
+      gameModes: null,
     },
   ];
 
@@ -91,7 +149,7 @@ const LobbyPage = ({ userNickname }: { userNickname: string }) => {
             </div>
 
             <div className='flex-1 overflow-y-auto'>
-              <RoomList rooms={rooms} />
+              <RoomList rooms={initialRooms} />
             </div>
           </div>
 
