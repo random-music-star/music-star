@@ -6,10 +6,18 @@ import GameBoard from '../../components/game-room/GameBoard';
 import ReadyPanel from '../../components/game-room/ReadyPannel';
 import SocketLayout from '@/components/layouts/SocketLayout';
 import { useWebSocketStore } from '@/stores/websocket/useWebsocketStore';
+import { useRouter } from 'next/router';
+import usePrompt from '@/hooks/useNavigationBlocker';
+import NavigationDialog from '@/components/game-room/NavigationDialog';
 
 export default function GameRoom() {
+  const router = useRouter();
+
   const { isConnected, updateSubscription, sendMessage } = useWebSocketStore();
+  const { isBlocked, handleProceed, handleCancel } = usePrompt();
+
   const [currentUserId, setCurrentUserId] = useState('');
+  const [isGameStarted, setIsGameStarted] = useState(false);
 
   useEffect(() => {
     const userName = localStorage.getItem('userNickname') as string;
@@ -18,13 +26,16 @@ export default function GameRoom() {
     }
   }, []);
 
-  const [isGameStarted, setIsGameStarted] = useState(false);
-
   useEffect(() => {
     if (isConnected) {
       updateSubscription('game-room');
     }
   }, [isConnected]);
+
+  const handleGameProceed = () => {
+    router.push('/');
+    handleProceed();
+  };
 
   const handleStartGame = () => {
     sendMessage(`/app/channel/1/room/1/start`, {
@@ -72,13 +83,21 @@ export default function GameRoom() {
             <ChatBox currentUserId={currentUserId} />
           </div>
         </div>
-
         <div className='w-1/4 bg-white rounded-xl shadow-lg overflow-hidden flex flex-col'>
           <div className='p-4 bg-indigo-600 text-white font-bold'>
             <h2>방 정보</h2>
           </div>
           <RoomInfo />
         </div>
+
+        {/* 리팩토링 필요 NavigationDialog 컴포넌트 + usePrompt 훅 */}
+        <NavigationDialog
+          isOpen={isBlocked}
+          onProceed={handleGameProceed}
+          onCancel={handleCancel}
+          title='게임을 종료하시겠습니까?'
+          description='기권 처리 된 후, 로비로 이동합니다.'
+        />
       </div>
     </SocketLayout>
   );
