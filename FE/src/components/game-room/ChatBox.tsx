@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, FormEvent } from 'react';
 import { Send } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -22,12 +22,11 @@ export default function ChatBox({ currentUserId }: ChatBoxProps) {
     }
   }, [gameChattings]);
 
-  const handleSendMessage = (event: React.FormEvent) => {
+  const handleSendMessage = (event: FormEvent) => {
     event.preventDefault();
 
     if (!inputValue.trim()) return;
 
-    console.log('입력된 값:', inputValue);
     sendMessage('/app/channel/1/room/1', {
       type: 'gameChat',
       request: {

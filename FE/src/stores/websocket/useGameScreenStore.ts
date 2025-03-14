@@ -15,7 +15,10 @@ const initialState = {
   boardInfo: null,
   score: [],
   gameResult: null,
-  gameHint: null,
+  gameHint: {
+    title: 'ㅌㅂㅇ',
+    singer: '',
+  },
 };
 
 export const useGameScreenStore = create<GameScreenState>(set => ({
@@ -37,8 +40,11 @@ export const useGameScreenStore = create<GameScreenState>(set => ({
   gameResult: null,
   setGameResult: (gameResult: GameResult | null) => set({ gameResult }),
 
-  gameHint: null,
-  setGameHint: (gameHint: GameHint | null) => set({ gameHint }),
+  gameHint: {
+    title: 'ㅌㅂㅇ',
+    singer: '',
+  },
+  setGameHint: (gameHint: GameHint) => set({ gameHint }),
 
   resetGameScreenStore: () => set(initialState),
 }));
