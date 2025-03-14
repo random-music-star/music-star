@@ -52,8 +52,8 @@ export default function ChatBox({ currentUserId }: ChatBoxProps) {
         ref={chatContainerRef}
         className='flex-1 overflow-y-auto p-2 bg-white text-sm leading-relaxed'
       >
-        {gameChattings.map(message => (
-          <div key={message.sender} className='mb-1'>
+        {gameChattings.map((message, index) => (
+          <div key={`${message.sender}-${index}`} className='mb-1'>
             {message.messageType === 'notice' ? (
               <div className='text-center my-1'>
                 <span className='inline-block px-2 py-0.5 bg-gray-200 rounded-full text-xs text-gray-600'>

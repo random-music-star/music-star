@@ -13,7 +13,11 @@ const SocketLayout = ({ children }: SocketLayoutProps) => {
     return () => disconnectWebSocket();
   }, []);
 
-  return <div className='flex flex-col min-h-screen w-screen'>{children}</div>;
+  return (
+    <div className='flex flex-col min-h-screen min-w-screen max-w-screen max-h-screen '>
+      {children}
+    </div>
+  );
 };
 
 export default SocketLayout;
