@@ -1,21 +1,21 @@
-import axios from "axios";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import axios from 'axios';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Form,
   FormControl,
@@ -23,7 +23,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from '@/components/ui/form';
 
 interface CreateRoomFormProps {
   onSuccess: () => void;
@@ -44,18 +44,18 @@ interface CreateRoomResponse {
 // Zod 스키마 정의 (superRefine 사용)
 const formSchema = z
   .object({
-    title: z.string().min(1, "방 이름을 설정해주세요"),
+    title: z.string().min(1, '방 이름을 설정해주세요'),
     isLocked: z.boolean().default(false),
     password: z.string().optional(),
-    format: z.string().min(1, "포맷을 선택해주세요"),
-    modes: z.array(z.string()).min(1, "모드는 최소 한 개 이상 선택해야 합니다"),
+    format: z.string().min(1, '포맷을 선택해주세요'),
+    modes: z.array(z.string()).min(1, '모드는 최소 한 개 이상 선택해야 합니다'),
   })
   .superRefine((data, ctx) => {
     if (data.isLocked && (!data.password || data.password.length === 0)) {
       ctx.addIssue({
-        code: "custom",
-        path: ["password"],
-        message: "비밀번호를 설정해주세요",
+        code: 'custom',
+        path: ['password'],
+        message: '비밀번호를 설정해주세요',
       });
     }
   });
@@ -69,33 +69,33 @@ export default function CreateRoomForm({ onSuccess }: CreateRoomFormProps) {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: "",
+      title: '',
       isLocked: false,
-      password: "",
-      format: "",
+      password: '',
+      format: '',
       modes: [],
     },
   });
 
   // 폼 상태 가져오기
-  const isLocked = form.watch("isLocked");
-  const selectedModes = form.watch("modes");
+  const isLocked = form.watch('isLocked');
+  const selectedModes = form.watch('modes');
 
   // 모드 선택 핸들러 (불필요한 리렌더링 방지)
   const handleModeSelect = (mode: string) => {
     if (!selectedModes.includes(mode)) {
-      form.setValue("modes", [...selectedModes, mode]);
-      form.trigger("modes");
+      form.setValue('modes', [...selectedModes, mode]);
+      form.trigger('modes');
     }
   };
 
   // 모드 제거 핸들러
   const removeMode = (mode: string) => {
     form.setValue(
-      "modes",
-      selectedModes.filter((m) => m !== mode)
+      'modes',
+      selectedModes.filter(m => m !== mode),
     );
-    form.trigger("modes");
+    form.trigger('modes');
   };
 
   // 폼 제출 핸들러
@@ -104,21 +104,21 @@ export default function CreateRoomForm({ onSuccess }: CreateRoomFormProps) {
 
     const requestData: CreateRoomRequest = {
       title: data.title,
-      password: data.isLocked ? data.password || "" : "",
+      password: data.isLocked ? data.password || '' : '',
       format: data.format,
-      mode: data.modes
+      mode: data.modes,
     };
 
     try {
       const response = await axios.post<CreateRoomResponse>(
-        "http://localhost:8080/room",
-        requestData
+        `${process.env.NEXT_PUBLIC_BASE_URL}/room`,
+        requestData,
       );
 
-      console.log("방 생성 완료:", response.data);
+      console.log('방 생성 완료:', response.data);
       onSuccess();
     } catch (error) {
-      console.error("API 오류:", error);
+      console.error('API 오류:', error);
     } finally {
       setLoading(false);
     }
@@ -126,16 +126,16 @@ export default function CreateRoomForm({ onSuccess }: CreateRoomFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
         {/* 방 이름 */}
         <FormField
           control={form.control}
-          name="title"
+          name='title'
           render={({ field }) => (
             <FormItem>
               <FormLabel>방 이름</FormLabel>
               <FormControl>
-                <Input {...field} placeholder="방 이름을 입력해주세요" />
+                <Input {...field} placeholder='방 이름을 입력해주세요' />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -145,17 +145,17 @@ export default function CreateRoomForm({ onSuccess }: CreateRoomFormProps) {
         {/* 잠금방 설정 */}
         <FormField
           control={form.control}
-          name="isLocked"
+          name='isLocked'
           render={({ field }) => (
-            <FormItem className="flex justify-between items-center">
+            <FormItem className='flex justify-between items-center'>
               <FormLabel>잠금방 설정</FormLabel>
               <FormControl>
                 <Switch
                   checked={field.value}
-                  onCheckedChange={(checked) => {
+                  onCheckedChange={checked => {
                     field.onChange(checked);
                     if (!checked) {
-                      form.setValue("password", "");
+                      form.setValue('password', '');
                     }
                   }}
                 />
@@ -167,7 +167,7 @@ export default function CreateRoomForm({ onSuccess }: CreateRoomFormProps) {
         {/* 비밀번호 입력 */}
         <FormField
           control={form.control}
-          name="password"
+          name='password'
           render={({ field }) => (
             <FormItem>
               <FormLabel>비밀번호</FormLabel>
@@ -175,8 +175,8 @@ export default function CreateRoomForm({ onSuccess }: CreateRoomFormProps) {
                 <Input
                   {...field}
                   disabled={!isLocked}
-                  placeholder="비밀번호 입력"
-                  className={!isLocked ? "bg-gray-100 text-gray-400" : ""}
+                  placeholder='비밀번호 입력'
+                  className={!isLocked ? 'bg-gray-100 text-gray-400' : ''}
                 />
               </FormControl>
               <FormMessage />
@@ -187,7 +187,7 @@ export default function CreateRoomForm({ onSuccess }: CreateRoomFormProps) {
         {/* 포맷 선택 */}
         <FormField
           control={form.control}
-          name="format"
+          name='format'
           render={({ field }) => (
             <FormItem>
               <FormLabel>포맷 선택</FormLabel>
@@ -195,15 +195,15 @@ export default function CreateRoomForm({ onSuccess }: CreateRoomFormProps) {
                 <RadioGroup
                   value={field.value}
                   onValueChange={field.onChange}
-                  className="flex gap-4"
+                  className='flex gap-4'
                 >
                   {/* <div className="flex items-center space-x-2">
                     <RadioGroupItem value="GENERAL" id="format-general" />
                     <Label htmlFor="format-general">점수판 모드</Label>
                   </div> */}
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="BOARD" id="format-board" />
-                    <Label htmlFor="format-board">보드판 모드</Label>
+                  <div className='flex items-center space-x-2'>
+                    <RadioGroupItem value='BOARD' id='format-board' />
+                    <Label htmlFor='format-board'>보드판 모드</Label>
                   </div>
                 </RadioGroup>
               </FormControl>
@@ -215,21 +215,21 @@ export default function CreateRoomForm({ onSuccess }: CreateRoomFormProps) {
         {/* 모드 선택 */}
         <FormField
           control={form.control}
-          name="modes"
+          name='modes'
           render={() => (
             <FormItem>
-              <div className="flex justify-between items-center">
+              <div className='flex justify-between items-center'>
                 <FormLabel>모드 선택</FormLabel>
                 <Select onValueChange={handleModeSelect}>
-                  <SelectTrigger className="w-auto min-w-[120px]">
-                    <SelectValue placeholder="모드 추가" />
+                  <SelectTrigger className='w-auto min-w-[120px]'>
+                    <SelectValue placeholder='모드 추가' />
                   </SelectTrigger>
                   <SelectContent>
-                    {["FULL", "1SEC"]
-                      .filter((mode) => !selectedModes.includes(mode))
-                      .map((mode) => (
+                    {['FULL', '1SEC']
+                      .filter(mode => !selectedModes.includes(mode))
+                      .map(mode => (
                         <SelectItem key={mode} value={mode}>
-                          {mode === "FULL" ? "전곡 재생" : "1초 재생"}
+                          {mode === 'FULL' ? '전곡 재생' : '1초 재생'}
                         </SelectItem>
                       ))}
                   </SelectContent>
@@ -237,23 +237,23 @@ export default function CreateRoomForm({ onSuccess }: CreateRoomFormProps) {
               </div>
 
               {selectedModes.length === 0 ? (
-                <div className="border border-dashed border-gray-300 rounded-md p-4 text-center text-gray-500 mt-2">
+                <div className='border border-dashed border-gray-300 rounded-md p-4 text-center text-gray-500 mt-2'>
                   모드를 선택해주세요
                 </div>
               ) : (
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {selectedModes.map((mode) => (
+                <div className='flex flex-wrap gap-2 mt-2'>
+                  {selectedModes.map(mode => (
                     <Badge
                       key={mode}
-                      variant="secondary"
-                      className="pl-2 pr-1 py-1 bg-gray-200 text-gray-700"
+                      variant='secondary'
+                      className='pl-2 pr-1 py-1 bg-gray-200 text-gray-700'
                     >
-                      {mode === "FULL" ? "전곡 재생" : "1초 재생"}
+                      {mode === 'FULL' ? '전곡 재생' : '1초 재생'}
                       <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="h-5 px-1 ml-1 text-gray-500 hover:text-gray-800"
+                        type='button'
+                        variant='ghost'
+                        size='sm'
+                        className='h-5 px-1 ml-1 text-gray-500 hover:text-gray-800'
                         onClick={() => removeMode(mode)}
                       >
                         삭제
@@ -268,21 +268,21 @@ export default function CreateRoomForm({ onSuccess }: CreateRoomFormProps) {
         />
 
         {/* 버튼 */}
-        <div className="flex justify-end gap-2">
+        <div className='flex justify-end gap-2'>
           <Button
-            variant="outline"
-            type="button"
+            variant='outline'
+            type='button'
             onClick={onSuccess}
-            className="border-gray-300 text-gray-700 hover:bg-gray-100"
+            className='border-gray-300 text-gray-700 hover:bg-gray-100'
           >
             취소
           </Button>
           <Button
-            type="submit"
+            type='submit'
             disabled={loading}
-            className="bg-blue-500 hover:bg-blue-600 text-white"
+            className='bg-blue-500 hover:bg-blue-600 text-white'
           >
-            {loading ? "생성 중..." : "방 생성"}
+            {loading ? '생성 중...' : '방 생성'}
           </Button>
         </div>
       </form>

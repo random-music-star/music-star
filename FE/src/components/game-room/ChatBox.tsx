@@ -30,7 +30,7 @@ export default function ChatBox({ currentUserId }: ChatBoxProps) {
     sendMessage('/app/channel/1/room/1', {
       type: 'gameChat',
       request: {
-        sender: 'hoberMin',
+        sender: currentUserId,
         message: inputValue,
       },
     });

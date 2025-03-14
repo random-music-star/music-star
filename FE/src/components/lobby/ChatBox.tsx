@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { useWebSocketStore } from '@/stores/websocket/useWebsocketStore';
 import { usePublicChatStore } from '@/stores/websocket/usePublicChatStore';
+import { useNicknameStore } from '@/stores/auth/useNicknameStore';
 
 export interface Chatting {
   sender: string;
@@ -10,18 +11,12 @@ export interface Chatting {
 }
 
 export default function ChatBox() {
-  const [userNickname, setUserNickname] = useState('');
-
+  const { nickname } = useNicknameStore();
   const [newMessage, setNewMessage] = useState<string>('');
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
   const { sendMessage, updateSubscription, isConnected } = useWebSocketStore();
   const { publicChattings } = usePublicChatStore();
-
-  useEffect(() => {
-    const nickname = localStorage.getItem('userNickname') || '';
-    setUserNickname(nickname);
-  }, []);
 
   useEffect(() => {
     if (isConnected) {
@@ -40,7 +35,7 @@ export default function ChatBox() {
     if (!newMessage.trim()) return;
 
     const newChatting: Chatting = {
-      sender: userNickname,
+      sender: nickname,
       messageType: 'CHAT',
       message: newMessage,
     };

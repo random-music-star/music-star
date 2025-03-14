@@ -4,6 +4,10 @@ import Header from '@/components/lobby/Header';
 import RoomList from '@/components/lobby/RoomList';
 import ChatBox from '@/components/lobby/ChatBox';
 import CreateRoomButton from '@/components/lobby/CreateRoomButton';
+import { GetServerSideProps } from 'next';
+import { getCookie } from 'cookies-next';
+import { useEffect } from 'react';
+import { useNicknameStore } from '@/stores/auth/useNicknameStore';
 
 export type Room = {
   id: string;
@@ -14,7 +18,32 @@ export type Room = {
   gameModes: string[];
 };
 
-const LobbyPage = () => {
+export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
+  const userNickname = (await getCookie('userNickname', { req, res })) || '';
+
+  if (!userNickname) {
+    return {
+      redirect: {
+        destination: '/',
+        permanent: false,
+      },
+    };
+  }
+
+  return {
+    props: {
+      userNickname,
+    },
+  };
+};
+
+const LobbyPage = ({ userNickname }: { userNickname: string }) => {
+  const { setNickname, nickname } = useNicknameStore();
+
+  useEffect(() => {
+    setNickname(userNickname);
+  }, [userNickname]);
+
   const rooms: Room[] = [
     {
       id: '1234',
@@ -53,7 +82,7 @@ const LobbyPage = () => {
   return (
     <SocketLayout>
       <div className='flex flex-col h-screen bg-gray-100'>
-        <Header />
+        <Header nickname={nickname} />
         <div className='flex flex-1 overflow-hidden'>
           <div className='flex-1 p-6 flex flex-col'>
             <div className='flex justify-between items-center mb-6'>

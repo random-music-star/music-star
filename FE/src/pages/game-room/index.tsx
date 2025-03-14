@@ -10,21 +10,41 @@ import { useRouter } from 'next/router';
 import usePrompt from '@/hooks/useNavigationBlocker';
 import NavigationDialog from '@/components/game-room/NavigationDialog';
 
-export default function GameRoom() {
+import { GetServerSideProps } from 'next';
+import { getCookie } from 'cookies-next';
+import { useNicknameStore } from '@/stores/auth/useNicknameStore';
+
+export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
+  const userNickname = (await getCookie('userNickname', { req, res })) || '';
+
+  if (!userNickname) {
+    return {
+      redirect: {
+        destination: '/',
+        permanent: false,
+      },
+    };
+  }
+
+  return {
+    props: {
+      userNickname,
+    },
+  };
+};
+
+export default function GameRoom({ userNickname }: { userNickname: string }) {
   const router = useRouter();
 
+  const { setNickname, nickname } = useNicknameStore();
   const { isConnected, updateSubscription, sendMessage } = useWebSocketStore();
   const { isBlocked, handleProceed, handleCancel } = usePrompt();
 
-  const [currentUserId, setCurrentUserId] = useState('');
   const [isGameStarted, setIsGameStarted] = useState(false);
 
   useEffect(() => {
-    const userName = localStorage.getItem('userNickname') as string;
-    if (userName) {
-      setCurrentUserId(userName);
-    }
-  }, []);
+    setNickname(userNickname);
+  }, [userNickname]);
 
   useEffect(() => {
     if (isConnected) {
@@ -61,7 +81,7 @@ export default function GameRoom() {
                   transition={{ duration: 0.5 }}
                 >
                   <ReadyPanel
-                    currentUserId={currentUserId}
+                    currentUserId={nickname}
                     handleStartGame={handleStartGame}
                   />
                 </motion.div>
@@ -80,7 +100,7 @@ export default function GameRoom() {
           </div>
 
           <div className='h-2/5 border-t-2 border-gray-200'>
-            <ChatBox currentUserId={currentUserId} />
+            <ChatBox currentUserId={nickname} />
           </div>
         </div>
         <div className='w-1/4 bg-white rounded-xl shadow-lg overflow-hidden flex flex-col'>
