@@ -9,7 +9,6 @@ import { useWebSocketStore } from '@/stores/websocket/useWebsocketStore';
 import { useRouter } from 'next/router';
 import usePrompt from '@/hooks/useNavigationBlocker';
 import NavigationDialog from '@/components/game-room/NavigationDialog';
-import { useGameChatStore } from '@/stores/websocket/useGameChatStore';
 
 export default function GameRoom() {
   const router = useRouter();
@@ -26,8 +25,6 @@ export default function GameRoom() {
       setCurrentUserId(userName);
     }
   }, []);
-
-  const { setGameChattings } = useGameChatStore();
 
   useEffect(() => {
     if (isConnected) {
@@ -47,12 +44,6 @@ export default function GameRoom() {
     });
 
     setIsGameStarted(true);
-
-    setGameChattings({
-      sender: 'system',
-      messageType: 'notice',
-      message: `곧 다음 라운드가 시작됩니다. `,
-    });
   };
 
   return (

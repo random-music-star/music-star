@@ -34,7 +34,7 @@ export interface GameHint {
   singer: string | null;
 }
 
-export interface GameMode {
+export interface RoundInfo {
   mode: string;
   round: number;
 }
@@ -77,8 +77,8 @@ export interface GameChatState {
 export interface GameScreenState {
   remainTime: number | null;
   setRemainTime: (remainTime: number | null) => void;
-  gameMode: GameMode | null;
-  setGameMode: (gameMode: GameMode | null) => void;
+  roundInfo: RoundInfo | null;
+  setGameMode: (roundInfo: RoundInfo | null) => void;
   songUrl: string | null;
   setSongUrl: (songUrl: string | null) => void;
   boardInfo: Board | null;
@@ -87,8 +87,8 @@ export interface GameScreenState {
   setScore: (score: BoardUser[] | []) => void;
   gameResult: GameResult | null;
   setGameResult: (gameResult: GameResult | null) => void;
-  gameHint: GameHint;
-  setGameHint: (gameHint: GameHint) => void;
+  gameHint: GameHint | null;
+  setGameHint: (gameHint: GameHint | null) => void;
   resetGameScreenStore: () => void;
 }
 
@@ -113,4 +113,14 @@ export interface GameScoreState {
   setScores: (newScore: Board) => void;
 
   updateScores: (player: string, score: number) => void;
+}
+
+export interface GameModeInfoState {
+  mode: 'FULL' | 'ONE_SEC';
+  round: number;
+}
+
+export interface GameModeInfoStore {
+  gameModeInfo: GameModeInfoState | null;
+  setGameModeInfo: (newGameModeInfo: GameModeInfoState) => void;
 }

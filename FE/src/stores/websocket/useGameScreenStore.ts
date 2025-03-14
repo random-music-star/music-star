@@ -2,7 +2,7 @@ import {
   Board,
   BoardUser,
   GameHint,
-  GameMode,
+  RoundInfo,
   GameResult,
   GameScreenState,
 } from '@/types/websocket';
@@ -10,23 +10,20 @@ import { create } from 'zustand';
 
 const initialState = {
   remainTime: null,
-  gameMode: null,
+  roundInfo: null,
   songUrl: null,
   boardInfo: null,
   score: [],
   gameResult: null,
-  gameHint: {
-    title: 'ㅌㅂㅇ',
-    singer: '',
-  },
+  gameHint: null,
 };
 
 export const useGameScreenStore = create<GameScreenState>(set => ({
   remainTime: null,
   setRemainTime: (remainTime: number | null) => set({ remainTime }),
 
-  gameMode: null,
-  setGameMode: (gameMode: GameMode | null) => set({ gameMode }),
+  roundInfo: null,
+  setGameMode: (roundInfo: RoundInfo | null) => set({ roundInfo }),
 
   songUrl: null,
   setSongUrl: (songUrl: string | null) => set({ songUrl }),
@@ -40,11 +37,8 @@ export const useGameScreenStore = create<GameScreenState>(set => ({
   gameResult: null,
   setGameResult: (gameResult: GameResult | null) => set({ gameResult }),
 
-  gameHint: {
-    title: 'ㅌㅂㅇ',
-    singer: '',
-  },
-  setGameHint: (gameHint: GameHint) => set({ gameHint }),
+  gameHint: null,
+  setGameHint: (gameHint: GameHint | null) => set({ gameHint }),
 
   resetGameScreenStore: () => set(initialState),
 }));

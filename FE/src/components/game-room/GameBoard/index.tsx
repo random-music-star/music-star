@@ -6,14 +6,13 @@ import { useGameStateStore } from '@/stores/websocket/useGameStateStore';
 export default function GameBoard() {
   const { gameState } = useGameStateStore();
 
-  console.log(gameState);
-
   return (
     <div className='h-full flex flex-col p-4'>
-      {gameState === 'gameWait' && <GameWait />}
-      {gameState === 'gameQuizOpened' && <GameQuiz />}
-      {(gameState === 'gameResultOpened' ||
-        gameState === 'gameScoreUpdate') && <GameResult />}
+      {gameState === 'TIMER_WAIT' && <GameWait />}
+      {gameState === 'QUIZ_OPEN' && <GameQuiz />}
+      {(gameState === 'GAME_RESULT' || gameState === 'SCORE_UPDATE') && (
+        <GameResult />
+      )}
     </div>
   );
 }
