@@ -83,9 +83,16 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
             gameScreenStore.setRemainTime(response.remainTime);
           }
 
-          if (type === 'gameMode') {
+          if (type === 'roundInfo') {
+            gameChatStore.setGameChattings({
+              sender: 'system',
+              messageType: 'notice',
+              message: `곧 다음 라운드가 시작됩니다. `,
+            });
+
             gameScreenStore.setGameMode(response);
-            gameStateStore.setGameState('gameWait');
+            gameStateStore.setGameState('TIMER_WAIT');
+            gameScreenStore.setGameHint(null);
 
             gameScoreStore.setScores(
               participantInfoStore.participantInfo.reduce<Board>((acc, p) => {
@@ -96,7 +103,7 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
           }
           if (type === 'quizInfo') {
             gameScreenStore.setSongUrl(response.songUrl);
-            gameStateStore.setGameState('gameQuizOpened');
+            gameStateStore.setGameState('QUIZ_OPEN');
           }
 
           if (type === 'gameChat') {
@@ -122,7 +129,7 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
           if (type === 'next') {
             // 메세지 추가
             if (gameScreenStore.gameResult) {
-              gameStateStore.setGameState('gameScoreUpdate');
+              gameStateStore.setGameState('SCORE_UPDATE');
 
               gameScoreStore.updateScores(
                 gameScreenStore.gameResult.winner,
@@ -133,14 +140,17 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
 
           if (type === 'gameResult') {
             gameScreenStore.setGameResult(response);
-            gameStateStore.setGameState('gameResultOpened');
+            gameStateStore.setGameState('GAME_RESULT');
           }
+
           if (type === 'hint') {
             gameScreenStore.setGameHint(response);
           }
+
           if (type === 'roomInfo') {
             useGameInfoStore.getState().setGameInfo(response);
           }
+
           if (type === 'userInfo') {
             useParticipantInfoStore
               .getState()

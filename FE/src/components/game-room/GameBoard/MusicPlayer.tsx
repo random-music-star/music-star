@@ -1,22 +1,5 @@
+import { useGameScreenStore } from '@/stores/websocket/useGameScreenStore';
 import React, { useEffect, useRef, useState } from 'react';
-
-interface GameData {
-  currentRound: number;
-  totalRounds: number;
-  artist: string;
-  initialConsonant: string;
-  skipVotes: number;
-  youtubeId: string;
-}
-
-const GAME_DATA: GameData = {
-  currentRound: 29,
-  totalRounds: 30,
-  artist: '아이들',
-  initialConsonant: 'ㅌㅂㅇ',
-  skipVotes: 0,
-  youtubeId: 'pCIJxLOKieo',
-};
 
 interface YouTubePlayer {
   playVideo: () => void;
@@ -83,25 +66,24 @@ const extractYouTubeVideoId = (url: string): string | null => {
   return null;
 };
 
-const MusicPlayer: React.FC<{ youtubeUrl?: string }> = ({ youtubeUrl }) => {
-  const [videoId, setVideoId] = useState<string>(GAME_DATA.youtubeId);
+const MusicPlayer = () => {
+  const [videoId, setVideoId] = useState<string>('');
   const playerRef = useRef<YouTubePlayer | null>(null);
   const ytApiLoadedRef = useRef<boolean>(false);
   const playerContainerRef = useRef<HTMLDivElement>(null);
 
-  // youtubeUrl prop이 변경될 때만 videoId 업데이트
+  const { songUrl, gameHint, roundInfo } = useGameScreenStore();
+
   useEffect(() => {
-    if (youtubeUrl) {
-      const extractedId = extractYouTubeVideoId(youtubeUrl);
+    if (songUrl) {
+      const extractedId = extractYouTubeVideoId(songUrl);
       if (extractedId) {
         setVideoId(extractedId);
       }
     }
-  }, [youtubeUrl]);
+  }, [songUrl]);
 
-  // YouTube API 로드 및 플레이어 초기화
   useEffect(() => {
-    // YouTube API가 이미 로드되어 있는지 확인
     if (!window.YT && !ytApiLoadedRef.current) {
       ytApiLoadedRef.current = true;
       const tag: HTMLScriptElement = document.createElement('script');
@@ -142,11 +124,9 @@ const MusicPlayer: React.FC<{ youtubeUrl?: string }> = ({ youtubeUrl }) => {
       });
     };
 
-    // YT API가 이미 로드되어 있으면 바로 플레이어 초기화
     if (window.YT && window.YT.Player) {
       initPlayer();
     } else {
-      // YT API가 로드되면 플레이어 초기화
       window.onYouTubeIframeAPIReady = initPlayer;
     }
 
@@ -176,7 +156,6 @@ const MusicPlayer: React.FC<{ youtubeUrl?: string }> = ({ youtubeUrl }) => {
       }
     };
 
-    // YouTube 플레이어가 로드된 후 스타일 적용을 위한 타이머
     if (playerRef.current) {
       const styleTimer = setInterval(() => {
         try {
@@ -216,6 +195,12 @@ const MusicPlayer: React.FC<{ youtubeUrl?: string }> = ({ youtubeUrl }) => {
     }
   };
 
+  if (!roundInfo) return;
+
+  console.log(roundInfo);
+
+  const { round: currentRound } = roundInfo;
+
   return (
     <div className='w-full h-full flex flex-col bg-gray-100 rounded-lg overflow-hidden max-w-lg mx-auto'>
       <div
@@ -227,9 +212,7 @@ const MusicPlayer: React.FC<{ youtubeUrl?: string }> = ({ youtubeUrl }) => {
 
       <div className='bg-gray-700 text-white p-3'>
         <div className='flex justify-center items-center'>
-          <h2 className='text-xl font-bold'>
-            남은곡 [ {GAME_DATA.currentRound} / {GAME_DATA.totalRounds} ]
-          </h2>
+          <h2 className='text-xl font-bold'>남은곡 [ {currentRound} / 20]</h2>
         </div>
       </div>
 
@@ -246,13 +229,21 @@ const MusicPlayer: React.FC<{ youtubeUrl?: string }> = ({ youtubeUrl }) => {
             <div className='flex justify-between border-b border-gray-300 pb-3 gap-10'>
               <span className='text-gray-600 font-medium'>가수힌트</span>
               <span className='font-bold text-gray-800'>
-                {GAME_DATA.artist}
+                {!gameHint
+                  ? '잠시후 힌트가 등장합니다'
+                  : gameHint.singer
+                    ? gameHint.singer
+                    : '잠시후 힌트가 등장합니다'}
               </span>
             </div>
             <div className='flex justify-between pt-1 gap-10'>
               <span className='text-gray-600 font-medium '>초성힌트</span>
               <span className='font-bold text-gray-800'>
-                {GAME_DATA.initialConsonant}
+                {!gameHint
+                  ? '잠시후 힌트가 등장합니다'
+                  : gameHint.title
+                    ? gameHint.title
+                    : '잠시후 힌트가 등장합니다'}
               </span>
             </div>
           </div>

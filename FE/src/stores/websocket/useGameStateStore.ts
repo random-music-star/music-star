@@ -1,10 +1,10 @@
 import { create } from 'zustand';
 
 type GameStateType =
-  | 'gameWait'
-  | 'gameQuizOpened'
-  | 'gameResultOpened'
-  | 'gameScoreUpdate'
+  | 'TIMER_WAIT'
+  | 'QUIZ_OPEN'
+  | 'GAME_RESULT'
+  | 'SCORE_UPDATE'
   | null;
 
 interface GameState {
@@ -13,6 +13,6 @@ interface GameState {
 }
 
 export const useGameStateStore = create<GameState>(set => ({
-  gameState: 'gameWait',
+  gameState: 'TIMER_WAIT',
   setGameState: (gameState: GameStateType) => set({ gameState }),
 }));
