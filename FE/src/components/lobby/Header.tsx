@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -6,32 +5,16 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { ChevronDown } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { useRouter } from 'next/router';
 
-export default function Header() {
-  const [nickname, setNickname] = useState<string>('');
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const storedNickname = localStorage.getItem('userNickname');
-      setNickname(storedNickname || '');
-      setIsLoading(false);
-    }
-  }, []);
-
-  const handleGuestLogin = async () => {
-    // 추후 로그인정보 fetch로 수정
-    const { token } = await fetch('http://localhost:8080/member/guest/login')
-      .then(res => res.json())
-      .then(data => data as { token: string });
-
-    localStorage.setItem('userNickname', token);
-    setNickname(token);
-  };
+export default function Header({ nickname }: { nickname: string }) {
+  const { logout } = useAuth();
+  const router = useRouter();
 
   const handleLogout = () => {
-    localStorage.removeItem('userNickname');
-    setNickname('');
+    logout();
+    router.push('/');
   };
 
   return (
@@ -40,9 +23,7 @@ export default function Header() {
         <h1 className='text-xl font-bold text-black'>알송달송</h1>
 
         <div className='flex items-center gap-2'>
-          {isLoading ? (
-            <span className='text-black'>로딩 중...</span>
-          ) : nickname ? (
+          {nickname && (
             <DropdownMenu>
               <DropdownMenuTrigger className='flex items-center gap-1 text-black'>
                 <span>{nickname}</span>
@@ -57,13 +38,6 @@ export default function Header() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-          ) : (
-            <button
-              onClick={handleGuestLogin}
-              className='px-4 py-2 bg-[hsl(var(--color-primary))] text-white rounded hover:bg-opacity-90 transition-colors'
-            >
-              게스트 로그인
-            </button>
           )}
         </div>
       </div>
