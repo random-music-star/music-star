@@ -75,8 +75,9 @@ export default function ReadyPanel({
           <div className='grid grid-cols-3 gap-2 max-h-[220px] overflow-y-auto pr-1'>
             {readyPlayers.map(user => {
               const isCurrentUser = user.userName === currentUserId;
-              // 방장 여부는 예시로 첫 번째 사용자를 방장으로 가정
+
               const isUserHost = user.userName === currentUserId;
+
               const isTransitioning =
                 transitioning === user.userName && direction;
 

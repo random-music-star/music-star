@@ -112,7 +112,11 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
           }
 
           if (type === 'skip') {
-            console.log('skip');
+            gameChatStore.setGameChattings({
+              sender: 'system',
+              messageType: 'notice',
+              message: `현재 ${response.skipCount}명이 스킵했습니다. `,
+            });
           }
 
           if (type === 'next') {

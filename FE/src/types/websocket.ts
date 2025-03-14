@@ -87,8 +87,8 @@ export interface GameScreenState {
   setScore: (score: BoardUser[] | []) => void;
   gameResult: GameResult | null;
   setGameResult: (gameResult: GameResult | null) => void;
-  gameHint: GameHint | null;
-  setGameHint: (gameHint: GameHint | null) => void;
+  gameHint: GameHint;
+  setGameHint: (gameHint: GameHint) => void;
   resetGameScreenStore: () => void;
 }
 
