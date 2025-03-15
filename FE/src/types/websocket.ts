@@ -101,11 +101,18 @@ export interface PublicChatState {
 export interface PariticpantInfo {
   userName: string;
   isReady: boolean;
+  isHost: boolean;
 }
 
 export interface ParticipantInfoStore {
   participantInfo: PariticpantInfo[];
   setParticipantInfo: (newPariticipantInfo: PariticpantInfo[]) => void;
+  hostNickname: string | null;
+  readyPlayers: PariticpantInfo[];
+  notReadyPlayers: PariticpantInfo[];
+  isAllReady: boolean;
+  setIsAllReady: (state: boolean) => void;
+  updateParticipantReadyStates: (userInfoList: PariticpantInfo[]) => void;
 }
 
 export interface GameScoreState {

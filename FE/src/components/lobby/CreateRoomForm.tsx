@@ -25,6 +25,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { useNicknameStore } from '@/stores/auth/useNicknameStore';
 
 interface CreateRoomFormProps {
   onSuccess: () => void;
@@ -66,6 +67,7 @@ type FormValues = z.infer<typeof formSchema>;
 export default function CreateRoomForm({ onSuccess }: CreateRoomFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const { nickname } = useNicknameStore();
 
   // React Hook Form 설정
   const form = useForm<FormValues>({
@@ -114,14 +116,12 @@ export default function CreateRoomForm({ onSuccess }: CreateRoomFormProps) {
     try {
       console.log('Sending request data:', JSON.stringify(requestData));
 
-      const username = localStorage.getItem('userNickname') || '';
-      console.log('Current username:', username);
       const response = await axios.post<CreateRoomResponse>(
         `${process.env.NEXT_PUBLIC_BASE_URL}/room`,
         requestData,
         {
           headers: {
-            Authorization: username,
+            Authorization: nickname,
             'Content-Type': 'application/json',
           },
         },

@@ -152,9 +152,13 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
           }
 
           if (type === 'userInfo') {
-            useParticipantInfoStore
-              .getState()
-              .setParticipantInfo(response?.userInfoList);
+            participantInfoStore.setParticipantInfo(response.userInfoList);
+
+            participantInfoStore.updateParticipantReadyStates(
+              response.userInfoList,
+            );
+
+            participantInfoStore.setIsAllReady(response.allReady);
           }
         },
       );
