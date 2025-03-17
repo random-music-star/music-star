@@ -1,5 +1,4 @@
 import { ChevronDown } from 'lucide-react';
-import { useRouter } from 'next/router';
 
 import {
   DropdownMenu,
@@ -8,15 +7,12 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/hooks/useAuth';
+import { Button } from '../ui/button';
+import { useNicknameStore } from '@/stores/auth/useNicknameStore';
 
-export default function Header({ nickname }: { nickname: string }) {
-  const { logout } = useAuth();
-  const router = useRouter();
-
-  const handleLogout = () => {
-    logout();
-    router.push('/');
-  };
+export default function Header() {
+  const { login, logout } = useAuth();
+  const {nickname} = useNicknameStore()
 
   return (
     <header className='bg-[hsl(var(--color-header-bg))] p-4 text-black shadow-md'>
@@ -24,7 +20,7 @@ export default function Header({ nickname }: { nickname: string }) {
         <h1 className='text-xl font-bold text-black'>알송달송</h1>
 
         <div className='flex items-center gap-2'>
-          {nickname && (
+          {nickname ? (
             <DropdownMenu>
               <DropdownMenuTrigger className='flex items-center gap-1 text-black'>
                 <span>{nickname}</span>
@@ -32,13 +28,17 @@ export default function Header({ nickname }: { nickname: string }) {
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 <DropdownMenuItem
-                  onClick={handleLogout}
+                  onClick={() => logout()}
                   className='cursor-pointer'
                 >
                   로그아웃
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+          ): (
+            <main className='row-start-2 flex flex-col items-center gap-8 sm:items-start'>
+            <Button onClick={()=> login()}>게스트 로그인</Button>
+          </main>
           )}
         </div>
       </div>

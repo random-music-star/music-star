@@ -21,7 +21,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   if (!userNickname) {
     return {
       redirect: {
-        destination: '/',
+        destination: '/lobby',
         permanent: false,
       },
     };
