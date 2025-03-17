@@ -27,14 +27,6 @@ export type Room = {
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   const userNickname = (await getCookie('userNickname', { req, res })) || '';
 
-  if (!userNickname) {
-    return {
-      redirect: {
-        destination: '/',
-        permanent: false,
-      },
-    };
-  }
 
   return {
     props: {
@@ -44,7 +36,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
 };
 
 const LobbyPage = ({ userNickname }: { userNickname: string }) => {
-  const { setNickname, nickname } = useNicknameStore();
+  const { setNickname } = useNicknameStore();
 
   useEffect(() => {
     setNickname(userNickname);
@@ -141,7 +133,7 @@ const LobbyPage = ({ userNickname }: { userNickname: string }) => {
   return (
     <SocketLayout>
       <div className='flex h-screen flex-col bg-gray-100'>
-        <Header nickname={nickname} />
+        <Header />
         <div className='flex flex-1 overflow-hidden'>
           <div className='flex flex-1 flex-col p-6'>
             <div className='mb-6 flex items-center justify-between'>
