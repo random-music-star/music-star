@@ -1,20 +1,19 @@
-import { useEffect, useState } from 'react';
-
-import { getCookie } from 'cookies-next';
-import { AnimatePresence, motion } from 'framer-motion';
-import { GetServerSideProps } from 'next';
-import { useRouter } from 'next/router';
-
-import NavigationDialog from '@/components/game-room/NavigationDialog';
-import SocketLayout from '@/components/layouts/SocketLayout';
-import usePrompt from '@/hooks/useNavigationBlocker';
-import { useNicknameStore } from '@/stores/auth/useNicknameStore';
-import { useWebSocketStore } from '@/stores/websocket/useWebsocketStore';
-
+import { useEffect} from 'react';
 import ChatBox from '../../components/game-room/ChatBox';
 import GameBoard from '../../components/game-room/GameBoard';
 import ReadyPanel from '../../components/game-room/ReadyPannel';
-import RoomInfo from '../../components/game-room/RoomInfo';
+import SocketLayout from '@/components/layouts/SocketLayout';
+import { useWebSocketStore } from '@/stores/websocket/useWebsocketStore';
+import { useRouter } from 'next/router';
+import usePrompt from '@/hooks/useNavigationBlocker';
+import NavigationDialog from '@/components/game-room/NavigationDialog';
+
+import { GetServerSideProps } from 'next';
+import { getCookie } from 'cookies-next';
+import { useNicknameStore } from '@/stores/auth/useNicknameStore';
+import { useGameStateStore } from '@/stores/websocket/useGameStateStore';
+import { AnimatePresence, motion } from 'framer-motion';
+import RoomInfo from '@/components/game-room/RoomInfo';
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   const userNickname = (await getCookie('userNickname', { req, res })) || '';
@@ -42,7 +41,7 @@ export default function GameRoom({ userNickname }: { userNickname: string }) {
   const { isConnected, updateSubscription, sendMessage } = useWebSocketStore();
   const { isBlocked, handleProceed, handleCancel } = usePrompt();
 
-  const [isGameStarted, setIsGameStarted] = useState(false);
+  const { gameState } = useGameStateStore();
 
   useEffect(() => {
     setNickname(userNickname);
@@ -64,8 +63,6 @@ export default function GameRoom({ userNickname }: { userNickname: string }) {
       type: 'gameStart',
       request: null,
     });
-
-    setIsGameStarted(true);
   };
 
   return (
@@ -74,7 +71,7 @@ export default function GameRoom({ userNickname }: { userNickname: string }) {
         <div className='flex flex-1 flex-col overflow-hidden rounded-xl bg-white shadow-lg'>
           <div className='flex-1 overflow-hidden'>
             <AnimatePresence mode='wait'>
-              {!isGameStarted ? (
+              {!gameState ? (
                 <motion.div
                   key='ready-panel'
                   className='h-full'

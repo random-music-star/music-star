@@ -52,8 +52,8 @@ export type Mode = 'FULL' | 'ONE_SEC';
 
 export interface GameInfoState {
   roomTitle: string;
-  password: string;
   maxPlayer: number;
+  hasPassword: boolean;
   maxGameRound: number;
   format: 'GENERAL' | 'BOARD';
   selectedYear: number[];
@@ -64,6 +64,7 @@ export interface GameInfoState {
 export interface GameInfoStore {
   gameRoomInfo: GameInfoState;
   setGameInfo: (newGameRoomInfo: GameInfoState) => void;
+  resetGameRoomInfo: () => void;
 }
 
 export interface GameChatState {
@@ -113,6 +114,7 @@ export interface ParticipantInfoStore {
   isAllReady: boolean;
   setIsAllReady: (state: boolean) => void;
   updateParticipantReadyStates: (userInfoList: PariticpantInfo[]) => void;
+  resetParticipantInfo: () => void;
 }
 
 export interface GameScoreState {
