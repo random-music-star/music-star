@@ -48,7 +48,7 @@ const LobbyPage = ({ userNickname }: { userNickname: string }) => {
 
   useEffect(() => {
     setNickname(userNickname);
-  }, [userNickname]);
+  }, [userNickname, setNickname]);
 
   const initialRooms: Room[] = [
     // 1. 일반 열린 방

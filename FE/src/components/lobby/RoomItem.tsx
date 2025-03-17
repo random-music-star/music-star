@@ -1,7 +1,6 @@
 import { useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { LockIcon, Users } from 'lucide-react';
 import { useRouter } from 'next/router';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
@@ -46,6 +45,18 @@ const modeBadgeVariants: Record<string, string> = {
   'AI 모드': 'bg-emerald-100 text-emerald-800 border-emerald-200',
 };
 
+// 상태별 뱃지 색상 및 텍스트 매핑
+const statusConfig: Record<string, { className: string; text: string }> = {
+  WAITING: {
+    className: 'bg-blue-100 text-blue-800 border-blue-200',
+    text: '대기 중',
+  },
+  IN_PROGRESS: {
+    className: 'bg-green-100 text-green-800 border-green-200',
+    text: '게임 중',
+  },
+};
+
 // 기본 뱃지 스타일
 const defaultBadgeStyle = 'bg-gray-100 text-gray-800 border-gray-200';
 
@@ -58,6 +69,12 @@ export default function RoomItem({ room }: RoomItemProps) {
   // 방이 가득 찼는지 확인
   const isFull = room.currentPlayers >= room.maxPlayer;
 
+  // 현재 방 상태 (기본값 'WAITING')
+  const currentStatus = room.status || 'WAITING';
+
+  // 방 상태에 따른 설정 가져오기
+  const statusDisplay = statusConfig[currentStatus] || statusConfig['WAITING'];
+
   // React Hook Form 설정
   const form = useForm<PasswordFormValues>({
     resolver: zodResolver(passwordSchema),
@@ -69,6 +86,14 @@ export default function RoomItem({ room }: RoomItemProps) {
   // 방 클릭 핸들러
   const handleRoomClick = () => {
     if (isFull) return; // 가득 찬 방은 클릭 무시
+
+    // 게임 중인 방인 경우
+    if (currentStatus === 'IN_PROGRESS') {
+      setError(''); // 에러 메시지 초기화
+      setIsDialogOpen(true); // 게임 중이라고 알려주는 다이얼로그만 표시
+      return;
+    }
+
     setError(''); // 에러 메시지 초기화
     form.reset(); // 폼 초기화
     setIsDialogOpen(true);
@@ -115,8 +140,12 @@ export default function RoomItem({ room }: RoomItemProps) {
   // 사용률 계산 (시각적 표현용)
   const usagePercentage = (room.currentPlayers / room.maxPlayer) * 100;
 
-  // 사용률에 따른 배경색 스타일
+  // 상태와 사용률에 따른 배경색 스타일
   const getCapacityStyle = () => {
+    // 게임 중인 방에 다른 스타일 적용
+    if (currentStatus === 'IN_PROGRESS') return 'bg-green-50 border-green-200';
+
+    // 대기 중인 방은 기존 로직 적용
     if (isFull) return 'bg-red-50 border-red-200';
     if (usagePercentage > 75) return 'bg-amber-50 border-amber-200';
     if (usagePercentage > 50) return 'bg-blue-50 border-blue-200';
@@ -142,11 +171,21 @@ export default function RoomItem({ room }: RoomItemProps) {
               방 번호 {room.id}
             </div>
           </div>
-          {room.hasPassword && (
-            <div className='ml-2 flex items-center'>
-              <LockIcon size={16} className='text-amber-500' />
-            </div>
-          )}
+          <div className='ml-2 flex items-center space-x-2'>
+            {/* 상태 뱃지 추가 */}
+            <Badge
+              variant='outline'
+              className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusDisplay.className}`}
+            >
+              {statusDisplay.text}
+            </Badge>
+
+            {room.hasPassword && (
+              <div className='flex items-center'>
+                <span className='text-xs font-bold text-amber-500'>🔒</span>
+              </div>
+            )}
+          </div>
         </CardHeader>
 
         <CardContent className='p-4 pt-2'>
@@ -154,7 +193,7 @@ export default function RoomItem({ room }: RoomItemProps) {
           <div className='mb-3'>
             <div className='mb-1 flex items-center justify-between'>
               <div className='flex items-center text-sm'>
-                <Users size={14} className='mr-1' />
+                <span className='mr-1'>👥</span>
                 <span
                   className={
                     isFull ? 'font-medium text-red-600' : 'text-slate-600'
@@ -212,25 +251,40 @@ export default function RoomItem({ room }: RoomItemProps) {
         <DialogContent className='sm:max-w-[400px]'>
           <DialogHeader>
             <DialogTitle
-              className={room.hasPassword ? 'text-amber-600' : 'text-blue-600'}
+              className={
+                currentStatus === 'IN_PROGRESS'
+                  ? 'text-green-600'
+                  : room.hasPassword
+                    ? 'text-amber-600'
+                    : 'text-blue-600'
+              }
             >
-              {room.hasPassword ? (
-                <div className='flex items-center'>
-                  <LockIcon size={18} className='mr-2' />
-                  비밀번호 입력
-                </div>
+              {currentStatus === 'IN_PROGRESS' ? (
+                <div className='flex items-center'>게임 진행 중</div>
+              ) : room.hasPassword ? (
+                <div className='flex items-center'>비밀번호 입력</div>
               ) : (
                 '방 입장'
               )}
             </DialogTitle>
             <DialogDescription>
-              {room.hasPassword
-                ? `'${room.title}' 방에 입장하기 위해 비밀번호를 입력해주세요.`
-                : `'${room.title}' 방에 입장하시겠습니까?`}
+              {currentStatus === 'IN_PROGRESS'
+                ? `'${room.title}' 방은 현재 게임이 진행 중입니다. 게임이 끝날 때까지 입장할 수 없습니다.`
+                : room.hasPassword
+                  ? `'${room.title}' 방에 입장하기 위해 비밀번호를 입력해주세요.`
+                  : `'${room.title}' 방에 입장하시겠습니까?`}
             </DialogDescription>
           </DialogHeader>
 
-          {room.hasPassword ? (
+          {currentStatus === 'IN_PROGRESS' ? (
+            // 게임 진행 중일 때는 확인 버튼만 표시
+            <DialogFooter className='pt-4'>
+              <Button variant='outline' onClick={() => setIsDialogOpen(false)}>
+                확인
+              </Button>
+            </DialogFooter>
+          ) : room.hasPassword ? (
+            // 비밀번호가 있는 방
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onPasswordSubmit)}
@@ -282,6 +336,7 @@ export default function RoomItem({ room }: RoomItemProps) {
               </form>
             </Form>
           ) : (
+            // 일반 방
             <>
               {/* 오류 메시지 표시 영역 (열린 방) */}
               {error && (
