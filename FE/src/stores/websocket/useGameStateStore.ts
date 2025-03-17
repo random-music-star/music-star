@@ -10,9 +10,12 @@ type GameStateType =
 interface GameState {
   gameState: GameStateType | null;
   setGameState: (gameState: GameStateType) => void;
+  resetGameState: () => void;
 }
 
 export const useGameStateStore = create<GameState>(set => ({
-  gameState: 'TIMER_WAIT',
+  gameState: null,
   setGameState: (gameState: GameStateType) => set({ gameState }),
+
+  resetGameState: () => set({ gameState: null }),
 }));

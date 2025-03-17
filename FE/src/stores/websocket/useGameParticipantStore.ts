@@ -1,10 +1,17 @@
 import { create } from 'zustand';
 
-import { PariticpantInfo, ParticipantInfoStore } from '@/types/websocket';
+const initialState = {
+  participantInfo: [],
+  readyPlayers: [],
+  notReadyPlayers: [],
+
+  hostNickname: null,
+  isAllReady: false,
+};
 
 export const useParticipantInfoStore = create<ParticipantInfoStore>(
   // 상태관리에 대한 고민 해볼 것(전역상태 or useMemo)
-  (set, get) => ({
+  set => ({
     participantInfo: [],
     readyPlayers: [],
     notReadyPlayers: [],
@@ -15,7 +22,7 @@ export const useParticipantInfoStore = create<ParticipantInfoStore>(
     setIsAllReady: (newState: boolean) => set({ isAllReady: newState }),
 
     setParticipantInfo: (newParticipantInfo: PariticpantInfo[]) => {
-      const host = get().participantInfo.find(user => user.isHost);
+      const host = newParticipantInfo.find(user => user.isHost);
 
       set({
         participantInfo: newParticipantInfo,
@@ -29,5 +36,7 @@ export const useParticipantInfoStore = create<ParticipantInfoStore>(
         notReadyPlayers: userInfoList.filter(user => !user.isReady),
       });
     },
+
+    resetParticipantInfo: () => set(initialState),
   }),
 );

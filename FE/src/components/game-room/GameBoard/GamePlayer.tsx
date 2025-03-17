@@ -1,4 +1,6 @@
+import { useGameStateStore } from '@/stores/websocket/useGameStateStore';
 import React, { useEffect, useRef, useState } from 'react';
+import GameResult from './GameResult';
 
 import { useGameScreenStore } from '@/stores/websocket/useGameScreenStore';
 
@@ -67,7 +69,8 @@ const extractYouTubeVideoId = (url: string): string | null => {
   return null;
 };
 
-const MusicPlayer = () => {
+const GamePlayer = () => {
+  const { gameState } = useGameStateStore();
   const [videoId, setVideoId] = useState<string>('');
   const playerRef = useRef<YouTubePlayer | null>(null);
   const ytApiLoadedRef = useRef<boolean>(false);
@@ -217,39 +220,43 @@ const MusicPlayer = () => {
         </div>
       </div>
 
-      <div className='flex flex-1 flex-col items-center justify-center p-6'>
-        <div className='mb-6 text-center'>
-          <p className='text-xl font-semibold'>
-            <span className='font-bold text-gray-800'>정답</span>을 듣고
-            <span className='font-bold text-gray-600'>답</span>을 입력하세요.
-          </p>
-        </div>
 
-        <div className='mb-6 w-fit rounded-lg bg-gray-200 p-5'>
-          <div className='flex flex-col space-y-4'>
-            <div className='flex justify-between gap-10 border-b border-gray-300 pb-3'>
-              <span className='font-medium text-gray-600'>가수힌트</span>
-              <span className='font-bold text-gray-800'>
-                {!gameHint
-                  ? '잠시후 힌트가 등장합니다'
-                  : gameHint.singer
-                    ? gameHint.singer
-                    : '잠시후 힌트가 등장합니다'}
-              </span>
-            </div>
-            <div className='flex justify-between gap-10 pt-1'>
-              <span className='font-medium text-gray-600'>초성힌트</span>
-              <span className='font-bold text-gray-800'>
-                {!gameHint
-                  ? '잠시후 힌트가 등장합니다'
-                  : gameHint.title
-                    ? gameHint.title
-                    : '잠시후 힌트가 등장합니다'}
-              </span>
+      {gameState === 'QUIZ_OPEN' && (
+        <div className='flex-1 flex flex-col p-6 justify-center items-center'>
+          <div className='mb-6 text-center'>
+            <p className='text-xl font-semibold'>
+              <span className='text-gray-800 font-bold'>정답</span>을 듣고
+              <span className='text-gray-600 font-bold'>답</span>을 입력하세요.
+            </p>
+          </div>
+
+          <div className='bg-gray-200 p-5 rounded-lg mb-6 w-fit'>
+            <div className='flex flex-col space-y-4 '>
+              <div className='flex justify-between border-b border-gray-300 pb-3 gap-10'>
+                <span className='text-gray-600 font-medium'>가수힌트</span>
+                <span className='font-bold text-gray-800'>
+                  {!gameHint
+                    ? '잠시후 힌트가 등장합니다'
+                    : gameHint.singer
+                      ? gameHint.singer
+                      : '잠시후 힌트가 등장합니다'}
+                </span>
+              </div>
+              <div className='flex justify-between pt-1 gap-10'>
+                <span className='text-gray-600 font-medium '>초성힌트</span>
+                <span className='font-bold text-gray-800'>
+                  {!gameHint
+                    ? '잠시후 힌트가 등장합니다'
+                    : gameHint.title
+                      ? gameHint.title
+                      : '잠시후 힌트가 등장합니다'}
+                </span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
+      {gameState === 'GAME_RESULT' && <GameResult />}
 
       <div className='bg-gray-300 p-3 text-center'>
         <p className='text-sm text-gray-700'>
@@ -264,4 +271,4 @@ const MusicPlayer = () => {
   );
 };
 
-export default MusicPlayer;
+export default GamePlayer;

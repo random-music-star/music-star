@@ -29,31 +29,16 @@ export interface FormatText {
 export default function RoomInfo() {
   const { gameRoomInfo } = useGameInfoStore();
 
-  const defaultData: GameInfoState = {
-    roomTitle: '즐거운 K-POP 맞추기',
-    password: 'ABC123',
-    maxPlayer: 8,
-    maxGameRound: 10,
-    format: 'GENERAL',
-    selectedYear: [2020, 2021, 2022],
-    mode: ['FULL'],
-    status: 'WAITING',
-  };
-
-  // gameRoomInfo가 비어있는지 확인
-  const isEmpty = !gameRoomInfo || Object.keys(gameRoomInfo).length === 0;
-
-  // 실제 사용할 데이터
   const {
     roomTitle,
-    password,
+    hasPassword,
     maxPlayer,
     maxGameRound,
     format,
     selectedYear,
     mode,
     status,
-  } = isEmpty ? defaultData : gameRoomInfo;
+  } = gameRoomInfo;
 
   // 방 상태에 따른 스타일 및 텍스트 설정
   const statusConfig: StatusConfig = {
@@ -69,15 +54,13 @@ export default function RoomInfo() {
   };
 
   // 비공개 방 여부 (roomNumber 기준으로 판단)
-  const isPrivate = password && password.length > 0;
-
   return (
     <div className='rounded-lg bg-white p-3 shadow-sm'>
       {/* 헤더: 방 이름과 상태 */}
       <div className='mb-3 flex items-center justify-between'>
         <div className='flex items-center'>
-          {isPrivate ? (
-            <Lock className='mr-2 text-amber-500' size={16} />
+          {hasPassword ? (
+            <Lock className='text-amber-500 mr-2' size={16} />
           ) : (
             <Unlock className='mr-2 text-green-500' size={16} />
           )}
@@ -157,13 +140,11 @@ export default function RoomInfo() {
       </div>
 
       {/* 방 코드 (비공개 방인 경우) */}
-      {isPrivate && (
-        <div className='mt-3 border-t border-gray-100 pt-2'>
-          <div className='flex items-center justify-between'>
+      {hasPassword && (
+        <div className='mt-3 pt-2 border-t border-gray-100'>
+          <div className='flex justify-between items-center'>
             <span className='text-xs text-amber-600'>방 코드:</span>
-            <span className='font-mono font-medium text-amber-700'>
-              {password}
-            </span>
+            <span className='font-mono font-medium text-amber-700'></span>
           </div>
         </div>
       )}

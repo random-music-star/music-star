@@ -9,7 +9,8 @@ import { useGameInfoStore } from './useGameRoomInfoStore';
 import { useGameScoreStore } from './useGameScoreStore';
 import { useGameScreenStore } from './useGameScreenStore';
 import { useGameStateStore } from './useGameStateStore';
-import { usePublicChatStore } from './usePublicChatStore';
+import { useGameScoreStore } from './useGameScoreStore';
+import { useNicknameStore } from '../auth/useNicknameStore';
 
 export const useWebSocketStore = create<WebSocketState>((set, get) => ({
   isConnected: false,
@@ -54,7 +55,10 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
     Object.values(subscriptions).forEach(sub => sub?.unsubscribe());
 
     useGameChatStore.getState().resetGameChatStore();
+    useParticipantInfoStore.getState().resetParticipantInfo();
+    useGameInfoStore.getState().resetGameRoomInfo();
     useGameScreenStore.getState().resetGameScreenStore();
+    useGameStateStore.getState().resetGameState();
     usePublicChatStore.getState().resetPublicChatStore();
 
     const newSubscriptions: Record<string, StompSubscription> = {};
@@ -65,6 +69,9 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
         message => {
           const { response } = JSON.parse(message.body);
           usePublicChatStore.getState().setPublicChattings(response);
+        },
+        {
+          Authorization: useNicknameStore.getState().nickname,
         },
       );
     }
@@ -77,7 +84,7 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
       const participantInfoStore = useParticipantInfoStore.getState();
 
       newSubscriptions['game-room'] = client.subscribe(
-        `/topic/channel/1/room/1`,
+        `/topic/channel/1/room/11`,
         message => {
           const { type, response } = JSON.parse(message.body);
 
@@ -124,7 +131,7 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
             gameChatStore.setGameChattings({
               sender: 'system',
               messageType: 'notice',
-              message: `현재 ${response.skipCount}명이 스킵했습니다. `,
+              message: `현재 ${response.skipPerson}명이 스킵했습니다. `,
             });
           }
 
@@ -151,6 +158,9 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
 
           if (type === 'roomInfo') {
             useGameInfoStore.getState().setGameInfo(response);
+
+            if (response.status === 'IN_PROGRESS')
+              gameStateStore.setGameState('TIMER_WAIT');
           }
 
           if (type === 'userInfo') {
@@ -162,6 +172,13 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
 
             participantInfoStore.setIsAllReady(response.allReady);
           }
+
+          if (type === 'refuseEnter') {
+            console.log('refuseEnter');
+          }
+        },
+        {
+          Authorization: useNicknameStore.getState().nickname,
         },
       );
     }

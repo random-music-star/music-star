@@ -7,4 +7,6 @@ export const useGameInfoStore = create<GameInfoStore>(set => ({
   setGameInfo: (newGameRoomInfo: GameInfoState) => {
     set({ gameRoomInfo: newGameRoomInfo });
   },
+
+  resetGameRoomInfo: () => set({ gameRoomInfo: {} as GameInfoState }),
 }));

@@ -156,7 +156,7 @@ export default function ReadyPanel({
           <div className='grid max-h-[220px] grid-cols-3 gap-2 overflow-y-auto pr-1'>
             {notReadyPlayers.map(user => {
               const isCurrentUser = user.userName === currentUserId;
-              const isUserHost = user.userName === currentUserId;
+              const isUserHost = user.userName === hostNickname;
               const isTransitioning =
                 transitioning === user.userName && !direction;
 
@@ -251,7 +251,7 @@ export default function ReadyPanel({
               READY
             </Button>
 
-            {isAllReady && (
+            {isAllReady && currentUserId === hostNickname && (
               <Button
                 onClick={handleStartGame}
                 className='ml-2 flex items-center gap-1 bg-yellow-500 text-white hover:bg-yellow-600'
