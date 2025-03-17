@@ -110,7 +110,7 @@ export default function RoomList({
     [],
   );
 
-  // SSE 연결 설정
+  // 수정이 필요한 useEffect 부분
   useEffect(() => {
     let eventSource: EventSource | null = null;
 
@@ -183,44 +183,43 @@ export default function RoomList({
           console.log('현재 페이지 (ref):', pageNow);
 
           if (pageNow === 0) {
-            // 첫 페이지인 경우: 새로운 방이 생기거나 업데이트된 방을 목록 맨 앞에 추가
-            const roomIndex = rooms.findIndex(
-              room => room.id === updatedRoom.id,
-            );
+            // 첫 페이지인 경우: 함수형 업데이트 사용
+            setRooms(currentRooms => {
+              const roomIndex = currentRooms.findIndex(
+                room => room.id === updatedRoom.id,
+              );
 
-            if (roomIndex !== -1) {
-              // 이미 있는 방이면 업데이트
-              setRooms(currentRooms => {
+              if (roomIndex !== -1) {
+                // 이미 있는 방이면 업데이트
                 const newRooms = [...currentRooms];
                 newRooms[roomIndex] = updatedRoom;
                 return newRooms;
-              });
-            } else {
-              // 새로운 방이면 목록 맨 앞에 추가하고, 페이지 크기 유지를 위해 마지막 항목 제거
-              setRooms(currentRooms => {
+              } else {
+                // 새로운 방이면 목록 맨 앞에 추가하고, 페이지 크기 유지
                 const newRooms = [updatedRoom, ...currentRooms];
                 // 페이지 크기 유지
                 if (newRooms.length > pageSize) {
                   return newRooms.slice(0, pageSize);
                 }
                 return newRooms;
-              });
-            }
+              }
+            });
           } else {
-            // 첫 페이지가 아닌 경우: 현재 방 목록에 있는 방만 업데이트
-            const roomIndex = rooms.findIndex(
-              room => room.id === updatedRoom.id,
-            );
+            // 첫 페이지가 아닌 경우: 함수형 업데이트 사용
+            setRooms(currentRooms => {
+              const roomIndex = currentRooms.findIndex(
+                room => room.id === updatedRoom.id,
+              );
 
-            if (roomIndex !== -1) {
-              // 방이 목록에 있을 경우 해당 방 정보 업데이트
-              setRooms(currentRooms => {
+              if (roomIndex !== -1) {
+                // 방이 목록에 있을 경우 해당 방 정보 업데이트
                 const newRooms = [...currentRooms];
                 newRooms[roomIndex] = updatedRoom;
                 return newRooms;
-              });
-            }
-            // 방이 목록에 없을 경우 별도 처리 없음
+              }
+              // 방이 목록에 없을 경우 기존 배열 반환
+              return currentRooms;
+            });
           }
         }
       });
@@ -245,7 +244,7 @@ export default function RoomList({
         eventSource.close();
       }
     };
-  }, [handleEventData, initialRooms.length]);
+  }, [handleEventData, initialRooms.length, pageSize]);
 
   // props로 전달된 rooms가 변경될 경우, SSE가 연결되지 않았다면 상태 업데이트
   useEffect(() => {
