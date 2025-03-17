@@ -43,7 +43,7 @@ export interface WebSocketState {
   subscriptions: Record<string, StompSubscription | null>;
   connectWebSocket: () => void;
   disconnectWebSocket: () => void;
-  updateSubscription: (subscriptionType: string) => void;
+  updateSubscription: (subscriptionType: string, roomId?: string) => void;
   sendMessage: (destination: string, payload?: unknown) => void;
   isConnected: boolean;
 }

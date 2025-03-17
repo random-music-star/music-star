@@ -94,7 +94,7 @@ export default function RoomItem({ room }: RoomItemProps) {
       // 다이얼로그 닫기
       setIsDialogOpen(false);
       // 해당 방 라우트로 이동
-      router.push(`/game-room?roomId=${room.id}`);
+      router.push(`/game-room/${room.id}`);
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다.';
@@ -109,7 +109,7 @@ export default function RoomItem({ room }: RoomItemProps) {
     // 다이얼로그 닫기
     setIsDialogOpen(false);
     // 해당 방 라우트로 직접 이동
-    router.push(`/game-room?roomId=${room.id}`);
+    router.push(`/game-room/${room.id}`);
   };
 
   // 사용률 계산 (시각적 표현용)
