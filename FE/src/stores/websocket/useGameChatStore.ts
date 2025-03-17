@@ -1,5 +1,6 @@
-import { Chatting, GameChatState, SkipUser } from '@/types/websocket';
 import { create } from 'zustand';
+
+import { Chatting, GameChatState, SkipUser } from '@/types/websocket';
 
 const initialState = {
   gameChattings: [],

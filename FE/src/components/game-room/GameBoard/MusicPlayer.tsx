@@ -1,5 +1,6 @@
-import { useGameScreenStore } from '@/stores/websocket/useGameScreenStore';
 import React, { useEffect, useRef, useState } from 'react';
+
+import { useGameScreenStore } from '@/stores/websocket/useGameScreenStore';
 
 interface YouTubePlayer {
   playVideo: () => void;
@@ -202,32 +203,32 @@ const MusicPlayer = () => {
   const { round: currentRound } = roundInfo;
 
   return (
-    <div className='w-full h-full flex flex-col bg-gray-100 rounded-lg overflow-hidden max-w-lg mx-auto'>
+    <div className='mx-auto flex h-full w-full max-w-lg flex-col overflow-hidden rounded-lg bg-gray-100'>
       <div
         ref={playerContainerRef}
-        className='absolute w-1 h-1 overflow-hidden opacity-0 pointer-events-none'
+        className='pointer-events-none absolute h-1 w-1 overflow-hidden opacity-0'
       >
         <div id='youtube-player'></div>
       </div>
 
-      <div className='bg-gray-700 text-white p-3'>
-        <div className='flex justify-center items-center'>
+      <div className='bg-gray-700 p-3 text-white'>
+        <div className='flex items-center justify-center'>
           <h2 className='text-xl font-bold'>남은곡 [ {currentRound} / 20]</h2>
         </div>
       </div>
 
-      <div className='flex-1 flex flex-col p-6 justify-center items-center'>
+      <div className='flex flex-1 flex-col items-center justify-center p-6'>
         <div className='mb-6 text-center'>
           <p className='text-xl font-semibold'>
-            <span className='text-gray-800 font-bold'>정답</span>을 듣고
-            <span className='text-gray-600 font-bold'>답</span>을 입력하세요.
+            <span className='font-bold text-gray-800'>정답</span>을 듣고
+            <span className='font-bold text-gray-600'>답</span>을 입력하세요.
           </p>
         </div>
 
-        <div className='bg-gray-200 p-5 rounded-lg mb-6 w-fit'>
-          <div className='flex flex-col space-y-4 '>
-            <div className='flex justify-between border-b border-gray-300 pb-3 gap-10'>
-              <span className='text-gray-600 font-medium'>가수힌트</span>
+        <div className='mb-6 w-fit rounded-lg bg-gray-200 p-5'>
+          <div className='flex flex-col space-y-4'>
+            <div className='flex justify-between gap-10 border-b border-gray-300 pb-3'>
+              <span className='font-medium text-gray-600'>가수힌트</span>
               <span className='font-bold text-gray-800'>
                 {!gameHint
                   ? '잠시후 힌트가 등장합니다'
@@ -236,8 +237,8 @@ const MusicPlayer = () => {
                     : '잠시후 힌트가 등장합니다'}
               </span>
             </div>
-            <div className='flex justify-between pt-1 gap-10'>
-              <span className='text-gray-600 font-medium '>초성힌트</span>
+            <div className='flex justify-between gap-10 pt-1'>
+              <span className='font-medium text-gray-600'>초성힌트</span>
               <span className='font-bold text-gray-800'>
                 {!gameHint
                   ? '잠시후 힌트가 등장합니다'
@@ -253,7 +254,7 @@ const MusicPlayer = () => {
       <div className='bg-gray-300 p-3 text-center'>
         <p className='text-sm text-gray-700'>
           채팅창에
-          <span className='font-semibold inline-block px-2 py-1 mx-1 bg-gray-400 text-white rounded'>
+          <span className='mx-1 inline-block rounded bg-gray-400 px-2 py-1 font-semibold text-white'>
             .
           </span>
           하나만 입력하면 스킵투표가 됩니다.

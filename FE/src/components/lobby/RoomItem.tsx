@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { useRouter } from 'next/router';
-import { Room } from '@/pages/lobby';
-import { useForm } from 'react-hook-form';
+
 import { zodResolver } from '@hookform/resolvers/zod';
+import { LockIcon, Users } from 'lucide-react';
+import { useRouter } from 'next/router';
+import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Dialog,
@@ -15,7 +17,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -25,7 +26,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { LockIcon, Users } from 'lucide-react';
+import { Room } from '@/pages/lobby';
 
 // 비밀번호 검증 스키마
 const passwordSchema = z.object({
@@ -127,22 +128,22 @@ export default function RoomItem({ room }: RoomItemProps) {
       <Card
         className={`overflow-hidden transition-all duration-200 hover:shadow-md ${getCapacityStyle()} ${
           isFull
-            ? 'opacity-70 cursor-not-allowed'
+            ? 'cursor-not-allowed opacity-70'
             : 'cursor-pointer hover:scale-[1.02]'
         }`}
         onClick={handleRoomClick}
       >
-        <CardHeader className='p-4 pb-2 flex flex-row justify-between items-start'>
+        <CardHeader className='flex flex-row items-start justify-between p-4 pb-2'>
           <div className='flex-1'>
-            <CardTitle className='text-lg truncate' title={room.title}>
+            <CardTitle className='truncate text-lg' title={room.title}>
               {room.title}
             </CardTitle>
-            <div className='text-sm text-muted-foreground'>
+            <div className='text-muted-foreground text-sm'>
               방 번호 {room.id}
             </div>
           </div>
           {room.hasPassword && (
-            <div className='flex items-center ml-2'>
+            <div className='ml-2 flex items-center'>
               <LockIcon size={16} className='text-amber-500' />
             </div>
           )}
@@ -151,12 +152,12 @@ export default function RoomItem({ room }: RoomItemProps) {
         <CardContent className='p-4 pt-2'>
           {/* 사용자 수 표시 */}
           <div className='mb-3'>
-            <div className='flex items-center justify-between mb-1'>
+            <div className='mb-1 flex items-center justify-between'>
               <div className='flex items-center text-sm'>
                 <Users size={14} className='mr-1' />
                 <span
                   className={
-                    isFull ? 'text-red-600 font-medium' : 'text-slate-600'
+                    isFull ? 'font-medium text-red-600' : 'text-slate-600'
                   }
                 >
                   {room.currentPlayers} / {room.maxPlayer}
@@ -170,7 +171,7 @@ export default function RoomItem({ room }: RoomItemProps) {
             </div>
 
             {/* 사용률 진행 표시줄 */}
-            <div className='w-full bg-gray-200 rounded-full h-1.5 overflow-hidden'>
+            <div className='h-1.5 w-full overflow-hidden rounded-full bg-gray-200'>
               <div
                 className={`h-full rounded-full ${
                   isFull
@@ -193,7 +194,7 @@ export default function RoomItem({ room }: RoomItemProps) {
                   <Badge
                     key={mode}
                     variant='outline'
-                    className={`text-xs border rounded-full px-2 py-0.5 font-medium ${modeBadgeVariants[mode] || defaultBadgeStyle}`}
+                    className={`rounded-full border px-2 py-0.5 text-xs font-medium ${modeBadgeVariants[mode] || defaultBadgeStyle}`}
                   >
                     {mode}
                   </Badge>
@@ -257,7 +258,7 @@ export default function RoomItem({ room }: RoomItemProps) {
 
                 {/* 오류 메시지 표시 영역 */}
                 {error && (
-                  <div className='text-sm font-medium text-red-500 bg-red-50 p-2 rounded border border-red-100'>
+                  <div className='rounded border border-red-100 bg-red-50 p-2 text-sm font-medium text-red-500'>
                     {error}
                   </div>
                 )}
@@ -273,7 +274,7 @@ export default function RoomItem({ room }: RoomItemProps) {
                   <Button
                     type='submit'
                     disabled={isLoading}
-                    className={`bg-amber-600 hover:bg-amber-700 text-white ${isLoading ? 'opacity-70' : ''}`}
+                    className={`bg-amber-600 text-white hover:bg-amber-700 ${isLoading ? 'opacity-70' : ''}`}
                   >
                     {isLoading ? '처리 중...' : '입장'}
                   </Button>
@@ -284,7 +285,7 @@ export default function RoomItem({ room }: RoomItemProps) {
             <>
               {/* 오류 메시지 표시 영역 (열린 방) */}
               {error && (
-                <div className='text-sm font-medium text-red-500 bg-red-50 p-2 rounded border border-red-100 mt-2 mb-4'>
+                <div className='mt-2 mb-4 rounded border border-red-100 bg-red-50 p-2 text-sm font-medium text-red-500'>
                   {error}
                 </div>
               )}
@@ -298,7 +299,7 @@ export default function RoomItem({ room }: RoomItemProps) {
                 </Button>
                 <Button
                   onClick={handleEnterOpenRoom}
-                  className='bg-blue-600 hover:bg-blue-700 text-white'
+                  className='bg-blue-600 text-white hover:bg-blue-700'
                 >
                   입장
                 </Button>

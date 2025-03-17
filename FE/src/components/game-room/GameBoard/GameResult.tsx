@@ -6,7 +6,7 @@ const GameResult = () => {
   if (!gameResult) return;
 
   return (
-    <div className='flex flex-col items-center justify-center h-full'>
+    <div className='flex h-full flex-col items-center justify-center'>
       <p>{gameResult.winner}</p>
       <p>{gameResult.songTitle}</p>
       <p>{gameResult.singer}</p>

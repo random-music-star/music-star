@@ -1,12 +1,13 @@
-import SocketLayout from '@/components/layouts/SocketLayout';
+import { useEffect } from 'react';
 
-import Header from '@/components/lobby/Header';
-import RoomList from '@/components/lobby/RoomList';
+import { getCookie } from 'cookies-next';
+import { GetServerSideProps } from 'next';
+
+import SocketLayout from '@/components/layouts/SocketLayout';
 import ChatBox from '@/components/lobby/ChatBox';
 import CreateRoomButton from '@/components/lobby/CreateRoomButton';
-import { GetServerSideProps } from 'next';
-import { getCookie } from 'cookies-next';
-import { useEffect } from 'react';
+import Header from '@/components/lobby/Header';
+import RoomList from '@/components/lobby/RoomList';
 import { useNicknameStore } from '@/stores/auth/useNicknameStore';
 
 export type Room = {
@@ -139,11 +140,11 @@ const LobbyPage = ({ userNickname }: { userNickname: string }) => {
 
   return (
     <SocketLayout>
-      <div className='flex flex-col h-screen bg-gray-100'>
+      <div className='flex h-screen flex-col bg-gray-100'>
         <Header nickname={nickname} />
         <div className='flex flex-1 overflow-hidden'>
-          <div className='flex-1 p-6 flex flex-col'>
-            <div className='flex justify-between items-center mb-6'>
+          <div className='flex flex-1 flex-col p-6'>
+            <div className='mb-6 flex items-center justify-between'>
               <h1 className='text-2xl font-bold text-gray-900'>게임 방 목록</h1>
               <CreateRoomButton />
             </div>

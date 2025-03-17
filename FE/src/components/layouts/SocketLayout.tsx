@@ -1,5 +1,6 @@
-import { useWebSocketStore } from '@/stores/websocket/useWebsocketStore';
 import { ReactNode, useEffect } from 'react';
+
+import { useWebSocketStore } from '@/stores/websocket/useWebsocketStore';
 
 interface SocketLayoutProps {
   children: ReactNode;
@@ -14,7 +15,7 @@ const SocketLayout = ({ children }: SocketLayoutProps) => {
   }, []);
 
   return (
-    <div className='flex flex-col min-h-screen min-w-screen max-w-screen max-h-screen '>
+    <div className='flex max-h-screen min-h-screen max-w-screen min-w-screen flex-col'>
       {children}
     </div>
   );

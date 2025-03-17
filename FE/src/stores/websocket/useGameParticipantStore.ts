@@ -1,5 +1,6 @@
-import { PariticpantInfo, ParticipantInfoStore } from '@/types/websocket';
 import { create } from 'zustand';
+
+import { PariticpantInfo, ParticipantInfoStore } from '@/types/websocket';
 
 export const useParticipantInfoStore = create<ParticipantInfoStore>(
   // 상태관리에 대한 고민 해볼 것(전역상태 or useMemo)

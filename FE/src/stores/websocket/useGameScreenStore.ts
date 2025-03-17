@@ -1,12 +1,13 @@
+import { create } from 'zustand';
+
 import {
   Board,
   BoardUser,
   GameHint,
-  RoundInfo,
   GameResult,
   GameScreenState,
+  RoundInfo,
 } from '@/types/websocket';
-import { create } from 'zustand';
 
 const initialState = {
   remainTime: null,

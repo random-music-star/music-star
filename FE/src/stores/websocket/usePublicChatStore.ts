@@ -1,5 +1,6 @@
-import { Chatting, PublicChatState } from '@/types/websocket';
 import { create } from 'zustand';
+
+import { Chatting, PublicChatState } from '@/types/websocket';
 
 const initialState = {
   publicChattings: [],

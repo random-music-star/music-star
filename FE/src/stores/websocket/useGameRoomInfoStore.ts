@@ -1,5 +1,6 @@
-import { GameInfoState, GameInfoStore } from '@/types/websocket';
 import { create } from 'zustand';
+
+import { GameInfoState, GameInfoStore } from '@/types/websocket';
 
 export const useGameInfoStore = create<GameInfoStore>(set => ({
   gameRoomInfo: {} as GameInfoState,

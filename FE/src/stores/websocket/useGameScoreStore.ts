@@ -1,5 +1,7 @@
-import { Board, GameScoreState } from '@/types/websocket';
 import { create } from 'zustand';
+
+import { Board, GameScoreState } from '@/types/websocket';
+
 import { useGameScreenStore } from './useGameScreenStore';
 
 export const useGameScoreStore = create<GameScoreState>(set => ({

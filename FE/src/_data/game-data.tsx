@@ -1,5 +1,5 @@
 // pages/game-room/_data/game-data.ts
-import { User, Room, ChatMessage } from '../_types/game';
+import { ChatMessage, Room, User } from '../_types/game';
 
 // 사용자 데이터
 export const userData: User[] = [

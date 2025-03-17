@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Crown, CheckCircle, Clock, PlayCircle } from 'lucide-react';
+
 import { motion } from 'framer-motion';
+import { CheckCircle, Clock, Crown, PlayCircle } from 'lucide-react';
+
+import { Button } from '@/components/ui/button';
 import { useParticipantInfoStore } from '@/stores/websocket/useGameParticipantStore';
 import { useWebSocketStore } from '@/stores/websocket/useWebsocketStore';
 
@@ -64,26 +66,26 @@ export default function ReadyPanel({
   };
 
   return (
-    <div className='p-4 h-full flex flex-col'>
-      <div className='flex justify-between items-center mb-5'>
+    <div className='flex h-full flex-col p-4'>
+      <div className='mb-5 flex items-center justify-between'>
         <h2 className='text-xl font-bold text-gray-800'>플레이어 준비 상태</h2>
-        <div className='bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-sm font-medium'>
+        <div className='rounded-full bg-indigo-100 px-3 py-1 text-sm font-medium text-indigo-700'>
           {readyPlayers.length}/{participantInfo.length} 준비 완료
         </div>
       </div>
 
-      <div className='flex flex-1 gap-4 relative'>
+      <div className='relative flex flex-1 gap-4'>
         {/* 준비 완료 */}
-        <div className='flex-1 border border-green-200 rounded-lg p-3 bg-green-50'>
-          <div className='flex items-center mb-3'>
-            <CheckCircle size={16} className='text-green-600 mr-2' />
-            <h3 className='text-green-700 font-medium'>준비 완료</h3>
-            <span className='ml-auto text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full'>
+        <div className='flex-1 rounded-lg border border-green-200 bg-green-50 p-3'>
+          <div className='mb-3 flex items-center'>
+            <CheckCircle size={16} className='mr-2 text-green-600' />
+            <h3 className='font-medium text-green-700'>준비 완료</h3>
+            <span className='ml-auto rounded-full bg-green-100 px-2 py-0.5 text-xs text-green-700'>
               {readyPlayers.length}명
             </span>
           </div>
 
-          <div className='grid grid-cols-3 gap-2 max-h-[220px] overflow-y-auto pr-1'>
+          <div className='grid max-h-[220px] grid-cols-3 gap-2 overflow-y-auto pr-1'>
             {readyPlayers.map(user => {
               const isCurrentUser = user.userName === currentUserId;
 
@@ -101,24 +103,24 @@ export default function ReadyPanel({
                     x: isTransitioning ? -30 : 0,
                   }}
                   transition={{ duration: 0.2, ease: 'easeOut' }}
-                  className='flex items-center p-2 bg-white rounded-md border border-green-200 hover:bg-green-100 transition-colors'
+                  className='flex items-center rounded-md border border-green-200 bg-white p-2 transition-colors hover:bg-green-100'
                 >
                   <div className='relative'>
-                    <div className='w-8 h-8 rounded-full bg-green-600 flex items-center justify-center text-white'>
+                    <div className='flex h-8 w-8 items-center justify-center rounded-full bg-green-600 text-white'>
                       {user.userName.charAt(0).toUpperCase()}
                     </div>
                     {isUserHost && (
-                      <div className='absolute -top-1 -right-1 bg-yellow-400 rounded-full p-0.5'>
+                      <div className='absolute -top-1 -right-1 rounded-full bg-yellow-400 p-0.5'>
                         <Crown size={10} className='text-yellow-800' />
                       </div>
                     )}
                   </div>
 
-                  <div className='ml-2 flex-1 min-w-0'>
-                    <p className='text-sm font-medium truncate'>
+                  <div className='ml-2 min-w-0 flex-1'>
+                    <p className='truncate text-sm font-medium'>
                       {user.userName}
                       {isCurrentUser && (
-                        <span className='text-indigo-600 text-xs ml-1'>
+                        <span className='ml-1 text-xs text-indigo-600'>
                           (나)
                         </span>
                       )}
@@ -130,7 +132,7 @@ export default function ReadyPanel({
                       variant='ghost'
                       size='sm'
                       onClick={handleToggleReady}
-                      className='ml-auto text-xs p-1.5 h-auto text-red-600 hover:text-red-700 hover:bg-red-100'
+                      className='ml-auto h-auto p-1.5 text-xs text-red-600 hover:bg-red-100 hover:text-red-700'
                     >
                       취소
                     </Button>
@@ -142,16 +144,16 @@ export default function ReadyPanel({
         </div>
 
         {/* 대기중 */}
-        <div className='flex-1 border border-gray-200 rounded-lg p-3 bg-gray-50'>
-          <div className='flex items-center mb-3'>
-            <Clock size={16} className='text-gray-500 mr-2' />
-            <h3 className='text-gray-700 font-medium'>대기 중</h3>
-            <span className='ml-auto text-xs bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full'>
+        <div className='flex-1 rounded-lg border border-gray-200 bg-gray-50 p-3'>
+          <div className='mb-3 flex items-center'>
+            <Clock size={16} className='mr-2 text-gray-500' />
+            <h3 className='font-medium text-gray-700'>대기 중</h3>
+            <span className='ml-auto rounded-full bg-gray-200 px-2 py-0.5 text-xs text-gray-700'>
               {notReadyPlayers.length}명
             </span>
           </div>
 
-          <div className='grid grid-cols-3 gap-2 max-h-[220px] overflow-y-auto pr-1'>
+          <div className='grid max-h-[220px] grid-cols-3 gap-2 overflow-y-auto pr-1'>
             {notReadyPlayers.map(user => {
               const isCurrentUser = user.userName === currentUserId;
               const isUserHost = user.userName === currentUserId;
@@ -167,24 +169,24 @@ export default function ReadyPanel({
                     x: isTransitioning ? 30 : 0,
                   }}
                   transition={{ duration: 0.2, ease: 'easeOut' }}
-                  className='flex items-center p-2 bg-white rounded-md border border-gray-200 hover:bg-gray-100 transition-colors'
+                  className='flex items-center rounded-md border border-gray-200 bg-white p-2 transition-colors hover:bg-gray-100'
                 >
                   <div className='relative'>
-                    <div className='w-8 h-8 rounded-full bg-gray-400 flex items-center justify-center text-white'>
+                    <div className='flex h-8 w-8 items-center justify-center rounded-full bg-gray-400 text-white'>
                       {user.userName.charAt(0).toUpperCase()}
                     </div>
                     {isUserHost && (
-                      <div className='absolute -top-1 -right-1 bg-yellow-400 rounded-full p-0.5'>
+                      <div className='absolute -top-1 -right-1 rounded-full bg-yellow-400 p-0.5'>
                         <Crown size={10} className='text-yellow-800' />
                       </div>
                     )}
                   </div>
 
-                  <div className='ml-2 flex-1 min-w-0'>
-                    <p className='text-sm font-medium truncate'>
+                  <div className='ml-2 min-w-0 flex-1'>
+                    <p className='truncate text-sm font-medium'>
                       {user.userName}
                       {isCurrentUser && (
-                        <span className='text-indigo-600 text-xs ml-1'>
+                        <span className='ml-1 text-xs text-indigo-600'>
                           (나)
                         </span>
                       )}
@@ -196,7 +198,7 @@ export default function ReadyPanel({
                       variant='ghost'
                       size='sm'
                       onClick={handleToggleReady}
-                      className='ml-auto text-xs p-1.5 h-auto text-green-600 hover:text-green-700 hover:bg-green-100'
+                      className='ml-auto h-auto p-1.5 text-xs text-green-600 hover:bg-green-100 hover:text-green-700'
                     >
                       준비
                     </Button>
@@ -209,17 +211,17 @@ export default function ReadyPanel({
       </div>
 
       {/* 레디 버튼 */}
-      <div className='mt-4 bg-indigo-50 p-3 rounded-lg border border-indigo-100'>
-        <div className='flex justify-between items-center'>
+      <div className='mt-4 rounded-lg border border-indigo-100 bg-indigo-50 p-3'>
+        <div className='flex items-center justify-between'>
           <div className='flex items-center'>
             <div className='relative'>
               <div
-                className={`w-10 h-10 rounded-full ${isCurrentReady ? 'bg-green-600' : 'bg-gray-400'} flex items-center justify-center text-white transition-colors duration-300`}
+                className={`h-10 w-10 rounded-full ${isCurrentReady ? 'bg-green-600' : 'bg-gray-400'} flex items-center justify-center text-white transition-colors duration-300`}
               >
                 {currentUserId.charAt(0).toUpperCase()}
               </div>
               {currentUserId === hostNickname && (
-                <div className='absolute -top-1 -right-1 bg-yellow-400 rounded-full p-0.5'>
+                <div className='absolute -top-1 -right-1 rounded-full bg-yellow-400 p-0.5'>
                   <Crown size={12} className='text-yellow-800' />
                 </div>
               )}
@@ -252,7 +254,7 @@ export default function ReadyPanel({
             {isAllReady && (
               <Button
                 onClick={handleStartGame}
-                className='bg-yellow-500 hover:bg-yellow-600 text-white ml-2 flex items-center gap-1'
+                className='ml-2 flex items-center gap-1 bg-yellow-500 text-white hover:bg-yellow-600'
               >
                 <PlayCircle size={16} />
                 <span>게임 시작</span>
@@ -265,7 +267,7 @@ export default function ReadyPanel({
       {!isAllReady && (
         <div className='mt-4'>
           <Button
-            className='w-full bg-gray-400 text-white font-bold py-2 cursor-not-allowed'
+            className='w-full cursor-not-allowed bg-gray-400 py-2 font-bold text-white'
             disabled={true}
           >
             모든 플레이어가 준비해야 합니다

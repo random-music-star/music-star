@@ -1,10 +1,13 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { Room } from '@/pages/lobby';
-import RoomItem from './RoomItem';
+import { useCallback, useEffect, useRef, useState } from 'react';
+
+import axios from 'axios';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import axios from 'axios';
+import { Room } from '@/pages/lobby';
+
+import RoomItem from './RoomItem';
 
 // SSE 엔드포인트 URL 상수 정의 (나중에 env로 빼야 함)
 const SSE_ENDPOINT = `${process.env.NEXT_PUBLIC_SSE_URL}/lobby`;
@@ -262,20 +265,20 @@ export default function RoomList({
       {isLoading ? (
         <div className='flex items-center justify-center py-12'>
           <div
-            className='animate-spin inline-block w-6 h-6 border-[3px] border-current border-t-transparent text-indigo-500 rounded-full mr-2'
+            className='mr-2 inline-block h-6 w-6 animate-spin rounded-full border-[3px] border-current border-t-transparent text-indigo-500'
             aria-hidden='true'
           ></div>
-          <p className='text-indigo-700 font-medium'>
+          <p className='font-medium text-indigo-700'>
             방 목록을 불러오는 중...
           </p>
         </div>
       ) : rooms.length === 0 ? (
-        <div className='flex flex-col items-center justify-center py-20 gap-2'>
-          <div className='w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mb-2'>
+        <div className='flex flex-col items-center justify-center gap-2 py-20'>
+          <div className='mb-2 flex h-16 w-16 items-center justify-center rounded-full bg-indigo-100'>
             <span className='text-2xl text-indigo-500'>🎵</span>
           </div>
-          <p className='text-indigo-700 font-medium'>생성된 방이 없습니다</p>
-          <p className='text-gray-500 text-sm'>
+          <p className='font-medium text-indigo-700'>생성된 방이 없습니다</p>
+          <p className='text-sm text-gray-500'>
             새로운 노래방을 만들어 보세요!
           </p>
         </div>
@@ -283,15 +286,15 @@ export default function RoomList({
         <>
           {/* SSE 연결 상태 표시 */}
           {!sseConnected && initialRooms.length > 0 && (
-            <Alert className='mb-4 bg-amber-50 border-amber-200'>
-              <AlertDescription className='text-amber-700 text-sm'>
+            <Alert className='mb-4 border-amber-200 bg-amber-50'>
+              <AlertDescription className='text-sm text-amber-700'>
                 ⚠️ 실시간 연결이 불가능합니다. 샘플 데이터를 표시합니다.
               </AlertDescription>
             </Alert>
           )}
 
           {/* 그리드 구조: 화면 크기에 따라 열 개수 조정 */}
-          <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'>
+          <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'>
             {rooms.map(room => (
               <RoomItem key={room.id} room={room} />
             ))}
@@ -299,15 +302,15 @@ export default function RoomList({
 
           {/* 페이지네이션 UI */}
           {totalPages > 0 && (
-            <div className='flex items-center justify-center mt-6 gap-4'>
+            <div className='mt-6 flex items-center justify-center gap-4'>
               <Button
                 variant='outline'
                 size='sm'
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={isFirstPage || isLoading}
-                className={`${isFirstPage ? 'opacity-50 cursor-not-allowed' : 'hover:bg-indigo-50'} border-indigo-200`}
+                className={`${isFirstPage ? 'cursor-not-allowed opacity-50' : 'hover:bg-indigo-50'} border-indigo-200`}
               >
-                <ChevronLeft className='h-4 w-4 mr-1' />
+                <ChevronLeft className='mr-1 h-4 w-4' />
                 이전
               </Button>
 
@@ -322,10 +325,10 @@ export default function RoomList({
                 size='sm'
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={isLastPage || isLoading}
-                className={`${isLastPage ? 'opacity-50 cursor-not-allowed' : 'hover:bg-indigo-50'} border-indigo-200`}
+                className={`${isLastPage ? 'cursor-not-allowed opacity-50' : 'hover:bg-indigo-50'} border-indigo-200`}
               >
                 다음
-                <ChevronRight className='h-4 w-4 ml-1' />
+                <ChevronRight className='ml-1 h-4 w-4' />
               </Button>
             </div>
           )}

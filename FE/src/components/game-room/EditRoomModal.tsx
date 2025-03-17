@@ -1,16 +1,16 @@
 import { useState } from 'react';
-import { Room } from '../../_types/game';
+
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
 import {
   Select,
   SelectContent,
@@ -18,7 +18,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Switch } from '@/components/ui/switch';
+
+import { Room } from '../../_types/game';
 
 interface EditRoomModalProps {
   isOpen: boolean;
@@ -79,7 +81,7 @@ export default function EditRoomModal({
     <Dialog open={isOpen} onOpenChange={open => !open && onClose()}>
       <DialogContent className='sm:max-w-[500px]'>
         <DialogHeader>
-          <DialogTitle className='text-xl font-bold text-center'>
+          <DialogTitle className='text-center text-xl font-bold'>
             방 설정 수정
           </DialogTitle>
         </DialogHeader>
@@ -139,7 +141,7 @@ export default function EditRoomModal({
           </div>
 
           <div className='grid grid-cols-4 items-start gap-4'>
-            <Label className='text-right pt-2'>게임 연도</Label>
+            <Label className='pt-2 text-right'>게임 연도</Label>
             <div className='col-span-3 space-y-2'>
               <div className='flex flex-wrap gap-3'>
                 {GAME_YEARS.map(year => (
@@ -151,7 +153,7 @@ export default function EditRoomModal({
                     />
                     <Label
                       htmlFor={`year-${year}`}
-                      className='text-sm font-medium cursor-pointer'
+                      className='cursor-pointer text-sm font-medium'
                     >
                       {year}
                     </Label>
@@ -168,7 +170,7 @@ export default function EditRoomModal({
 
           {/* 게임 모드 - 다중 선택 */}
           <div className='grid grid-cols-4 items-start gap-4'>
-            <Label className='text-right pt-2'>게임 모드</Label>
+            <Label className='pt-2 text-right'>게임 모드</Label>
             <div className='col-span-3 space-y-2'>
               <div className='flex flex-wrap gap-3'>
                 {GAME_MODES.map(mode => (
@@ -180,7 +182,7 @@ export default function EditRoomModal({
                     />
                     <Label
                       htmlFor={`mode-${mode}`}
-                      className='text-sm font-medium cursor-pointer'
+                      className='cursor-pointer text-sm font-medium'
                     >
                       {mode}
                     </Label>

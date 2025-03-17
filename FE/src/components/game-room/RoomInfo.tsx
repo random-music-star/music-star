@@ -1,3 +1,8 @@
+import { Award, Clock, LayoutGrid, Lock, Unlock, Users } from 'lucide-react';
+
+import { useGameInfoStore } from '@/stores/websocket/useGameRoomInfoStore';
+import { GameInfoState } from '@/types/websocket';
+
 // types/websocket.ts
 export type RoomStatus = 'WAITING' | 'FINISHED' | 'IN_PROGRESS';
 export type GameFormat = 'GENERAL' | 'BOARD';
@@ -20,10 +25,6 @@ export interface StatusConfig {
 export interface FormatText {
   [key: string]: string;
 }
-
-import { useGameInfoStore } from '@/stores/websocket/useGameRoomInfoStore';
-import { GameInfoState } from '@/types/websocket';
-import { Lock, Unlock, Users, Clock, LayoutGrid, Award } from 'lucide-react';
 
 export default function RoomInfo() {
   const { gameRoomInfo } = useGameInfoStore();
@@ -71,43 +72,43 @@ export default function RoomInfo() {
   const isPrivate = password && password.length > 0;
 
   return (
-    <div className='p-3 bg-white rounded-lg shadow-sm'>
+    <div className='rounded-lg bg-white p-3 shadow-sm'>
       {/* 헤더: 방 이름과 상태 */}
-      <div className='flex justify-between items-center mb-3'>
+      <div className='mb-3 flex items-center justify-between'>
         <div className='flex items-center'>
           {isPrivate ? (
-            <Lock className='text-amber-500 mr-2' size={16} />
+            <Lock className='mr-2 text-amber-500' size={16} />
           ) : (
-            <Unlock className='text-green-500 mr-2' size={16} />
+            <Unlock className='mr-2 text-green-500' size={16} />
           )}
           <h2 className='font-bold text-gray-800'>
             {roomTitle || '방 이름 없음'}
           </h2>
         </div>
         <div
-          className={`px-2 py-0.5 rounded text-xs font-medium ${statusConfig[status]?.color || 'text-gray-600'}`}
+          className={`rounded px-2 py-0.5 text-xs font-medium ${statusConfig[status]?.color || 'text-gray-600'}`}
         >
           {statusConfig[status]?.text || '상태 없음'}
         </div>
       </div>
 
       {/* 방 정보 그리드 */}
-      <div className='grid grid-cols-2 gap-2 text-sm mb-2'>
+      <div className='mb-2 grid grid-cols-2 gap-2 text-sm'>
         {/* 참가자 수 */}
         <div className='flex items-center'>
-          <Users size={14} className='text-blue-500 mr-1.5' />
+          <Users size={14} className='mr-1.5 text-blue-500' />
           <span className='text-gray-600'>최대 {maxPlayer || '?'} 명</span>
         </div>
 
         {/* 라운드 수 */}
         <div className='flex items-center'>
-          <Award size={14} className='text-purple-500 mr-1.5' />
+          <Award size={14} className='mr-1.5 text-purple-500' />
           <span className='text-gray-600'>{maxGameRound || '?'} 라운드</span>
         </div>
 
         {/* 게임 형식 */}
         <div className='flex items-center'>
-          <LayoutGrid size={14} className='text-teal-500 mr-1.5' />
+          <LayoutGrid size={14} className='mr-1.5 text-teal-500' />
           <span className='text-gray-600'>
             {formatText[format] || format || '?'} 모드
           </span>
@@ -115,7 +116,7 @@ export default function RoomInfo() {
 
         {/* 연도 범위 */}
         <div className='flex items-center'>
-          <Clock size={14} className='text-indigo-500 mr-1.5' />
+          <Clock size={14} className='mr-1.5 text-indigo-500' />
           <span className='text-gray-600'>
             {selectedYear && selectedYear.length > 0
               ? `${Math.min(...selectedYear)}~${Math.max(...selectedYear)}`
@@ -128,11 +129,11 @@ export default function RoomInfo() {
       <div className='mt-3'>
         {/* 게임 모드 태그 */}
         {mode && mode.length > 0 && (
-          <div className='flex flex-wrap gap-1 mb-2'>
+          <div className='mb-2 flex flex-wrap gap-1'>
             {mode.map(gameMode => (
               <span
                 key={gameMode}
-                className='inline-block px-1.5 py-0.5 bg-purple-100 text-purple-700 rounded text-xs'
+                className='inline-block rounded bg-purple-100 px-1.5 py-0.5 text-xs text-purple-700'
               >
                 {gameMode}
               </span>
@@ -146,7 +147,7 @@ export default function RoomInfo() {
             {selectedYear.map(year => (
               <span
                 key={year}
-                className='inline-block px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded text-xs'
+                className='inline-block rounded bg-blue-100 px-1.5 py-0.5 text-xs text-blue-700'
               >
                 {year}
               </span>
@@ -157,8 +158,8 @@ export default function RoomInfo() {
 
       {/* 방 코드 (비공개 방인 경우) */}
       {isPrivate && (
-        <div className='mt-3 pt-2 border-t border-gray-100'>
-          <div className='flex justify-between items-center'>
+        <div className='mt-3 border-t border-gray-100 pt-2'>
+          <div className='flex items-center justify-between'>
             <span className='text-xs text-amber-600'>방 코드:</span>
             <span className='font-mono font-medium text-amber-700'>
               {password}

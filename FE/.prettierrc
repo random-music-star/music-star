@@ -18,5 +18,8 @@
     "^[./]"
   ],
   "tailwindFunctions": ["clsx", "cn", "twmerge", "cva"],
-  "plugins": []
+  "plugins": [
+    "@trivago/prettier-plugin-sort-imports",
+    "prettier-plugin-tailwindcss"
+  ]
 }

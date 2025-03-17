@@ -1,9 +1,11 @@
-import { useState, useRef, useEffect, FormEvent } from 'react';
+import { FormEvent, useEffect, useRef, useState } from 'react';
+
 import { Send } from 'lucide-react';
-import { Input } from '@/components/ui/input';
+
 import { Button } from '@/components/ui/button';
-import { useWebSocketStore } from '@/stores/websocket/useWebsocketStore';
+import { Input } from '@/components/ui/input';
 import { useGameChatStore } from '@/stores/websocket/useGameChatStore';
+import { useWebSocketStore } from '@/stores/websocket/useWebsocketStore';
 
 interface ChatBoxProps {
   currentUserId: string;
@@ -46,16 +48,16 @@ export default function ChatBox({ currentUserId }: ChatBoxProps) {
   };
 
   return (
-    <div className='flex flex-col h-full'>
+    <div className='flex h-full flex-col'>
       <div
         ref={chatContainerRef}
-        className='flex-1 overflow-y-auto p-2 bg-white text-sm leading-relaxed'
+        className='flex-1 overflow-y-auto bg-white p-2 text-sm leading-relaxed'
       >
         {gameChattings.map((message, index) => (
           <div key={`${message.sender}-${index}`} className='mb-1'>
             {message.messageType === 'notice' ? (
-              <div className='text-center my-1'>
-                <span className='inline-block px-2 py-0.5 bg-gray-200 rounded-full text-xs text-gray-600'>
+              <div className='my-1 text-center'>
+                <span className='inline-block rounded-full bg-gray-200 px-2 py-0.5 text-xs text-gray-600'>
                   {message.message}
                 </span>
               </div>
@@ -75,19 +77,19 @@ export default function ChatBox({ currentUserId }: ChatBoxProps) {
         ))}
       </div>
 
-      <div className='p-2 bg-gray-50 border-t border-gray-200'>
+      <div className='border-t border-gray-200 bg-gray-50 p-2'>
         <form onSubmit={handleSendMessage} className='flex space-x-1'>
           <Input
             value={inputValue}
             onChange={e => setInputValue(e.target.value)}
             onKeyDown={handleKeyPress}
             placeholder='메시지 입력...'
-            className='flex-1 text-xs h-8'
+            className='h-8 flex-1 text-xs'
           />
           <Button
             type='submit'
             size='sm'
-            className='bg-indigo-600 hover:bg-indigo-700 h-8'
+            className='h-8 bg-indigo-600 hover:bg-indigo-700'
           >
             <Send size={14} className='mr-1' />
             <span className='text-xs'>전송</span>

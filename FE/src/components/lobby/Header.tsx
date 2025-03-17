@@ -1,12 +1,13 @@
+import { ChevronDown } from 'lucide-react';
+import { useRouter } from 'next/router';
+
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { ChevronDown } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { useRouter } from 'next/router';
 
 export default function Header({ nickname }: { nickname: string }) {
   const { logout } = useAuth();
@@ -18,8 +19,8 @@ export default function Header({ nickname }: { nickname: string }) {
   };
 
   return (
-    <header className='bg-[hsl(var(--color-header-bg))] text-black p-4 shadow-md'>
-      <div className='container mx-auto flex justify-between items-center'>
+    <header className='bg-[hsl(var(--color-header-bg))] p-4 text-black shadow-md'>
+      <div className='container mx-auto flex items-center justify-between'>
         <h1 className='text-xl font-bold text-black'>알송달송</h1>
 
         <div className='flex items-center gap-2'>

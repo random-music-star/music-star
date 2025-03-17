@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { useGameScreenStore } from '@/stores/websocket/useGameScreenStore';
+import React, { useEffect, useState } from 'react';
+
 import { useGameInfoStore } from '@/stores/websocket/useGameRoomInfoStore';
+import { useGameScreenStore } from '@/stores/websocket/useGameScreenStore';
 import { Mode } from '@/types/websocket';
 
 const GameWait = () => {
@@ -32,7 +33,7 @@ const GameWait = () => {
   }, [remainTime, selectedMode]);
 
   return (
-    <div className='flex flex-col items-center justify-center h-full'>
+    <div className='flex h-full flex-col items-center justify-center'>
       <div className='relative h-64 w-64 overflow-hidden'>
         {!selectedMode &&
           gameRoomInfo.mode.map((mode, index) => {
@@ -45,7 +46,7 @@ const GameWait = () => {
             return (
               <div
                 key={mode}
-                className='absolute w-full h-36 bg-white rounded-lg shadow-lg flex items-center justify-center transition-transform duration-75 ease-linear'
+                className='absolute flex h-36 w-full items-center justify-center rounded-lg bg-white shadow-lg transition-transform duration-75 ease-linear'
                 style={{
                   transform: `translateY(${yPosition}px) scale(${scale})`,
                   opacity,
@@ -53,8 +54,8 @@ const GameWait = () => {
                   top: '20%',
                 }}
               >
-                <div className='text-center p-4'>
-                  <h3 className='text-2xl font-bold mb-2'>{mode}</h3>
+                <div className='p-4 text-center'>
+                  <h3 className='mb-2 text-2xl font-bold'>{mode}</h3>
                 </div>
               </div>
             );
@@ -62,11 +63,11 @@ const GameWait = () => {
 
         {selectedMode && (
           <div
-            className='absolute w-full h-36 bg-white rounded-lg shadow-lg flex items-center justify-center animate-pulse'
+            className='absolute flex h-36 w-full animate-pulse items-center justify-center rounded-lg bg-white shadow-lg'
             style={{ top: '20%' }}
           >
-            <div className='text-center p-4'>
-              <h3 className='text-3xl font-bold mb-2'>{selectedMode}</h3>
+            <div className='p-4 text-center'>
+              <h3 className='mb-2 text-3xl font-bold'>{selectedMode}</h3>
             </div>
           </div>
         )}

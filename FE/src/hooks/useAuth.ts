@@ -1,4 +1,4 @@
-import { setCookie, deleteCookie } from 'cookies-next';
+import { deleteCookie, setCookie } from 'cookies-next';
 
 export function useAuth() {
   const login = (token: string) => {

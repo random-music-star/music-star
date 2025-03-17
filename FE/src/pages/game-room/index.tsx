@@ -1,18 +1,20 @@
 import { useEffect, useState } from 'react';
+
+import { getCookie } from 'cookies-next';
+import { AnimatePresence, motion } from 'framer-motion';
+import { GetServerSideProps } from 'next';
+import { useRouter } from 'next/router';
+
+import NavigationDialog from '@/components/game-room/NavigationDialog';
+import SocketLayout from '@/components/layouts/SocketLayout';
+import usePrompt from '@/hooks/useNavigationBlocker';
+import { useNicknameStore } from '@/stores/auth/useNicknameStore';
+import { useWebSocketStore } from '@/stores/websocket/useWebsocketStore';
+
 import ChatBox from '../../components/game-room/ChatBox';
-import RoomInfo from '../../components/game-room/RoomInfo';
-import { motion, AnimatePresence } from 'framer-motion';
 import GameBoard from '../../components/game-room/GameBoard';
 import ReadyPanel from '../../components/game-room/ReadyPannel';
-import SocketLayout from '@/components/layouts/SocketLayout';
-import { useWebSocketStore } from '@/stores/websocket/useWebsocketStore';
-import { useRouter } from 'next/router';
-import usePrompt from '@/hooks/useNavigationBlocker';
-import NavigationDialog from '@/components/game-room/NavigationDialog';
-
-import { GetServerSideProps } from 'next';
-import { getCookie } from 'cookies-next';
-import { useNicknameStore } from '@/stores/auth/useNicknameStore';
+import RoomInfo from '../../components/game-room/RoomInfo';
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   const userNickname = (await getCookie('userNickname', { req, res })) || '';
@@ -68,8 +70,8 @@ export default function GameRoom({ userNickname }: { userNickname: string }) {
 
   return (
     <SocketLayout>
-      <div className='flex flex-1 overflow-hidden p-4 gap-4'>
-        <div className='flex-1 flex flex-col bg-white rounded-xl shadow-lg overflow-hidden'>
+      <div className='flex flex-1 gap-4 overflow-hidden p-4'>
+        <div className='flex flex-1 flex-col overflow-hidden rounded-xl bg-white shadow-lg'>
           <div className='flex-1 overflow-hidden'>
             <AnimatePresence mode='wait'>
               {!isGameStarted ? (
@@ -103,8 +105,8 @@ export default function GameRoom({ userNickname }: { userNickname: string }) {
             <ChatBox currentUserId={nickname} />
           </div>
         </div>
-        <div className='w-1/4 bg-white rounded-xl shadow-lg overflow-hidden flex flex-col'>
-          <div className='p-4 bg-indigo-600 text-white font-bold'>
+        <div className='flex w-1/4 flex-col overflow-hidden rounded-xl bg-white shadow-lg'>
+          <div className='bg-indigo-600 p-4 font-bold text-white'>
             <h2>방 정보</h2>
           </div>
           <RoomInfo />

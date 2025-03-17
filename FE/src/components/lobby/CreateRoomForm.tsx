@@ -1,22 +1,13 @@
-import axios from 'axios';
 import { useState } from 'react';
+
+import { zodResolver } from '@hookform/resolvers/zod';
+import axios from 'axios';
 import { useRouter } from 'next/router';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+
 import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -25,6 +16,17 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import { useNicknameStore } from '@/stores/auth/useNicknameStore';
 
 interface CreateRoomFormProps {
@@ -165,7 +167,7 @@ export default function CreateRoomForm({ onSuccess }: CreateRoomFormProps) {
           control={form.control}
           name='isLocked'
           render={({ field }) => (
-            <FormItem className='flex justify-between items-center'>
+            <FormItem className='flex items-center justify-between'>
               <FormLabel>잠금방 설정</FormLabel>
               <FormControl>
                 <Switch
@@ -236,7 +238,7 @@ export default function CreateRoomForm({ onSuccess }: CreateRoomFormProps) {
           name='modes'
           render={() => (
             <FormItem>
-              <div className='flex justify-between items-center'>
+              <div className='flex items-center justify-between'>
                 <FormLabel>모드 선택</FormLabel>
                 <Select onValueChange={handleModeSelect}>
                   <SelectTrigger className='w-auto min-w-[120px]'>
@@ -255,23 +257,23 @@ export default function CreateRoomForm({ onSuccess }: CreateRoomFormProps) {
               </div>
 
               {selectedModes.length === 0 ? (
-                <div className='border border-dashed border-gray-300 rounded-md p-4 text-center text-gray-500 mt-2'>
+                <div className='mt-2 rounded-md border border-dashed border-gray-300 p-4 text-center text-gray-500'>
                   모드를 선택해주세요
                 </div>
               ) : (
-                <div className='flex flex-wrap gap-2 mt-2'>
+                <div className='mt-2 flex flex-wrap gap-2'>
                   {selectedModes.map(mode => (
                     <Badge
                       key={mode}
                       variant='secondary'
-                      className='pl-2 pr-1 py-1 bg-gray-200 text-gray-700'
+                      className='bg-gray-200 py-1 pr-1 pl-2 text-gray-700'
                     >
                       {mode === 'FULL' ? '전곡 재생' : '1초 재생'}
                       <Button
                         type='button'
                         variant='ghost'
                         size='sm'
-                        className='h-5 px-1 ml-1 text-gray-500 hover:text-gray-800'
+                        className='ml-1 h-5 px-1 text-gray-500 hover:text-gray-800'
                         onClick={() => removeMode(mode)}
                       >
                         삭제
@@ -298,7 +300,7 @@ export default function CreateRoomForm({ onSuccess }: CreateRoomFormProps) {
           <Button
             type='submit'
             disabled={loading}
-            className='bg-blue-500 hover:bg-blue-600 text-white'
+            className='bg-blue-500 text-white hover:bg-blue-600'
           >
             {loading ? '생성 중...' : '방 생성'}
           </Button>

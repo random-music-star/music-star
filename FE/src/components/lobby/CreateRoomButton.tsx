@@ -1,12 +1,14 @@
 import { useState } from 'react';
+
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from '@/components/ui/dialog';
+
 import CreateRoomForm from './CreateRoomForm';
 
 export default function CreateRoomButton() {
@@ -16,7 +18,7 @@ export default function CreateRoomButton() {
     <>
       <Button
         onClick={() => setIsOpen(true)}
-        className='bg-blue-600 hover:bg-blue-700 text-white'
+        className='bg-blue-600 text-white hover:bg-blue-700'
       >
         방 생성
       </Button>
