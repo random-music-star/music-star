@@ -9,8 +9,8 @@ import { useGameInfoStore } from './useGameRoomInfoStore';
 import { useGameScoreStore } from './useGameScoreStore';
 import { useGameScreenStore } from './useGameScreenStore';
 import { useGameStateStore } from './useGameStateStore';
-import { useGameScoreStore } from './useGameScoreStore';
 import { useNicknameStore } from '../auth/useNicknameStore';
+import { usePublicChatStore } from './usePublicChatStore';
 
 export const useWebSocketStore = create<WebSocketState>((set, get) => ({
   isConnected: false,

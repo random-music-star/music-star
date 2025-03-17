@@ -1,3 +1,4 @@
+import { PariticpantInfo, ParticipantInfoStore } from '@/types/websocket';
 import { create } from 'zustand';
 
 const initialState = {
