@@ -130,7 +130,7 @@ export default function CreateRoomForm({ onSuccess }: CreateRoomFormProps) {
       );
       console.log('방 생성 완료:', response.data);
       const roomId = response.data.roomId;
-      router.push(`/game-room?roomId=${roomId}`);
+      router.push(`/game-room/${roomId}`);
       onSuccess();
     } catch (error) {
       console.error('API 오류:', error);
@@ -147,7 +147,6 @@ export default function CreateRoomForm({ onSuccess }: CreateRoomFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
-        {/* 방 이름 */}
         <FormField
           control={form.control}
           name='title'
@@ -162,7 +161,6 @@ export default function CreateRoomForm({ onSuccess }: CreateRoomFormProps) {
           )}
         />
 
-        {/* 잠금방 설정 */}
         <FormField
           control={form.control}
           name='isLocked'
@@ -184,7 +182,6 @@ export default function CreateRoomForm({ onSuccess }: CreateRoomFormProps) {
           )}
         />
 
-        {/* 비밀번호 입력 */}
         <FormField
           control={form.control}
           name='password'
@@ -204,7 +201,6 @@ export default function CreateRoomForm({ onSuccess }: CreateRoomFormProps) {
           )}
         />
 
-        {/* 포맷 선택 */}
         <FormField
           control={form.control}
           name='format'
@@ -232,7 +228,6 @@ export default function CreateRoomForm({ onSuccess }: CreateRoomFormProps) {
           )}
         />
 
-        {/* 모드 선택 */}
         <FormField
           control={form.control}
           name='modes'
@@ -287,7 +282,6 @@ export default function CreateRoomForm({ onSuccess }: CreateRoomFormProps) {
           )}
         />
 
-        {/* 버튼 */}
         <div className='flex justify-end gap-2'>
           <Button
             variant='outline'

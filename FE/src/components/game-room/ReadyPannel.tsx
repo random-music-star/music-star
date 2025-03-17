@@ -10,11 +10,13 @@ import { useWebSocketStore } from '@/stores/websocket/useWebsocketStore';
 interface ReadyPanelProps {
   currentUserId: string;
   handleStartGame: () => void;
+  roomId: string;
 }
 
 export default function ReadyPanel({
   currentUserId,
   handleStartGame,
+  roomId,
 }: ReadyPanelProps) {
   const {
     participantInfo,
@@ -52,7 +54,7 @@ export default function ReadyPanel({
     setDirection(isReady);
 
     setTimeout(() => {
-      sendMessage('/app/channel/1/room/1/ready', {
+      sendMessage(`/app/channel/1/room/${roomId}/ready`, {
         type: 'ready',
         username: currentUserId,
       });
@@ -75,7 +77,6 @@ export default function ReadyPanel({
       </div>
 
       <div className='relative flex flex-1 gap-4'>
-        {/* 준비 완료 */}
         <div className='flex-1 rounded-lg border border-green-200 bg-green-50 p-3'>
           <div className='mb-3 flex items-center'>
             <CheckCircle size={16} className='mr-2 text-green-600' />
@@ -143,7 +144,6 @@ export default function ReadyPanel({
           </div>
         </div>
 
-        {/* 대기중 */}
         <div className='flex-1 rounded-lg border border-gray-200 bg-gray-50 p-3'>
           <div className='mb-3 flex items-center'>
             <Clock size={16} className='mr-2 text-gray-500' />
@@ -210,7 +210,6 @@ export default function ReadyPanel({
         </div>
       </div>
 
-      {/* 레디 버튼 */}
       <div className='mt-4 rounded-lg border border-indigo-100 bg-indigo-50 p-3'>
         <div className='flex items-center justify-between'>
           <div className='flex items-center'>

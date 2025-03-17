@@ -3,13 +3,13 @@ import { create } from 'zustand';
 
 import { Board, WebSocketState } from '@/types/websocket';
 
+import { useNicknameStore } from '../auth/useNicknameStore';
 import { useGameChatStore } from './useGameChatStore';
 import { useParticipantInfoStore } from './useGameParticipantStore';
 import { useGameInfoStore } from './useGameRoomInfoStore';
 import { useGameScoreStore } from './useGameScoreStore';
 import { useGameScreenStore } from './useGameScreenStore';
 import { useGameStateStore } from './useGameStateStore';
-import { useNicknameStore } from '../auth/useNicknameStore';
 import { usePublicChatStore } from './usePublicChatStore';
 
 export const useWebSocketStore = create<WebSocketState>((set, get) => ({
@@ -47,7 +47,7 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
     }
   },
 
-  updateSubscription: (subscriptionType: string) => {
+  updateSubscription: (subscriptionType: string, roomId?: string) => {
     const { client, subscriptions } = get();
 
     if (!client || !client.connected) return;
@@ -84,7 +84,7 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
       const participantInfoStore = useParticipantInfoStore.getState();
 
       newSubscriptions['game-room'] = client.subscribe(
-        `/topic/channel/1/room/11`,
+        `/topic/channel/1/room/${roomId}`,
         message => {
           const { type, response } = JSON.parse(message.body);
 

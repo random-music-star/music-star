@@ -1,22 +1,29 @@
-import { useEffect} from 'react';
+import { useEffect } from 'react';
+
+import { getCookie } from 'cookies-next';
+import { AnimatePresence, motion } from 'framer-motion';
+import { GetServerSideProps } from 'next';
+import { useRouter } from 'next/router';
+
+import NavigationDialog from '@/components/game-room/NavigationDialog';
+import RoomInfo from '@/components/game-room/RoomInfo';
+import SocketLayout from '@/components/layouts/SocketLayout';
+import usePrompt from '@/hooks/useNavigationBlocker';
+import { useNicknameStore } from '@/stores/auth/useNicknameStore';
+import { useGameStateStore } from '@/stores/websocket/useGameStateStore';
+import { useWebSocketStore } from '@/stores/websocket/useWebsocketStore';
+
 import ChatBox from '../../components/game-room/ChatBox';
 import GameBoard from '../../components/game-room/GameBoard';
 import ReadyPanel from '../../components/game-room/ReadyPannel';
-import SocketLayout from '@/components/layouts/SocketLayout';
-import { useWebSocketStore } from '@/stores/websocket/useWebsocketStore';
-import { useRouter } from 'next/router';
-import usePrompt from '@/hooks/useNavigationBlocker';
-import NavigationDialog from '@/components/game-room/NavigationDialog';
 
-import { GetServerSideProps } from 'next';
-import { getCookie } from 'cookies-next';
-import { useNicknameStore } from '@/stores/auth/useNicknameStore';
-import { useGameStateStore } from '@/stores/websocket/useGameStateStore';
-import { AnimatePresence, motion } from 'framer-motion';
-import RoomInfo from '@/components/game-room/RoomInfo';
-
-export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
+export const getServerSideProps: GetServerSideProps = async ({
+  req,
+  res,
+  params,
+}) => {
   const userNickname = (await getCookie('userNickname', { req, res })) || '';
+  const { roomId } = params as { roomId: string };
 
   if (!userNickname) {
     return {
@@ -30,11 +37,20 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   return {
     props: {
       userNickname,
+      roomId,
     },
   };
 };
 
-export default function GameRoom({ userNickname }: { userNickname: string }) {
+interface GameRoomServerProps {
+  userNickname: string;
+  roomId: string;
+}
+
+export default function GameRoom({
+  userNickname,
+  roomId,
+}: GameRoomServerProps) {
   const router = useRouter();
 
   const { setNickname, nickname } = useNicknameStore();
@@ -49,7 +65,7 @@ export default function GameRoom({ userNickname }: { userNickname: string }) {
 
   useEffect(() => {
     if (isConnected) {
-      updateSubscription('game-room');
+      updateSubscription('game-room', roomId);
     }
   }, [isConnected]);
 
@@ -59,7 +75,7 @@ export default function GameRoom({ userNickname }: { userNickname: string }) {
   };
 
   const handleStartGame = () => {
-    sendMessage(`/app/channel/1/room/1/start`, {
+    sendMessage(`/app/channel/1/room/${roomId}/start`, {
       type: 'gameStart',
       request: null,
     });
@@ -82,6 +98,7 @@ export default function GameRoom({ userNickname }: { userNickname: string }) {
                   <ReadyPanel
                     currentUserId={nickname}
                     handleStartGame={handleStartGame}
+                    roomId={roomId}
                   />
                 </motion.div>
               ) : (
@@ -99,7 +116,7 @@ export default function GameRoom({ userNickname }: { userNickname: string }) {
           </div>
 
           <div className='h-2/5 border-t-2 border-gray-200'>
-            <ChatBox currentUserId={nickname} />
+            <ChatBox currentUserId={nickname} roomId={roomId} />
           </div>
         </div>
         <div className='flex w-1/4 flex-col overflow-hidden rounded-xl bg-white shadow-lg'>
@@ -108,8 +125,6 @@ export default function GameRoom({ userNickname }: { userNickname: string }) {
           </div>
           <RoomInfo />
         </div>
-
-        {/* 리팩토링 필요 NavigationDialog 컴포넌트 + usePrompt 훅 */}
         <NavigationDialog
           isOpen={isBlocked}
           onProceed={handleGameProceed}
