@@ -190,17 +190,6 @@ export default function ReadyPanel({
                         )}
                       </p>
                     </div>
-
-                    {isCurrentUser && (
-                      <Button
-                        variant='ghost'
-                        size='sm'
-                        onClick={handleToggleReady}
-                        className='ml-auto h-auto p-1.5 text-xs text-green-600 hover:bg-green-100 hover:text-green-700'
-                      >
-                        준비
-                      </Button>
-                    )}
                   </motion.div>
                 );
               })}
