@@ -1,6 +1,5 @@
 import Link from 'next/link';
 
-// pages/404.js
 export default function Custom404() {
   return (
     <div className='flex h-screen flex-col items-center justify-center bg-gray-100'>

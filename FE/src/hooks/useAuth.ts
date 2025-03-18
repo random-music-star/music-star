@@ -1,10 +1,10 @@
-import { useNicknameStore } from '@/stores/auth/useNicknameStore';
 import { deleteCookie, setCookie } from 'cookies-next';
 
-export function useAuth() {
-  const {setNickname} = useNicknameStore();
-  const login = async() => {
+import { useNicknameStore } from '@/stores/auth/useNicknameStore';
 
+export function useAuth() {
+  const { setNickname } = useNicknameStore();
+  const login = async () => {
     const { token } = await fetch(
       `${process.env.NEXT_PUBLIC_BASE_URL}/member/guest/login`,
     )
@@ -13,12 +13,11 @@ export function useAuth() {
 
     setCookie('userNickname', token, { maxAge: 60 * 60 * 24 * 7, path: '/' });
     setNickname(token);
-
   };
 
   const logout = () => {
     deleteCookie('userNickname', { path: '/' });
-    setNickname('')
+    setNickname('');
   };
 
   return { login, logout };

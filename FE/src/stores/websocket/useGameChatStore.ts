@@ -1,22 +1,23 @@
 import { create } from 'zustand';
 
-import { Chatting, GameChatState, SkipUser } from '@/types/websocket';
+import { Chatting } from '@/types/websocket';
 
-const initialState = {
-  gameChattings: [],
-  skipInfo: [],
+const initialChat: Chatting = {
+  sender: 'system',
+  messageType: 'notice',
+  message: '방에 입장하였습니다.',
 };
 
-export const useGameChatStore = create<GameChatState>((set, get) => ({
-  gameChattings: [],
+interface GameChatStore {
+  gameChattings: Chatting[];
+  setGameChattings: (gameChatting: Chatting) => void;
+  resetGameChatStore: () => void;
+}
+
+export const useGameChatStore = create<GameChatStore>((set, get) => ({
+  gameChattings: [initialChat],
   setGameChattings: (gameChatting: Chatting) => {
     set({ gameChattings: [...get().gameChattings, gameChatting] });
   },
-
-  skipInfo: [],
-  setSkipInfo: (skipUser: SkipUser) => {
-    set({ skipInfo: [...get().skipInfo, skipUser] });
-  },
-
-  resetGameChatStore: () => set(initialState),
+  resetGameChatStore: () => set({ gameChattings: [initialChat] }),
 }));

@@ -11,7 +11,9 @@ const GameWait = () => {
   const [positions, setPositions] = useState<number[]>([]);
 
   useEffect(() => {
-    setPositions(gameRoomInfo.mode.map((_mode: Mode, i) => i + 1));
+    if (gameRoomInfo) {
+      setPositions(gameRoomInfo.mode.map((_mode: Mode, i) => i + 1));
+    }
   }, [gameRoomInfo]);
 
   useEffect(() => {
@@ -31,6 +33,9 @@ const GameWait = () => {
       setSelectedMode('한곡모드');
     }
   }, [remainTime, selectedMode]);
+
+  // gameRoomInfo가 없을 때 에러
+  if (!gameRoomInfo) return;
 
   return (
     <div className='flex h-full flex-col items-center justify-center'>

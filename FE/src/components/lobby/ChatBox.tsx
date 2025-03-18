@@ -1,15 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
+import { FormEvent, useEffect, useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { useNicknameStore } from '@/stores/auth/useNicknameStore';
 import { usePublicChatStore } from '@/stores/websocket/usePublicChatStore';
 import { useWebSocketStore } from '@/stores/websocket/useWebsocketStore';
-
-export interface Chatting {
-  sender: string;
-  messageType: string;
-  message: string;
-}
+import { Chatting } from '@/types/websocket';
 
 export default function ChatBox() {
   const { nickname } = useNicknameStore();
@@ -49,13 +44,9 @@ export default function ChatBox() {
     setNewMessage('');
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter') {
-      if (!e.shiftKey) {
-        e.preventDefault();
-        handleSendMessage();
-      }
-    }
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    handleSendMessage();
   };
 
   return (
@@ -92,25 +83,24 @@ export default function ChatBox() {
       </div>
 
       <div className='border-t border-gray-200 bg-white p-3'>
-        <div className='flex gap-2'>
+        <form onSubmit={handleSubmit} className='flex gap-2'>
           <div className='flex-1'>
-            <textarea
+            <input
+              type='text'
               value={newMessage}
               onChange={e => setNewMessage(e.target.value)}
-              onKeyDown={handleKeyPress}
-              placeholder='메시지를 입력하세요... (Enter: 전송, Shift+Enter: 줄바꿈)'
-              className='w-full resize-none rounded-lg border border-gray-300 p-3 text-sm focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none'
-              rows={2}
+              placeholder='메시지를 입력하세요...'
+              className='h-10 w-full rounded-lg border border-gray-300 px-3 text-sm focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none'
             />
           </div>
           <Button
-            onClick={handleSendMessage}
+            type='submit'
             disabled={!newMessage.trim()}
             className='h-10 self-end rounded-lg bg-blue-600 px-4 text-white transition-colors hover:bg-blue-700'
           >
             전송
           </Button>
-        </div>
+        </form>
       </div>
     </div>
   );

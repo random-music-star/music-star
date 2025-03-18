@@ -27,7 +27,6 @@ import {
 import { Input } from '@/components/ui/input';
 import { Room } from '@/pages/lobby';
 
-// 비밀번호 검증 스키마
 const passwordSchema = z.object({
   password: z.string().min(1, { message: '비밀번호를 입력해주세요' }),
 });
@@ -38,14 +37,12 @@ interface RoomItemProps {
   room: Room;
 }
 
-// 게임 모드별 뱃지 색상 매핑
 const modeBadgeVariants: Record<string, string> = {
   '전곡 모드': 'bg-purple-100 text-purple-800 border-purple-200',
   '1초 모드': 'bg-amber-100 text-amber-800 border-amber-200',
   'AI 모드': 'bg-emerald-100 text-emerald-800 border-emerald-200',
 };
 
-// 상태별 뱃지 색상 및 텍스트 매핑
 const statusConfig: Record<string, { className: string; text: string }> = {
   WAITING: {
     className: 'bg-blue-100 text-blue-800 border-blue-200',
@@ -57,7 +54,6 @@ const statusConfig: Record<string, { className: string; text: string }> = {
   },
 };
 
-// 기본 뱃지 스타일
 const defaultBadgeStyle = 'bg-gray-100 text-gray-800 border-gray-200';
 
 export default function RoomItem({ room }: RoomItemProps) {
@@ -66,16 +62,12 @@ export default function RoomItem({ room }: RoomItemProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // 방이 가득 찼는지 확인
   const isFull = room.currentPlayers >= room.maxPlayer;
 
-  // 현재 방 상태 (기본값 'WAITING')
   const currentStatus = room.status || 'WAITING';
 
-  // 방 상태에 따른 설정 가져오기
   const statusDisplay = statusConfig[currentStatus] || statusConfig['WAITING'];
 
-  // React Hook Form 설정
   const form = useForm<PasswordFormValues>({
     resolver: zodResolver(passwordSchema),
     defaultValues: {
@@ -83,29 +75,25 @@ export default function RoomItem({ room }: RoomItemProps) {
     },
   });
 
-  // 방 클릭 핸들러
   const handleRoomClick = () => {
-    if (isFull) return; // 가득 찬 방은 클릭 무시
+    if (isFull) return;
 
-    // 게임 중인 방인 경우
     if (currentStatus === 'IN_PROGRESS') {
-      setError(''); // 에러 메시지 초기화
-      setIsDialogOpen(true); // 게임 중이라고 알려주는 다이얼로그만 표시
+      setError('');
+      setIsDialogOpen(true);
       return;
     }
 
-    setError(''); // 에러 메시지 초기화
-    form.reset(); // 폼 초기화
+    setError('');
+    form.reset();
     setIsDialogOpen(true);
   };
 
-  // 방 입장 처리 핸들러 (비밀번호가 있는 방)
   const onPasswordSubmit = async (values: PasswordFormValues) => {
     setIsLoading(true);
     setError('');
 
     try {
-      // 비밀번호 확인 API 호출
       const response = await fetch(`/api/rooms/${room.id}/verify-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -116,9 +104,7 @@ export default function RoomItem({ room }: RoomItemProps) {
         throw new Error('비밀번호가 틀렸습니다.');
       }
 
-      // 다이얼로그 닫기
       setIsDialogOpen(false);
-      // 해당 방 라우트로 이동
       router.push(`/game-room/${room.id}`);
     } catch (err) {
       const errorMessage =
@@ -129,23 +115,16 @@ export default function RoomItem({ room }: RoomItemProps) {
     }
   };
 
-  // 방 입장 처리 핸들러 (열린 방) - API 호출 없이 바로 라우팅
   const handleEnterOpenRoom = () => {
-    // 다이얼로그 닫기
     setIsDialogOpen(false);
-    // 해당 방 라우트로 직접 이동
     router.push(`/game-room/${room.id}`);
   };
 
-  // 사용률 계산 (시각적 표현용)
   const usagePercentage = (room.currentPlayers / room.maxPlayer) * 100;
 
-  // 상태와 사용률에 따른 배경색 스타일
   const getCapacityStyle = () => {
-    // 게임 중인 방에 다른 스타일 적용
     if (currentStatus === 'IN_PROGRESS') return 'bg-green-50 border-green-200';
 
-    // 대기 중인 방은 기존 로직 적용
     if (isFull) return 'bg-red-50 border-red-200';
     if (usagePercentage > 75) return 'bg-amber-50 border-amber-200';
     if (usagePercentage > 50) return 'bg-blue-50 border-blue-200';

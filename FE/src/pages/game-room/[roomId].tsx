@@ -1,21 +1,21 @@
 import { useEffect } from 'react';
 
 import { getCookie } from 'cookies-next';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
 
+import ChatBox from '@/components/game-room/ChatBox';
+import GameBoard from '@/components/game-room/GameBoard';
 import NavigationDialog from '@/components/game-room/NavigationDialog';
+import ReadyPanel from '@/components/game-room/ReadyPannel';
 import RoomInfo from '@/components/game-room/RoomInfo';
 import SocketLayout from '@/components/layouts/SocketLayout';
 import usePrompt from '@/hooks/useNavigationBlocker';
 import { useNicknameStore } from '@/stores/auth/useNicknameStore';
+import { useGameInfoStore } from '@/stores/websocket/useGameRoomInfoStore';
 import { useGameStateStore } from '@/stores/websocket/useGameStateStore';
 import { useWebSocketStore } from '@/stores/websocket/useWebsocketStore';
-
-import ChatBox from '../../components/game-room/ChatBox';
-import GameBoard from '../../components/game-room/GameBoard';
-import ReadyPanel from '../../components/game-room/ReadyPannel';
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
@@ -56,6 +56,7 @@ export default function GameRoom({
   const { setNickname, nickname } = useNicknameStore();
   const { isConnected, updateSubscription, sendMessage } = useWebSocketStore();
   const { isBlocked, handleProceed, handleCancel } = usePrompt();
+  const { gameRoomInfo } = useGameInfoStore();
 
   const { gameState } = useGameStateStore();
 
@@ -81,50 +82,36 @@ export default function GameRoom({
     });
   };
 
+  if (gameState === 'REFUSED') {
+    // refused 상태라면, 로비로 라우팅
+    // 테스트 필요
+    router.push('/lobby');
+  }
+
+  if (!gameRoomInfo) return;
+
+  const { status } = gameRoomInfo;
+
   return (
     <SocketLayout>
       <div className='flex flex-1 gap-4 overflow-hidden p-4'>
         <div className='flex flex-1 flex-col overflow-hidden rounded-xl bg-white shadow-lg'>
           <div className='flex-1 overflow-hidden'>
             <AnimatePresence mode='wait'>
-              {!gameState ? (
-                <motion.div
-                  key='ready-panel'
-                  className='h-full'
-                  initial={{ opacity: 1 }}
-                  exit={{ x: '-100%', opacity: 0 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  <ReadyPanel
-                    currentUserId={nickname}
-                    handleStartGame={handleStartGame}
-                    roomId={roomId}
-                  />
-                </motion.div>
+              {status === 'WAITING' ? (
+                <ReadyPanel
+                  currentUserId={nickname}
+                  handleStartGame={handleStartGame}
+                  roomId={roomId}
+                />
               ) : (
-                <motion.div
-                  key='game-board'
-                  className='h-full'
-                  initial={{ x: '100%', opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ duration: 0.5, ease: 'easeOut' }}
-                >
-                  <GameBoard />
-                </motion.div>
+                <GameBoard />
               )}
             </AnimatePresence>
           </div>
-
-          <div className='h-2/5 border-t-2 border-gray-200'>
-            <ChatBox currentUserId={nickname} roomId={roomId} />
-          </div>
+          <ChatBox currentUserId={nickname} roomId={roomId} />
         </div>
-        <div className='flex w-1/4 flex-col overflow-hidden rounded-xl bg-white shadow-lg'>
-          <div className='bg-indigo-600 p-4 font-bold text-white'>
-            <h2>방 정보</h2>
-          </div>
-          <RoomInfo />
-        </div>
+        <RoomInfo />
         <NavigationDialog
           isOpen={isBlocked}
           onProceed={handleGameProceed}

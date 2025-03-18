@@ -13,7 +13,6 @@ export interface CreateRoomResponse {
   roomId: number;
 }
 
-// Zod 스키마 정의
 export const createRoomFormSchema = z.object({
   title: z.string().min(1, '방 이름을 설정해주세요'),
   format: z.string().min(1, '포맷을 선택해주세요'),
@@ -23,11 +22,9 @@ export const createRoomFormSchema = z.object({
 
 export type CreateRoomFormValues = z.infer<typeof createRoomFormSchema>;
 
-// 가능한 모드와 연도 상수 정의
 export const AVAILABLE_MODES = ['FULL'] as const;
 export const AVAILABLE_YEARS = [2020, 2021] as const;
 
 export type GameMode = (typeof AVAILABLE_MODES)[number];
 
-// 게임 포맷 타입
 export type GameFormat = 'BOARD' | 'GENERAL';

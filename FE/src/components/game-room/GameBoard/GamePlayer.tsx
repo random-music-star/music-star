@@ -1,8 +1,10 @@
-import { useGameStateStore } from '@/stores/websocket/useGameStateStore';
 import React, { useEffect, useRef, useState } from 'react';
-import GameResult from './GameResult';
 
+import { useGameRoundInfoStore } from '@/stores/websocket/useGameRoundInfoStore';
 import { useGameScreenStore } from '@/stores/websocket/useGameScreenStore';
+import { useGameStateStore } from '@/stores/websocket/useGameStateStore';
+
+import GameResult from './GameResult';
 
 interface YouTubePlayer {
   playVideo: () => void;
@@ -36,7 +38,6 @@ declare global {
           };
           events: {
             onReady: (event: YouTubeEvent) => void;
-            onStateChange: (event: YouTubeEvent) => void;
           };
         },
       ) => YouTubePlayer;
@@ -76,7 +77,8 @@ const GamePlayer = () => {
   const ytApiLoadedRef = useRef<boolean>(false);
   const playerContainerRef = useRef<HTMLDivElement>(null);
 
-  const { songUrl, gameHint, roundInfo } = useGameScreenStore();
+  const { songUrl, gameHint } = useGameScreenStore();
+  const { roundInfo } = useGameRoundInfoStore();
 
   useEffect(() => {
     if (songUrl) {
@@ -99,15 +101,12 @@ const GamePlayer = () => {
       }
     }
 
-    // YouTube API 사용 준비 함수
     const initPlayer = () => {
-      // 기존 플레이어 제거
       if (playerRef.current) {
         playerRef.current.destroy();
         playerRef.current = null;
       }
 
-      // YouTube 플레이어 초기화
       playerRef.current = new window.YT.Player('youtube-player', {
         height: '1',
         width: '1',
@@ -123,7 +122,6 @@ const GamePlayer = () => {
         },
         events: {
           onReady: onPlayerReady,
-          onStateChange: onPlayerStateChange,
         },
       });
     };
@@ -134,7 +132,6 @@ const GamePlayer = () => {
       window.onYouTubeIframeAPIReady = initPlayer;
     }
 
-    // 컴포넌트 언마운트 시 플레이어 정리
     return () => {
       if (playerRef.current) {
         playerRef.current.destroy();
@@ -143,7 +140,6 @@ const GamePlayer = () => {
     };
   }, [videoId]);
 
-  // YouTube 플레이어 iframe을 숨기는 스타일 적용
   useEffect(() => {
     const applyStyles = () => {
       try {
@@ -193,16 +189,8 @@ const GamePlayer = () => {
     }
   };
 
-  const onPlayerStateChange = (event: YouTubeEvent): void => {
-    if (event.data === window.YT.PlayerState.ENDED) {
-      console.log('동영상 재생 완료');
-    }
-  };
-
   if (!roundInfo) return;
-
-  console.log(roundInfo);
-
+  // 라운드 정보가 없을 때 에러처리 필요함
   const { round: currentRound } = roundInfo;
 
   return (
@@ -220,20 +208,19 @@ const GamePlayer = () => {
         </div>
       </div>
 
-
       {gameState === 'QUIZ_OPEN' && (
-        <div className='flex-1 flex flex-col p-6 justify-center items-center'>
+        <div className='flex flex-1 flex-col items-center justify-center p-6'>
           <div className='mb-6 text-center'>
             <p className='text-xl font-semibold'>
-              <span className='text-gray-800 font-bold'>정답</span>을 듣고
-              <span className='text-gray-600 font-bold'>답</span>을 입력하세요.
+              <span className='font-bold text-gray-800'>정답</span>을 듣고
+              <span className='font-bold text-gray-600'>답</span>을 입력하세요.
             </p>
           </div>
 
-          <div className='bg-gray-200 p-5 rounded-lg mb-6 w-fit'>
-            <div className='flex flex-col space-y-4 '>
-              <div className='flex justify-between border-b border-gray-300 pb-3 gap-10'>
-                <span className='text-gray-600 font-medium'>가수힌트</span>
+          <div className='mb-6 w-fit rounded-lg bg-gray-200 p-5'>
+            <div className='flex flex-col space-y-4'>
+              <div className='flex justify-between gap-10 border-b border-gray-300 pb-3'>
+                <span className='font-medium text-gray-600'>가수힌트</span>
                 <span className='font-bold text-gray-800'>
                   {!gameHint
                     ? '잠시후 힌트가 등장합니다'
@@ -242,8 +229,8 @@ const GamePlayer = () => {
                       : '잠시후 힌트가 등장합니다'}
                 </span>
               </div>
-              <div className='flex justify-between pt-1 gap-10'>
-                <span className='text-gray-600 font-medium '>초성힌트</span>
+              <div className='flex justify-between gap-10 pt-1'>
+                <span className='font-medium text-gray-600'>초성힌트</span>
                 <span className='font-bold text-gray-800'>
                   {!gameHint
                     ? '잠시후 힌트가 등장합니다'
