@@ -186,7 +186,6 @@ export default function CreateRoomForm({ onSuccess }: CreateRoomFormProps) {
           )}
         />
 
-        {/* 연도 선택 - 추가된 부분 */}
         <FormField
           control={form.control}
           name='years'
