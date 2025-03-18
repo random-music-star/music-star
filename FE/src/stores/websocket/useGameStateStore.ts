@@ -5,17 +5,17 @@ type GameStateType =
   | 'QUIZ_OPEN'
   | 'GAME_RESULT'
   | 'SCORE_UPDATE'
+  | 'REFUSED'
   | null;
 
-interface GameState {
+interface GameStateStore {
   gameState: GameStateType | null;
   setGameState: (gameState: GameStateType) => void;
   resetGameState: () => void;
 }
 
-export const useGameStateStore = create<GameState>(set => ({
+export const useGameStateStore = create<GameStateStore>(set => ({
   gameState: null,
   setGameState: (gameState: GameStateType) => set({ gameState }),
-
   resetGameState: () => set({ gameState: null }),
 }));

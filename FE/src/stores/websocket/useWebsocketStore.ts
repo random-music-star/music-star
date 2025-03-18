@@ -1,13 +1,14 @@
 import { Client, StompSubscription } from '@stomp/stompjs';
 import { create } from 'zustand';
 
-import { Board, WebSocketState } from '@/types/websocket';
+import { WebSocketState } from '@/types/websocket';
 
 import { useNicknameStore } from '../auth/useNicknameStore';
 import { useGameChatStore } from './useGameChatStore';
 import { useParticipantInfoStore } from './useGameParticipantStore';
 import { useGameInfoStore } from './useGameRoomInfoStore';
-import { useGameScoreStore } from './useGameScoreStore';
+import { useGameRoundInfoStore } from './useGameRoundInfoStore';
+import { useGameRoundResultStore } from './useGameRoundResultStore';
 import { useGameScreenStore } from './useGameScreenStore';
 import { useGameStateStore } from './useGameStateStore';
 import { usePublicChatStore } from './usePublicChatStore';
@@ -55,8 +56,6 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
     Object.values(subscriptions).forEach(sub => sub?.unsubscribe());
 
     useGameChatStore.getState().resetGameChatStore();
-    useParticipantInfoStore.getState().resetParticipantInfo();
-    useGameInfoStore.getState().resetGameRoomInfo();
     useGameScreenStore.getState().resetGameScreenStore();
     useGameStateStore.getState().resetGameState();
     usePublicChatStore.getState().resetPublicChatStore();
@@ -80,8 +79,10 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
       const gameScreenStore = useGameScreenStore.getState();
       const gameChatStore = useGameChatStore.getState();
       const gameStateStore = useGameStateStore.getState();
-      const gameScoreStore = useGameScoreStore.getState();
       const participantInfoStore = useParticipantInfoStore.getState();
+      const gameRoomStore = useGameInfoStore.getState();
+      const gameRoundResult = useGameRoundResultStore.getState();
+      const roundInfo = useGameRoundInfoStore.getState();
 
       newSubscriptions['game-room'] = client.subscribe(
         `/topic/channel/1/room/${roomId}`,
@@ -99,17 +100,11 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
               message: `곧 다음 라운드가 시작됩니다. `,
             });
 
-            gameScreenStore.setGameMode(response);
+            roundInfo.setGameMode(response);
             gameStateStore.setGameState('TIMER_WAIT');
             gameScreenStore.setGameHint(null);
-
-            gameScoreStore.setScores(
-              participantInfoStore.participantInfo.reduce<Board>((acc, p) => {
-                acc[p.userName] = 0;
-                return acc;
-              }, {}),
-            );
           }
+
           if (type === 'quizInfo') {
             gameScreenStore.setSongUrl(response.songUrl);
             gameStateStore.setGameState('QUIZ_OPEN');
@@ -123,10 +118,6 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
             gameScreenStore.setBoardInfo(response.board);
           }
 
-          if (type === ' score') {
-            gameScreenStore.setScore(response.board);
-          }
-
           if (type === 'skip') {
             gameChatStore.setGameChattings({
               sender: 'system',
@@ -136,19 +127,13 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
           }
 
           if (type === 'next') {
-            // 메세지 추가
-            if (gameScreenStore.gameResult) {
+            if (gameRoundResult.gameRoundResult) {
               gameStateStore.setGameState('SCORE_UPDATE');
-
-              gameScoreStore.updateScores(
-                gameScreenStore.gameResult.winner,
-                gameScreenStore.gameResult.score,
-              );
             }
           }
 
           if (type === 'gameResult') {
-            gameScreenStore.setGameResult(response);
+            gameRoundResult.setGameRoundResult(response);
             gameStateStore.setGameState('GAME_RESULT');
           }
 
@@ -157,7 +142,7 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
           }
 
           if (type === 'roomInfo') {
-            useGameInfoStore.getState().setGameInfo(response);
+            gameRoomStore.setGameInfo(response);
 
             if (response.status === 'IN_PROGRESS')
               gameStateStore.setGameState('TIMER_WAIT');
@@ -174,7 +159,7 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
           }
 
           if (type === 'refuseEnter') {
-            console.log('refuseEnter');
+            gameStateStore.setGameState('REFUSED');
           }
         },
         {

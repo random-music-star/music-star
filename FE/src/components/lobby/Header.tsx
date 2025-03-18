@@ -7,12 +7,13 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/hooks/useAuth';
-import { Button } from '../ui/button';
 import { useNicknameStore } from '@/stores/auth/useNicknameStore';
+
+import { Button } from '../ui/button';
 
 export default function Header() {
   const { login, logout } = useAuth();
-  const {nickname} = useNicknameStore()
+  const { nickname } = useNicknameStore();
 
   return (
     <header className='bg-[hsl(var(--color-header-bg))] p-4 text-black shadow-md'>
@@ -35,10 +36,10 @@ export default function Header() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-          ): (
+          ) : (
             <main className='row-start-2 flex flex-col items-center gap-8 sm:items-start'>
-            <Button onClick={()=> login()}>게스트 로그인</Button>
-          </main>
+              <Button onClick={() => login()}>게스트 로그인</Button>
+            </main>
           )}
         </div>
       </div>

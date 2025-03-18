@@ -1,216 +1,237 @@
 import { useState } from 'react';
 
+import { zodResolver } from '@hookform/resolvers/zod';
+import axios from 'axios';
+import { useRouter } from 'next/router';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
+
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { useNicknameStore } from '@/stores/auth/useNicknameStore';
+import { useGameInfoStore } from '@/stores/websocket/useGameRoomInfoStore';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
+  AVAILABLE_MODES,
+  AVAILABLE_YEARS,
+  CreateRoomRequest,
+  CreateRoomResponse,
+  createRoomFormSchema,
+} from '@/types/rooms';
 
-import { Room } from '../../_types/game';
-
-interface EditRoomModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  roomData: Room;
+interface CreateRoomFormProps {
+  onSuccess: () => void;
 }
 
-// 게임 연도 옵션
-const GAME_YEARS = ['20년', '21년', '22년', '23년'];
+const extendedFormSchema = createRoomFormSchema;
 
-// 게임 모드 옵션
-const GAME_MODES = ['한곡', '도입부', 'AI생성', '역순', '2배속'];
+type ExtendedFormValues = z.infer<typeof extendedFormSchema>;
 
-export default function EditRoomModal({
-  isOpen,
-  onClose,
-  roomData,
-}: EditRoomModalProps) {
-  const [formData, setFormData] = useState<Room>({ ...roomData });
-  const [selectedYears, setSelectedYears] = useState<string[]>(
-    roomData.gameYears,
-  );
-  const [selectedModes, setSelectedModes] = useState<string[]>(
-    roomData.gameModes,
-  );
+export default function CreateRoomForm({ onSuccess }: CreateRoomFormProps) {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const { nickname } = useNicknameStore();
 
-  const handleChange = (field: keyof Room, value: unknown) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
+  const { gameRoomInfo } = useGameInfoStore();
 
-  const handleYearToggle = (year: string) => {
-    setSelectedYears(prev =>
-      prev.includes(year) ? prev.filter(y => y !== year) : [...prev, year],
-    );
-  };
+  const roomTitle = gameRoomInfo?.roomTitle || '';
+  const selectedYear = gameRoomInfo?.selectedYear || null;
+  const mode = gameRoomInfo?.mode || null;
 
-  const handleModeToggle = (mode: string) => {
-    setSelectedModes(prev =>
-      prev.includes(mode) ? prev.filter(m => m !== mode) : [...prev, mode],
-    );
-  };
+  const form = useForm<ExtendedFormValues>({
+    resolver: zodResolver(extendedFormSchema),
+    defaultValues: {
+      title: roomTitle || '',
+      format: 'BOARD',
+      modes: mode ? mode : [],
+      years: selectedYear ? selectedYear : [],
+    },
+  });
 
-  const handleSubmit = () => {
-    const updatedRoomData = {
-      ...formData,
-      gameYears: selectedYears,
-      gameModes: selectedModes,
+  const selectedModes = form.watch('modes');
+  const selectedYears = form.watch('years');
+
+  const onSubmit = async (data: ExtendedFormValues) => {
+    setLoading(true);
+
+    const requestData: CreateRoomRequest = {
+      title: data.title,
+      password: '',
+      format: data.format,
+      gameModes: data.modes,
+      selectedYears: data.years,
     };
 
-    console.log('업데이트된 방 정보:', updatedRoomData);
-    onClose();
+    try {
+      const response = await axios.post<CreateRoomResponse>(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/room`,
+        requestData,
+        {
+          headers: {
+            Authorization: nickname,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+      router.push(`/game-room/${response.data.roomId}`);
+      onSuccess();
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        console.error('Response data:', error.response.data);
+        console.error('Response status:', error.response.status);
+        console.error('Response headers:', error.response.headers);
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={open => !open && onClose()}>
-      <DialogContent className='sm:max-w-[500px]'>
-        <DialogHeader>
-          <DialogTitle className='text-center text-xl font-bold'>
-            방 설정 수정
-          </DialogTitle>
-        </DialogHeader>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
+        <FormField
+          control={form.control}
+          name='title'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>방 이름</FormLabel>
+              <FormControl>
+                <Input {...field} placeholder='방 이름을 입력해주세요' />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-        <div className='grid gap-4 py-4'>
-          <div className='grid grid-cols-4 items-center gap-4'>
-            <Label htmlFor='room-name' className='text-right'>
-              방 이름
-            </Label>
-            <Input
-              id='room-name'
-              value={formData.name}
-              onChange={e => handleChange('name', e.target.value)}
-              className='col-span-3'
-            />
-          </div>
-
-          <div className='grid grid-cols-4 items-center gap-4'>
-            <Label htmlFor='private-room' className='text-right'>
-              비공개 방
-            </Label>
-            <div className='col-span-3 flex items-center gap-2'>
-              <Switch
-                id='private-room'
-                checked={formData.isPrivate}
-                onCheckedChange={checked => handleChange('isPrivate', checked)}
-              />
-              <span className='text-sm text-gray-500'>
-                {formData.isPrivate
-                  ? '참가자는 방 코드가 필요합니다'
-                  : '누구나 입장할 수 있습니다'}
-              </span>
-            </div>
-          </div>
-
-          <div className='grid grid-cols-4 items-center gap-4'>
-            <Label htmlFor='max-players' className='text-right'>
-              최대 인원
-            </Label>
-            <Select
-              value={formData.maxPlayers.toString()}
-              onValueChange={value =>
-                handleChange('maxPlayers', parseInt(value))
-              }
-            >
-              <SelectTrigger className='col-span-3'>
-                <SelectValue placeholder='최대 인원 선택' />
-              </SelectTrigger>
-              <SelectContent>
-                {[2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
-                  <SelectItem key={num} value={num.toString()}>
-                    {num}명
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className='grid grid-cols-4 items-start gap-4'>
-            <Label className='pt-2 text-right'>게임 연도</Label>
-            <div className='col-span-3 space-y-2'>
-              <div className='flex flex-wrap gap-3'>
-                {GAME_YEARS.map(year => (
-                  <div key={year} className='flex items-center space-x-2'>
-                    <Checkbox
-                      id={`year-${year}`}
-                      checked={selectedYears.includes(year)}
-                      onCheckedChange={() => handleYearToggle(year)}
-                    />
-                    <Label
-                      htmlFor={`year-${year}`}
-                      className='cursor-pointer text-sm font-medium'
-                    >
-                      {year}
-                    </Label>
+        <FormField
+          control={form.control}
+          name='format'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>포맷 선택</FormLabel>
+              <FormControl>
+                <RadioGroup
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  className='flex gap-4'
+                >
+                  <div className='flex items-center space-x-2'>
+                    <RadioGroupItem value='BOARD' id='format-board' />
+                    <Label htmlFor='format-board'>보드판 모드</Label>
                   </div>
-                ))}
-              </div>
-              {selectedYears.length === 0 && (
-                <p className='text-sm text-red-500'>
-                  최소 하나의 연도를 선택해주세요
-                </p>
-              )}
-            </div>
-          </div>
+                  {/* <div className='flex items-center space-x-2'>
+                    <RadioGroupItem value='GENERAL' id='format-general' />
+                    <Label htmlFor='format-general'>점수판 모드</Label>
+                  </div> */}
+                </RadioGroup>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-          {/* 게임 모드 - 다중 선택 */}
-          <div className='grid grid-cols-4 items-start gap-4'>
-            <Label className='pt-2 text-right'>게임 모드</Label>
-            <div className='col-span-3 space-y-2'>
-              <div className='flex flex-wrap gap-3'>
-                {GAME_MODES.map(mode => (
-                  <div key={mode} className='flex items-center space-x-2'>
-                    <Checkbox
-                      id={`mode-${mode}`}
-                      checked={selectedModes.includes(mode)}
-                      onCheckedChange={() => handleModeToggle(mode)}
-                    />
-                    <Label
-                      htmlFor={`mode-${mode}`}
-                      className='cursor-pointer text-sm font-medium'
+        <FormField
+          control={form.control}
+          name='modes'
+          render={() => (
+            <FormItem>
+              <FormLabel>모드 선택</FormLabel>
+              <div className='rounded-md border p-4'>
+                <div className='grid grid-cols-1 gap-3'>
+                  {AVAILABLE_MODES.map(mode => (
+                    <FormItem
+                      key={mode}
+                      className='flex flex-row items-start space-y-0 space-x-3'
                     >
-                      {mode}
-                    </Label>
-                  </div>
-                ))}
+                      <FormControl>
+                        <Checkbox
+                          checked={selectedModes.includes(mode)}
+                          onCheckedChange={checked => {
+                            const updatedModes = checked
+                              ? [...selectedModes, mode]
+                              : selectedModes.filter(m => m !== mode);
+                            form.setValue('modes', updatedModes);
+                            form.trigger('modes');
+                          }}
+                        />
+                      </FormControl>
+                      <FormLabel className='cursor-pointer font-normal'>
+                        {mode === 'FULL' ? '전곡 재생' : '1초 재생'}
+                      </FormLabel>
+                    </FormItem>
+                  ))}
+                </div>
               </div>
-              {selectedModes.length === 0 && (
-                <p className='text-sm text-red-500'>
-                  최소 하나의 모드를 선택해주세요
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-        <DialogFooter>
-          <Button variant='outline' onClick={onClose}>
+        <FormField
+          control={form.control}
+          name='years'
+          render={() => (
+            <FormItem>
+              <FormLabel>연도 선택</FormLabel>
+              <div className='rounded-md border p-4'>
+                <div className='grid grid-cols-2 gap-3 sm:grid-cols-3'>
+                  {AVAILABLE_YEARS.map(year => (
+                    <FormItem
+                      key={year}
+                      className='flex flex-row items-start space-y-0 space-x-3'
+                    >
+                      <FormControl>
+                        <Checkbox
+                          checked={selectedYears.includes(year)}
+                          onCheckedChange={checked => {
+                            const updatedYears = checked
+                              ? [...selectedYears, year]
+                              : selectedYears.filter(y => y !== year);
+                            form.setValue('years', updatedYears);
+                            form.trigger('years');
+                          }}
+                        />
+                      </FormControl>
+                      <FormLabel className='cursor-pointer font-normal'>
+                        {year}년
+                      </FormLabel>
+                    </FormItem>
+                  ))}
+                </div>
+              </div>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className='flex justify-end gap-2'>
+          <Button
+            variant='outline'
+            type='button'
+            onClick={onSuccess}
+            className='border-gray-300 text-gray-700 hover:bg-gray-100'
+          >
             취소
           </Button>
           <Button
-            onClick={handleSubmit}
-            className='bg-indigo-600 hover:bg-indigo-700'
-            disabled={selectedYears.length === 0 || selectedModes.length === 0}
+            type='submit'
+            disabled={loading}
+            className='bg-blue-500 text-white hover:bg-blue-600'
           >
-            저장하기
+            {loading ? '생성 중...' : '방 생성'}
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </div>
+      </form>
+    </Form>
   );
 }

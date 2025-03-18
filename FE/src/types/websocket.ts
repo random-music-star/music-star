@@ -6,38 +6,8 @@ export interface Chatting {
   message: string;
 }
 
-export interface BoardInfo {
-  sender: string;
-  messageType: string;
-  message: 'default' | 'notice' | 'error';
-}
+export type Mode = 'FULL' | 'ONE_SEC';
 
-export type BoardUser = {
-  [key: string]: number;
-};
-
-export type Board = Record<string, number>;
-
-export type SkipUser = {
-  [key: string]: boolean;
-};
-
-export interface GameResult {
-  winner: string;
-  songTitle: string;
-  singer: string;
-  score: number;
-}
-
-export interface GameHint {
-  title: string;
-  singer: string | null;
-}
-
-export interface RoundInfo {
-  mode: string;
-  round: number;
-}
 export interface WebSocketState {
   client: Client | null;
   subscriptions: Record<string, StompSubscription | null>;
@@ -46,90 +16,4 @@ export interface WebSocketState {
   updateSubscription: (subscriptionType: string, roomId?: string) => void;
   sendMessage: (destination: string, payload?: unknown) => void;
   isConnected: boolean;
-}
-
-export type Mode = 'FULL' | 'ONE_SEC';
-
-export interface GameInfoState {
-  roomTitle: string;
-  maxPlayer: number;
-  hasPassword: boolean;
-  maxGameRound: number;
-  format: 'GENERAL' | 'BOARD';
-  selectedYear: number[];
-  mode: Mode[];
-  status: 'WAITING' | 'FINISHED' | 'IN_PROGRESS';
-}
-
-export interface GameInfoStore {
-  gameRoomInfo: GameInfoState;
-  setGameInfo: (newGameRoomInfo: GameInfoState) => void;
-  resetGameRoomInfo: () => void;
-}
-
-export interface GameChatState {
-  gameChattings: Chatting[];
-  setGameChattings: (gameChatting: Chatting) => void;
-  skipInfo: SkipUser[];
-  setSkipInfo: (skipUser: SkipUser) => void;
-  resetGameChatStore: () => void;
-}
-
-export interface GameScreenState {
-  remainTime: number | null;
-  setRemainTime: (remainTime: number | null) => void;
-  roundInfo: RoundInfo | null;
-  setGameMode: (roundInfo: RoundInfo | null) => void;
-  songUrl: string | null;
-  setSongUrl: (songUrl: string | null) => void;
-  boardInfo: Board | null;
-  setBoardInfo: (boardInfo: Board | null) => void;
-  score: BoardUser[];
-  setScore: (score: BoardUser[] | []) => void;
-  gameResult: GameResult | null;
-  setGameResult: (gameResult: GameResult | null) => void;
-  gameHint: GameHint | null;
-  setGameHint: (gameHint: GameHint | null) => void;
-  resetGameScreenStore: () => void;
-}
-
-export interface PublicChatState {
-  publicChattings: Chatting[];
-  setPublicChattings: (publicChatting?: Chatting) => void;
-  resetPublicChatStore: () => void;
-}
-
-export interface PariticpantInfo {
-  userName: string;
-  isReady: boolean;
-  isHost: boolean;
-}
-
-export interface ParticipantInfoStore {
-  participantInfo: PariticpantInfo[];
-  setParticipantInfo: (newPariticipantInfo: PariticpantInfo[]) => void;
-  hostNickname: string | null;
-  readyPlayers: PariticpantInfo[];
-  notReadyPlayers: PariticpantInfo[];
-  isAllReady: boolean;
-  setIsAllReady: (state: boolean) => void;
-  updateParticipantReadyStates: (userInfoList: PariticpantInfo[]) => void;
-  resetParticipantInfo: () => void;
-}
-
-export interface GameScoreState {
-  scores: Board | null;
-  setScores: (newScore: Board) => void;
-
-  updateScores: (player: string, score: number) => void;
-}
-
-export interface GameModeInfoState {
-  mode: 'FULL' | 'ONE_SEC';
-  round: number;
-}
-
-export interface GameModeInfoStore {
-  gameModeInfo: GameModeInfoState | null;
-  setGameModeInfo: (newGameModeInfo: GameModeInfoState) => void;
 }
