@@ -88,17 +88,13 @@ export default function GameRoom({
     router.push('/lobby');
   }
 
-  if (!gameRoomInfo) return;
-
-  const { status } = gameRoomInfo;
-
   return (
     <SocketLayout>
       <div className='flex flex-1 gap-4 overflow-hidden p-4'>
         <div className='flex flex-1 flex-col overflow-hidden rounded-xl bg-white shadow-lg'>
           <div className='flex-1 overflow-hidden'>
             <AnimatePresence mode='wait'>
-              {status === 'WAITING' ? (
+              {gameRoomInfo === null || gameRoomInfo.status === 'WAITING' ? (
                 <ReadyPanel
                   currentUserId={nickname}
                   handleStartGame={handleStartGame}

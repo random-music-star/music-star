@@ -136,17 +136,6 @@ export default function ReadyPanel({
                         )}
                       </p>
                     </div>
-
-                    {isCurrentUser && (
-                      <Button
-                        variant='ghost'
-                        size='sm'
-                        onClick={handleToggleReady}
-                        className='ml-auto h-auto p-1.5 text-xs text-red-600 hover:bg-red-100 hover:text-red-700'
-                      >
-                        취소
-                      </Button>
-                    )}
                   </motion.div>
                 );
               })}

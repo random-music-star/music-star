@@ -2,8 +2,6 @@ import { Award, Clock, LayoutGrid, Lock, Unlock, Users } from 'lucide-react';
 
 import { useGameInfoStore } from '@/stores/websocket/useGameRoomInfoStore';
 
-import EditRoomButton from './EditRoomButton';
-
 export interface StatusConfig {
   [key: string]: {
     text: string;
@@ -130,7 +128,7 @@ export default function RoomInfo() {
             </div>
           </div>
         )}
-        <EditRoomButton />
+        {/* <EditRoomButton /> */}
       </div>
     </div>
   );
