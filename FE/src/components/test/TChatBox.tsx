@@ -17,28 +17,12 @@ const TChatBox = ({ currentUserId, roomId }: TChatBoxProps) => {
   const { gameChattings } = useGameChatStore();
   const { sendMessage } = useWebSocketStore();
 
-  // 더미 데이터 생성
-  const dummyChats = [
-    { sender: '아이유', message: '안녕하세요!', messageType: 'chat' },
-    { sender: '좋은날', message: '게임 시작할까요?', messageType: 'chat' },
-    {
-      messageType: 'notice',
-      message: '게임이 곧 시작됩니다',
-      sender: 'system',
-    },
-    { sender: currentUserId, message: '네 좋아요!', messageType: 'chat' },
-    { sender: '아이유', message: '준비 완료했어요', messageType: 'chat' },
-  ];
-
-  // 실제 채팅이 없을 경우 더미 데이터 사용
-  const chats = gameChattings.length > 2 ? gameChattings : dummyChats;
-
   useEffect(() => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop =
         chatContainerRef.current.scrollHeight;
     }
-  }, [chats]);
+  }, [gameChattings]);
 
   const handleSendMessage = (event: FormEvent) => {
     event.preventDefault();
@@ -60,7 +44,7 @@ const TChatBox = ({ currentUserId, roomId }: TChatBoxProps) => {
     <div className='flex h-full w-full flex-col'>
       <div ref={chatContainerRef} className='flex-1 overflow-y-auto px-2 py-1'>
         {/* 스크롤 로직 추가해야 함  */}
-        {chats.map((message, index) => (
+        {gameChattings.map((message, index) => (
           <div key={`${message.sender}-${index}`} className='mb-3'>
             {message.messageType === 'notice' ? (
               <div className='my-2 text-center'>

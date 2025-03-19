@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { useParticipantInfoStore } from '@/stores/websocket/useGameParticipantStore';
 import { useGameInfoStore } from '@/stores/websocket/useGameRoomInfoStore';
 
 export type StatusConfig = {
@@ -12,6 +13,7 @@ export type FormatText = {
 
 const GameRoomInfo = () => {
   const { gameRoomInfo } = useGameInfoStore();
+  const { participantInfo } = useParticipantInfoStore();
 
   if (!gameRoomInfo) return null;
 
@@ -38,15 +40,12 @@ const GameRoomInfo = () => {
     BOARD: '보드',
   };
 
-  const currentPlayers = 4; // 실제 데이터에 맞게 수정 필요
-
   const modeArray = Array.isArray(mode) ? mode : [mode];
   const yearArray = Array.isArray(selectedYear) ? selectedYear : [selectedYear];
 
   return (
     <div className='h-full w-full p-6'>
       <div className='flex h-full w-full flex-col rounded-lg px-6 py-4'>
-        {/* 밝은 형광색 타이틀 */}
         <h2 className='mb-3 text-center text-2xl font-bold text-fuchsia-300'>
           {roomTitle || '방 정보'}
         </h2>
@@ -82,7 +81,7 @@ const GameRoomInfo = () => {
           <div className='flex items-center gap-4'>
             <span className='font-medium text-cyan-200'>인원:</span>
             <span className='font-medium text-white'>
-              {currentPlayers}/{maxPlayer}명
+              {participantInfo.length}/{maxPlayer}명
             </span>
           </div>
           <div className='flex items-center gap-4'>
