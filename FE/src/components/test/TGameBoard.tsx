@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 
+import { useGameBoardInfoStore } from '@/stores/websocket/useGameBoardInfoStore';
+import { useParticipantInfoStore } from '@/stores/websocket/useGameParticipantStore';
+
 interface FootholderPosition {
   xRatio: number;
   yRatio: number;
@@ -18,15 +21,9 @@ interface UserCharacter {
   moveProgress: number; // 0(시작 위치)에서 1(목표 위치)까지의 진행도
 }
 
-// 유저별 발판 위치 정보
-const USER_BOARD: Record<string, number> = {
-  user1: 5,
-  user2: 10,
-  user3: 2,
-  user4: 0,
-};
-
 const TGameBoard = () => {
+  const { boardInfo } = useGameBoardInfoStore();
+  const { participantInfo } = useParticipantInfoStore();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const animationFrameRef = useRef<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -74,6 +71,32 @@ const TGameBoard = () => {
     { xRatio: 0.92, yRatio: 0.14, size: 2 }, // 19
   ];
 
+  const moveBoard = () => {
+    setCharacters(prevCharacters => {
+      return prevCharacters.map(character => {
+        const toPosition = boardInfo[character.name];
+        if (character.position !== toPosition) {
+          return {
+            ...character,
+            fromPosition: character.position,
+            toPosition,
+            isMoving: true,
+            moveProgress: 0,
+          };
+        }
+        return character;
+      });
+    });
+
+    // 이동 시작 시간 기록
+    moveStartTimeRef.current = performance.now();
+  };
+
+  useEffect(() => {
+    // 이동
+    moveBoard();
+  }, [boardInfo]);
+
   // 이미지 로딩
   useEffect(() => {
     const loadImages = async (): Promise<void> => {
@@ -88,18 +111,20 @@ const TGameBoard = () => {
       const characterImg = new Image();
       characterImg.src = '/yellow.svg';
       characterImg.onload = () => {
-        // USER_BOARD에 기반하여 캐릭터 생성
+        // 캐릭터 생성
         const userCharacters: UserCharacter[] = [];
 
-        Object.entries(USER_BOARD).forEach(([name, position]) => {
+        participantInfo.forEach(participant => {
           // 위치 값이 범위를 벗어나지 않도록 확인
+          // 초기값
+          participant.userName;
           const validPosition = Math.min(
-            Math.max(0, position),
+            Math.max(0, 0),
             footholderRatios.length - 1,
           );
 
           userCharacters.push({
-            name,
+            name: participant.userName,
             position: validPosition,
             image: characterImg,
             animationOffset: 0, // 초기 애니메이션 오프셋
