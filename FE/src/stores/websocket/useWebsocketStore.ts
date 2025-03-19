@@ -4,6 +4,7 @@ import { create } from 'zustand';
 import { WebSocketState } from '@/types/websocket';
 
 import { useNicknameStore } from '../auth/useNicknameStore';
+import { useGameBoardInfoStore } from './useGameBoardInfoStore';
 import { useGameChatStore } from './useGameChatStore';
 import { useParticipantInfoStore } from './useGameParticipantStore';
 import { useGameInfoStore } from './useGameRoomInfoStore';
@@ -88,6 +89,7 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
       const gameRoomStore = useGameInfoStore.getState();
       const gameRoundResult = useGameRoundResultStore.getState();
       const roundInfo = useGameRoundInfoStore.getState();
+      const boardInfoStore = useGameBoardInfoStore.getState();
 
       newSubscriptions['game-room'] = client.subscribe(
         `/topic/channel/1/room/${roomId}`,
@@ -149,8 +151,16 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
           if (type === 'roomInfo') {
             gameRoomStore.setGameInfo(response);
 
-            if (response.status === 'IN_PROGRESS')
+            if (response.status === 'IN_PROGRESS') {
               gameStateStore.setGameState('TIMER_WAIT');
+
+              const initialBoard = participantInfoStore.participantInfo.reduce(
+                (acc, participant) => ({ ...acc, [participant.userName]: 0 }),
+                {} as Record<string, number>,
+              );
+
+              boardInfoStore.setBoardInfo(initialBoard);
+            }
           }
 
           if (type === 'userInfo') {
@@ -163,9 +173,9 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
             participantInfoStore.setIsAllReady(response.allReady);
           }
 
-          if (type === 'refuseEnter') {
-            gameStateStore.setGameState('REFUSED');
-          }
+          if (type === 'move') boardInfoStore.updateBoardInfo(response);
+
+          if (type === 'refuseEnter') gameStateStore.setGameState('REFUSED');
         },
         {
           Authorization: useNicknameStore.getState().nickname,
