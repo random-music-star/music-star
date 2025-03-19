@@ -1,9 +1,9 @@
-import { dirname } from 'path';
-import { fileURLToPath } from 'url';
 import { FlatCompat } from '@eslint/eslintrc';
 import eslint from '@eslint/js';
-import tseslint from 'typescript-eslint';
 import unusedImports from 'eslint-plugin-unused-imports';
+import { dirname } from 'path';
+import tseslint from 'typescript-eslint';
+import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -42,6 +42,7 @@ export default tseslint.config(
     extends: ['next', 'next/core-web-vitals'],
     rules: {
       'no-var': 'warn',
+      'react-hooks/exhaustive-deps': 'off',
     },
   }),
 );

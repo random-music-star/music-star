@@ -83,7 +83,7 @@ export default function CreateRoomForm({ onSuccess }: CreateRoomFormProps) {
           },
         },
       );
-      router.push(`/game-room/${response.data.roomId}`);
+      router.push(`/game/room/${response.data.roomId}`);
       onSuccess();
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
