@@ -96,6 +96,10 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
 
           if (type === 'timer') {
             gameScreenStore.setRemainTime(response.remainTime);
+
+            if (response.remainTime === 1) {
+              gameStateStore.setGameState('ROUND_OPEN');
+            }
           }
 
           if (type === 'roundInfo') {
