@@ -10,7 +10,7 @@ import NavigationDialog from '@/components/game-room/NavigationDialog';
 import SocketLayout from '@/components/layouts/SocketLayout';
 import TChatBox from '@/components/test/TChatBox';
 import TReadyPannel from '@/components/test/TReadyPannel';
-import TRoomInfo from '@/components/test/TRoomInfo';
+import TRoomPannel from '@/components/test/TRoomPannel';
 import usePrompt from '@/hooks/useNavigationBlocker';
 import { useNicknameStore } from '@/stores/auth/useNicknameStore';
 import { useGameInfoStore } from '@/stores/websocket/useGameRoomInfoStore';
@@ -103,9 +103,9 @@ export default function GameRoom({
             <GameBoard />
           )}
         </AnimatePresence>
-        <div className='flex h-screen w-[480px] flex-grow flex-col items-center gap-5 bg-black/50 p-4 text-white'>
-          <TRoomInfo />
-          <TChatBox />
+        <div className='flex max-h-screen min-h-screen w-[480px] flex-grow flex-col items-center gap-5 bg-black/50 text-white'>
+          <TRoomPannel />
+          <TChatBox currentUserId={nickname} roomId={roomId} />
         </div>
         <NavigationDialog
           isOpen={isBlocked}
