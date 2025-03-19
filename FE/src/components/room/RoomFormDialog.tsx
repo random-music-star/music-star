@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { useRouter } from 'next/router';
 
@@ -23,6 +23,14 @@ interface RoomFormDialogProps {
   onDialogClose?: () => void;
 }
 
+interface InitialDataType {
+  roomTitle?: string;
+  format?: 'GENERAL' | 'BOARD';
+  mode?: ('FULL' | 'ONE_SEC')[];
+  selectedYear?: number[];
+  hasPassword?: boolean;
+}
+
 export default function RoomFormDialog({
   mode,
   roomId,
@@ -34,6 +42,21 @@ export default function RoomFormDialog({
   const { gameRoomInfo } = useGameInfoStore();
   const router = useRouter();
 
+  // 초기 데이터를 저장할 ref
+  const initialDataRef = useRef<InitialDataType | null>(null);
+
+  useEffect(() => {
+    if (isOpen && mode === 'edit' && gameRoomInfo && !initialDataRef.current) {
+      initialDataRef.current = {
+        roomTitle: gameRoomInfo.roomTitle,
+        format: gameRoomInfo.format,
+        mode: gameRoomInfo.mode,
+        selectedYear: gameRoomInfo.selectedYear,
+        hasPassword: gameRoomInfo.hasPassword,
+      };
+    }
+  }, [isOpen, mode, gameRoomInfo]);
+
   // 방 생성 또는 수정 성공 핸들러
   const handleSuccess = (_data: CreateRoomFormValues, newRoomId?: string) => {
     if (mode === 'create') {
@@ -42,6 +65,8 @@ export default function RoomFormDialog({
       // 방 정보는 소켓 연결을 통해 자동으로 업데이트될 거라 없음
     }
     setIsOpen(false);
+    initialDataRef.current = null;
+
     if (onDialogClose) {
       onDialogClose();
     }
@@ -49,7 +74,12 @@ export default function RoomFormDialog({
 
   // 다이얼로그 상태 변경 핸들러
   const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      initialDataRef.current = null;
+    }
+
     setIsOpen(open);
+
     if (!open && onDialogClose) {
       onDialogClose();
     }
@@ -79,7 +109,8 @@ export default function RoomFormDialog({
             mode={mode}
             roomId={roomId}
             initialData={
-              mode === 'edit' && gameRoomInfo
+              initialDataRef.current ||
+              (mode === 'edit' && gameRoomInfo
                 ? {
                     roomTitle: gameRoomInfo.roomTitle,
                     format: gameRoomInfo.format,
@@ -87,7 +118,7 @@ export default function RoomFormDialog({
                     selectedYear: gameRoomInfo.selectedYear,
                     hasPassword: gameRoomInfo.hasPassword,
                   }
-                : undefined
+                : undefined)
             }
             onSuccess={handleSuccess}
             onCancel={() => handleOpenChange(false)}
