@@ -25,7 +25,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Room } from '@/pages/lobby';
+import { Room } from '@/pages/game/lobby';
 
 const passwordSchema = z.object({
   password: z.string().min(1, { message: '비밀번호를 입력해주세요' }),
@@ -105,7 +105,7 @@ export default function RoomItem({ room }: RoomItemProps) {
       }
 
       setIsDialogOpen(false);
-      router.push(`/game-room/${room.id}`);
+      router.push(`/game/room/${room.id}`);
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다.';
@@ -117,7 +117,7 @@ export default function RoomItem({ room }: RoomItemProps) {
 
   const handleEnterOpenRoom = () => {
     setIsDialogOpen(false);
-    router.push(`/game-room/${room.id}`);
+    router.push(`/game/room/${room.id}`);
   };
 
   const usagePercentage = (room.currentPlayers / room.maxPlayer) * 100;

@@ -5,7 +5,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { Room } from '@/pages/lobby';
+import { Room } from '@/pages/game/lobby';
 
 import RoomItem from './RoomItem';
 

@@ -6,10 +6,11 @@ interface SocketLayoutProps {
   children: ReactNode;
 }
 const SocketLayout = ({ children }: SocketLayoutProps) => {
-  const { connectWebSocket, disconnectWebSocket } = useWebSocketStore();
+  const { connectWebSocket, disconnectWebSocket, isConnected } =
+    useWebSocketStore();
 
   useEffect(() => {
-    connectWebSocket();
+    if (!isConnected) connectWebSocket();
 
     return () => disconnectWebSocket();
   }, []);

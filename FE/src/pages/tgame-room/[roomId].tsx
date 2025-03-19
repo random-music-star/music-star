@@ -5,13 +5,11 @@ import { AnimatePresence } from 'framer-motion';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
 
-import GameBoard from '@/components/game-room/GameBoard';
-import NavigationDialog from '@/components/game-room/NavigationDialog';
 import SocketLayout from '@/components/layouts/SocketLayout';
 import TChatBox from '@/components/test/TChatBox';
+import TGameBoard from '@/components/test/TGameBoard';
 import TReadyPannel from '@/components/test/TReadyPannel';
 import TRoomPannel from '@/components/test/TRoomPannel';
-import usePrompt from '@/hooks/useNavigationBlocker';
 import { useNicknameStore } from '@/stores/auth/useNicknameStore';
 import { useGameInfoStore } from '@/stores/websocket/useGameRoomInfoStore';
 import { useGameStateStore } from '@/stores/websocket/useGameStateStore';
@@ -28,7 +26,7 @@ export const getServerSideProps: GetServerSideProps = async ({
   if (!userNickname) {
     return {
       redirect: {
-        destination: '/lobby',
+        destination: 'game/lobby',
         permanent: false,
       },
     };
@@ -47,7 +45,7 @@ interface GameRoomServerProps {
   roomId: string;
 }
 
-export default function GameRoom({
+export default function TGameRoom({
   userNickname,
   roomId,
 }: GameRoomServerProps) {
@@ -55,7 +53,7 @@ export default function GameRoom({
 
   const { setNickname, nickname } = useNicknameStore();
   const { isConnected, updateSubscription, sendMessage } = useWebSocketStore();
-  const { isBlocked, handleProceed, handleCancel } = usePrompt();
+  // const { isBlocked, handleProceed, handleCancel } = usePrompt();
   const { gameRoomInfo } = useGameInfoStore();
 
   const { gameState } = useGameStateStore();
@@ -70,10 +68,10 @@ export default function GameRoom({
     }
   }, [isConnected]);
 
-  const handleGameProceed = () => {
-    router.push('/');
-    handleProceed();
-  };
+  // const handleGameProceed = () => {
+  //   router.push('/');
+  //   handleProceed();
+  // };
 
   const handleStartGame = () => {
     sendMessage(`/app/channel/1/room/${roomId}/start`, {
@@ -85,35 +83,30 @@ export default function GameRoom({
   if (gameState === 'REFUSED') {
     // refused 상태라면, 로비로 라우팅
     // 테스트 필요
-    router.push('/lobby');
+    router.push('game/lobby');
   }
 
   return (
     <SocketLayout>
-      <div className='flex flex-1 bg-[url(/background.svg)] bg-cover bg-center'>
+      <div className='flex flex-1 justify-between bg-[url(/background.svg)] bg-cover bg-center'>
         <AnimatePresence mode='wait'>
-          {gameRoomInfo === null || gameRoomInfo.status === 'WAITING' ? (
-            <TReadyPannel
-              currentUserId={nickname}
-              handleStartGame={handleStartGame}
-              roomId={roomId}
-            />
-          ) : (
-            // 게임
-            <GameBoard />
-          )}
+          <div className='w-full'>
+            {gameRoomInfo === null || gameRoomInfo.status === 'WAITING' ? (
+              <TReadyPannel
+                currentUserId={nickname}
+                handleStartGame={handleStartGame}
+                roomId={roomId}
+              />
+            ) : (
+              // 게임
+              <TGameBoard />
+            )}
+          </div>
         </AnimatePresence>
         <div className='flex max-h-screen min-h-screen w-[480px] flex-grow flex-col items-center gap-5 bg-black/50 text-white'>
           <TRoomPannel />
           <TChatBox currentUserId={nickname} roomId={roomId} />
         </div>
-        <NavigationDialog
-          isOpen={isBlocked}
-          onProceed={handleGameProceed}
-          onCancel={handleCancel}
-          title='게임을 종료하시겠습니까?'
-          description='기권 처리 된 후, 로비로 이동합니다.'
-        />
       </div>
     </SocketLayout>
   );

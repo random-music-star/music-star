@@ -13,6 +13,7 @@ export interface WebSocketState {
   subscriptions: Record<string, StompSubscription | null>;
   connectWebSocket: () => void;
   disconnectWebSocket: () => void;
+  checkSubscription: (subscriptiontype: string) => boolean;
   updateSubscription: (subscriptionType: string, roomId?: string) => void;
   sendMessage: (destination: string, payload?: unknown) => void;
   isConnected: boolean;

@@ -3,7 +3,6 @@ import { useEffect } from 'react';
 import { getCookie } from 'cookies-next';
 import { GetServerSideProps } from 'next';
 
-import SocketLayout from '@/components/layouts/SocketLayout';
 import ChatBox from '@/components/lobby/ChatBox';
 import CreateRoomButton from '@/components/lobby/CreateRoomButton';
 import Header from '@/components/lobby/Header';
@@ -42,27 +41,25 @@ const LobbyPage = ({ userNickname }: { userNickname: string }) => {
   }, [userNickname, setNickname]);
 
   return (
-    <SocketLayout>
-      <div className='flex h-screen flex-col bg-gray-100'>
-        <Header />
-        <div className='flex flex-1 overflow-hidden'>
-          <div className='flex flex-1 flex-col p-6'>
-            <div className='mb-6 flex items-center justify-between'>
-              <h1 className='text-2xl font-bold text-gray-900'>게임 방 목록</h1>
-              <CreateRoomButton />
-            </div>
-
-            <div className='flex-1 overflow-y-auto'>
-              <RoomList />
-            </div>
+    <div className='flex h-screen flex-col bg-gray-100'>
+      <Header />
+      <div className='flex flex-1 overflow-hidden'>
+        <div className='flex flex-1 flex-col p-6'>
+          <div className='mb-6 flex items-center justify-between'>
+            <h1 className='text-2xl font-bold text-gray-900'>게임 방 목록</h1>
+            <CreateRoomButton />
           </div>
 
-          <div className='w-80 border-l border-gray-300 bg-white'>
-            <ChatBox />
+          <div className='flex-1 overflow-y-auto'>
+            <RoomList />
           </div>
         </div>
+
+        <div className='w-80 border-l border-gray-300 bg-white'>
+          <ChatBox />
+        </div>
       </div>
-    </SocketLayout>
+    </div>
   );
 };
 

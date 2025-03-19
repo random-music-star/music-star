@@ -48,6 +48,11 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
     }
   },
 
+  checkSubscription: (subscriptionType: string) => {
+    const { subscriptions } = get();
+    return !!subscriptions[subscriptionType];
+  },
+
   updateSubscription: (subscriptionType: string, roomId?: string) => {
     const { client, subscriptions } = get();
 

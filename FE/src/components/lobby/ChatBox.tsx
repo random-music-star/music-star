@@ -11,11 +11,12 @@ export default function ChatBox() {
   const [newMessage, setNewMessage] = useState<string>('');
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
-  const { sendMessage, updateSubscription, isConnected } = useWebSocketStore();
+  const { sendMessage, updateSubscription, isConnected, checkSubscription } =
+    useWebSocketStore();
   const { publicChattings } = usePublicChatStore();
 
   useEffect(() => {
-    if (isConnected) {
+    if (isConnected && !checkSubscription('channel')) {
       updateSubscription('channel');
     }
   }, [isConnected]);
