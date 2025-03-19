@@ -1,5 +1,7 @@
 import { Award, Clock, LayoutGrid, Lock, Unlock, Users } from 'lucide-react';
+import { useRouter } from 'next/router';
 
+import EditRoomButton from '@/components/game-room/EditRoomButton';
 import { useGameInfoStore } from '@/stores/websocket/useGameRoomInfoStore';
 
 export interface StatusConfig {
@@ -15,6 +17,8 @@ export interface FormatText {
 
 export default function RoomInfo() {
   const { gameRoomInfo } = useGameInfoStore();
+  const router = useRouter();
+  const { roomId } = router.query;
 
   if (!gameRoomInfo) return;
 
@@ -129,6 +133,7 @@ export default function RoomInfo() {
           </div>
         )}
         {/* <EditRoomButton /> */}
+        <EditRoomButton roomId={roomId as string} />
       </div>
     </div>
   );

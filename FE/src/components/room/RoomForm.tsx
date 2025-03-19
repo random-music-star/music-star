@@ -1,11 +1,3 @@
-import { useState } from 'react';
-
-import { zodResolver } from '@hookform/resolvers/zod';
-import axios from 'axios';
-import { useRouter } from 'next/router';
-import { useForm } from 'react-hook-form';
-import * as z from 'zod';
-
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -19,85 +11,39 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { useNicknameStore } from '@/stores/auth/useNicknameStore';
-// rooms.ts에서 가져온 타입과 상수
-import {
-  AVAILABLE_MODES,
-  AVAILABLE_YEARS,
-  CreateRoomRequest,
-  CreateRoomResponse,
-  createRoomFormSchema,
-} from '@/types/rooms';
+import { useRoomApi } from '@/hooks/useRoomApi';
+import { type RoomFormValues, useRoomForm } from '@/hooks/useRoomForm';
+import { AVAILABLE_MODES, AVAILABLE_YEARS } from '@/types/rooms';
 
-interface CreateRoomFormProps {
-  onSuccess: () => void;
+interface RoomFormProps {
+  mode: 'create' | 'edit';
+  roomId?: string;
+  initialData?: {
+    roomTitle?: string;
+    format?: 'GENERAL' | 'BOARD';
+    mode?: ('FULL' | 'ONE_SEC')[];
+    selectedYear?: number[];
+    hasPassword?: boolean;
+  };
+  onSuccess: (data: RoomFormValues, roomId?: string) => void;
+  onCancel: () => void;
 }
 
-// Zod 스키마 확장 - 비밀번호 필드 제거
-const extendedFormSchema = createRoomFormSchema;
-
-type ExtendedFormValues = z.infer<typeof extendedFormSchema>;
-
-export default function CreateRoomForm({ onSuccess }: CreateRoomFormProps) {
-  const router = useRouter();
-  const [loading, setLoading] = useState(false);
-  const { nickname } = useNicknameStore();
-
-  // React Hook Form 설정
-  const form = useForm<ExtendedFormValues>({
-    resolver: zodResolver(extendedFormSchema),
-    defaultValues: {
-      title: '',
-      format: 'BOARD',
-      modes: [],
-      years: [],
-    },
-  });
-
-  // 폼 상태 가져오기
-  const selectedModes = form.watch('modes');
-  const selectedYears = form.watch('years');
-
-  // 체크박스 핸들러는 아래 UI 코드에서 인라인으로 처리하므로 별도 함수 불필요
+export default function RoomForm({
+  mode,
+  roomId,
+  initialData,
+  onSuccess,
+  onCancel,
+}: RoomFormProps) {
+  // 폼 로직
+  const { form, selectedModes, selectedYears } = useRoomForm({ initialData });
+  // API 통신 로직
+  const { loading, submitForm } = useRoomApi({ mode, roomId, onSuccess });
 
   // 폼 제출 핸들러
-  const onSubmit = async (data: ExtendedFormValues) => {
-    setLoading(true);
-
-    const requestData: CreateRoomRequest = {
-      title: data.title,
-      password: '', // 빈 문자열로 하드코딩
-      format: data.format,
-      gameModes: data.modes,
-      selectedYears: data.years,
-    };
-
-    try {
-      console.log('Sending request data:', JSON.stringify(requestData));
-
-      const response = await axios.post<CreateRoomResponse>(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/room`,
-        requestData,
-        {
-          headers: {
-            Authorization: nickname,
-            'Content-Type': 'application/json',
-          },
-        },
-      );
-      console.log('방 생성 완료:', response.data);
-      router.push(`/game-room/${response.data.roomId}`);
-      onSuccess();
-    } catch (error) {
-      console.error('API 오류:', error);
-      if (axios.isAxiosError(error) && error.response) {
-        console.error('Response data:', error.response.data);
-        console.error('Response status:', error.response.status);
-        console.error('Response headers:', error.response.headers);
-      }
-    } finally {
-      setLoading(false);
-    }
+  const onSubmit = async (data: RoomFormValues) => {
+    await submitForm(data);
   };
 
   return (
@@ -118,8 +64,6 @@ export default function CreateRoomForm({ onSuccess }: CreateRoomFormProps) {
           )}
         />
 
-        {/* 비밀번호 관련 필드 제거 */}
-
         {/* 포맷 선택 */}
         <FormField
           control={form.control}
@@ -137,10 +81,10 @@ export default function CreateRoomForm({ onSuccess }: CreateRoomFormProps) {
                     <RadioGroupItem value='BOARD' id='format-board' />
                     <Label htmlFor='format-board'>보드판 모드</Label>
                   </div>
-                  {/* <div className='flex items-center space-x-2'>
+                  <div className='flex items-center space-x-2'>
                     <RadioGroupItem value='GENERAL' id='format-general' />
                     <Label htmlFor='format-general'>점수판 모드</Label>
-                  </div> */}
+                  </div>
                 </RadioGroup>
               </FormControl>
               <FormMessage />
@@ -186,6 +130,7 @@ export default function CreateRoomForm({ onSuccess }: CreateRoomFormProps) {
           )}
         />
 
+        {/* 연도 선택 */}
         <FormField
           control={form.control}
           name='years'
@@ -228,7 +173,7 @@ export default function CreateRoomForm({ onSuccess }: CreateRoomFormProps) {
           <Button
             variant='outline'
             type='button'
-            onClick={onSuccess}
+            onClick={onCancel}
             className='border-gray-300 text-gray-700 hover:bg-gray-100'
           >
             취소
@@ -238,7 +183,13 @@ export default function CreateRoomForm({ onSuccess }: CreateRoomFormProps) {
             disabled={loading}
             className='bg-blue-500 text-white hover:bg-blue-600'
           >
-            {loading ? '생성 중...' : '방 생성'}
+            {loading
+              ? mode === 'create'
+                ? '생성 중...'
+                : '수정 중...'
+              : mode === 'create'
+                ? '방 생성'
+                : '방 수정'}
           </Button>
         </div>
       </form>

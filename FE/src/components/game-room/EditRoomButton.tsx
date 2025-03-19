@@ -1,3 +1,39 @@
+import RoomFormDialog from '@/components/room/RoomFormDialog';
+import { useNicknameStore } from '@/stores/auth/useNicknameStore';
+import { useParticipantInfoStore } from '@/stores/websocket/useGameParticipantStore';
+import { useGameInfoStore } from '@/stores/websocket/useGameRoomInfoStore';
+
+interface EditRoomButtonProps {
+  roomId: string;
+}
+
+export default function EditRoomButton({ roomId }: EditRoomButtonProps) {
+  const { gameRoomInfo } = useGameInfoStore();
+  const { hostNickname } = useParticipantInfoStore();
+  const { nickname } = useNicknameStore();
+
+  // 방장인지 확인
+  const isRoomOwner = (hostNickname && hostNickname === nickname) || false;
+
+  // 방 상태 확인
+  const status = gameRoomInfo?.status;
+  const isWaiting = status === 'WAITING';
+
+  // 방장이 아니거나 대기 중이 아니면 버튼을 렌더링하지 않음
+  if (!isRoomOwner || !isWaiting) {
+    return null;
+  }
+
+  return (
+    <RoomFormDialog
+      mode='edit'
+      roomId={roomId}
+      buttonText='수정'
+      buttonClassName='px-2 py-1 bg-white text-indigo-600 hover:bg-gray-100 text-xs rounded-md'
+    />
+  );
+}
+
 // import { useState } from 'react';
 
 // import { Button } from '@/components/ui/button';

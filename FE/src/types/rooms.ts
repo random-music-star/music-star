@@ -23,7 +23,9 @@ export const createRoomFormSchema = z.object({
 export type CreateRoomFormValues = z.infer<typeof createRoomFormSchema>;
 
 export const AVAILABLE_MODES = ['FULL'] as const;
-export const AVAILABLE_YEARS = [2020, 2021] as const;
+export const AVAILABLE_YEARS = [
+  1970, 1980, 1990, 2000, 2010, 2020, 2021, 2022, 2023, 2024,
+] as const;
 
 export type GameMode = (typeof AVAILABLE_MODES)[number];
 
