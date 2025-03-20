@@ -1,207 +1,241 @@
 import React, { useEffect, useRef, useState } from 'react';
 
+import ReactPlayer from 'react-player';
+
 import { useGameRoundInfoStore } from '@/stores/websocket/useGameRoundInfoStore';
 import { useGameRoundResultStore } from '@/stores/websocket/useGameRoundResultStore';
 import { useGameScreenStore } from '@/stores/websocket/useGameScreenStore';
-
-interface YouTubePlayer {
-  playVideo: () => void;
-  pauseVideo: () => void;
-  destroy: () => void;
-  getIframe: () => HTMLIFrameElement;
-}
-
-interface YouTubeEvent {
-  data: number;
-  target: YouTubePlayer;
-}
-
-declare global {
-  interface Window {
-    YT: {
-      Player: new (
-        elementId: string,
-        options: {
-          height: string | number;
-          width: string | number;
-          videoId: string;
-          playerVars: {
-            autoplay: number;
-            controls: number;
-            disablekb: number;
-            fs: number;
-            modestbranding: number;
-            rel: number;
-            host?: string;
-          };
-          events: {
-            onReady: (event: YouTubeEvent) => void;
-          };
-        },
-      ) => YouTubePlayer;
-      PlayerState: {
-        ENDED: number;
-        PLAYING: number;
-        PAUSED: number;
-        BUFFERING: number;
-      };
-    };
-    onYouTubeIframeAPIReady: () => void;
-  }
-}
 
 interface MusicPlayerProps {
   gameState: 'GAME_RESULT' | 'QUIZ_OPEN';
 }
 
-const extractYouTubeVideoId = (url: string): string | null => {
-  if (!url) return null;
-
-  const shortUrlRegex = /youtu\.be\/([a-zA-Z0-9_-]{11})(?:\?|$)/;
-  const shortUrlMatch = url.match(shortUrlRegex);
-  if (shortUrlMatch) return shortUrlMatch[1];
-
-  const standardRegex = /youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})(?:&|$)/;
-  const standardMatch = url.match(standardRegex);
-  if (standardMatch) return standardMatch[1];
-
-  const videoIdRegex = /^[a-zA-Z0-9_-]{11}$/;
-  if (videoIdRegex.test(url)) return url;
-
-  console.error('지원되지 않는 YouTube URL 형식입니다:', url);
-  return null;
-};
-
 const GameMusicPlayer = ({ gameState }: MusicPlayerProps) => {
-  const [videoId, setVideoId] = useState<string>('');
-  const playerRef = useRef<YouTubePlayer | null>(null);
-  const ytApiLoadedRef = useRef<boolean>(false);
-  const playerContainerRef = useRef<HTMLDivElement>(null);
+  // 플레이어 상태 및 참조
+  const playerRef = useRef<ReactPlayer>(null);
+  const [playerError, setPlayerError] = useState<string | null>(null);
+  const [isAudioPlaying, setIsAudioPlaying] = useState<boolean>(false);
+
+  // 미디어 세션을 위한 빈 오디오 요소
+  const blankAudioRef = useRef<HTMLAudioElement | null>(null);
+  const metadataIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const { songUrl, gameHint } = useGameScreenStore();
   const { roundInfo } = useGameRoundInfoStore();
   const { gameRoundResult } = useGameRoundResultStore();
 
-  useEffect(() => {
-    if (songUrl) {
-      const extractedId = extractYouTubeVideoId(songUrl);
-      if (extractedId) {
-        setVideoId(extractedId);
-      }
-    }
-  }, [songUrl]);
-
-  useEffect(() => {
-    if (!window.YT && !ytApiLoadedRef.current) {
-      ytApiLoadedRef.current = true;
-      const tag: HTMLScriptElement = document.createElement('script');
-      tag.src = 'https://www.youtube.com/iframe_api';
-      const firstScriptTag: HTMLScriptElement | null =
-        document.getElementsByTagName('script')[0];
-      if (firstScriptTag?.parentNode) {
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-      }
-    }
-
-    const initPlayer = () => {
-      if (playerRef.current) {
-        playerRef.current.destroy();
-        playerRef.current = null;
-      }
-
-      playerRef.current = new window.YT.Player('youtube-player', {
-        height: '1',
-        width: '1',
-        videoId: videoId,
-        playerVars: {
-          autoplay: 1,
-          controls: 0,
-          disablekb: 1,
-          fs: 0,
-          modestbranding: 1,
-          rel: 0,
-          host: 'https://www.youtube-nocookie.com',
-        },
-        events: {
-          onReady: onPlayerReady,
-        },
+  // 미디어 세션 강제 업데이트 함수
+  const updateMediaSession = () => {
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: '음악 퀴즈',
+        artist: '게임',
+        album: '게임 오디오',
       });
-    };
-
-    if (window.YT && window.YT.Player) {
-      initPlayer();
-    } else {
-      window.onYouTubeIframeAPIReady = initPlayer;
-    }
-
-    return () => {
-      if (playerRef.current) {
-        playerRef.current.destroy();
-        playerRef.current = null;
-      }
-    };
-  }, [videoId]);
-
-  useEffect(() => {
-    const applyStyles = () => {
-      try {
-        const iframe = playerRef.current?.getIframe();
-        if (iframe) {
-          iframe.style.position = 'absolute';
-          iframe.style.opacity = '0.01';
-          iframe.style.pointerEvents = 'none';
-          iframe.style.left = '-1000px';
-          iframe.setAttribute('tabindex', '-1');
-        }
-      } catch (error) {
-        console.error('iframe 스타일링 오류:', error);
-      }
-    };
-
-    if (playerRef.current) {
-      const styleTimer = setInterval(() => {
-        try {
-          if (playerRef.current?.getIframe()) {
-            applyStyles();
-            clearInterval(styleTimer);
-          }
-        } catch (error) {
-          console.error(error);
-        }
-      }, 300);
-
-      return () => clearInterval(styleTimer);
-    }
-  }, [playerRef.current]);
-
-  const onPlayerReady = (event: YouTubeEvent): void => {
-    event.target.playVideo();
-
-    try {
-      const iframe = event.target.getIframe();
-      if (iframe) {
-        iframe.style.position = 'absolute';
-        iframe.style.opacity = '0.01';
-        iframe.style.pointerEvents = 'none';
-        iframe.style.left = '-1000px';
-        iframe.setAttribute('tabindex', '-1');
-      }
-    } catch (error) {
-      console.error('iframe 초기 스타일링 오류:', error);
     }
   };
 
+  // 무음 오디오 재생 시작 함수
+  const startBlankAudio = () => {
+    if (
+      blankAudioRef.current &&
+      (blankAudioRef.current.paused || !isAudioPlaying)
+    ) {
+      blankAudioRef.current
+        .play()
+        .then(() => {
+          setIsAudioPlaying(true);
+          console.log('무음 오디오 재생 시작');
+        })
+        .catch(err => {
+          console.warn('무음 오디오 재생 오류:', err);
+          // 다시 시도 설정
+          setTimeout(startBlankAudio, 1000);
+        });
+    }
+  };
+
+  // 미디어 세션 관리 및 무음 오디오 트랙 설정
+  useEffect(() => {
+    // 새로운 미디어 세션 메타데이터 설정
+    if ('mediaSession' in navigator) {
+      try {
+        updateMediaSession();
+
+        // 모든 미디어 세션 액션 핸들러 빈 함수로 설정
+        const actions = [
+          'play',
+          'pause',
+          'seekbackward',
+          'seekforward',
+          'previoustrack',
+          'nexttrack',
+        ];
+
+        actions.forEach(action => {
+          try {
+            navigator.mediaSession.setActionHandler(
+              action as MediaSessionAction,
+              () => {
+                console.log(`미디어 세션 액션 무시: ${action}`);
+                // 무음 오디오 재시작 및 메타데이터 재설정
+                startBlankAudio();
+                updateMediaSession();
+              },
+            );
+          } catch (e) {
+            console.warn(`'${action}' 액션 설정 불가:`, e);
+          }
+        });
+      } catch (e) {
+        console.warn('미디어 세션 메타데이터 설정 오류:', e);
+      }
+    }
+
+    // 무음 오디오 트랙 생성
+    if (!blankAudioRef.current) {
+      const audio = new Audio('/audio/noneSound.wav');
+      audio.loop = true;
+      audio.autoplay = false;
+      audio.volume = 0.02; // 아주 작은 볼륨으로 설정 (0이 아닌)
+      audio.setAttribute('playsinline', '');
+      audio.setAttribute('webkit-playsinline', '');
+
+      // 오디오 이벤트 리스너 추가
+      audio.addEventListener('play', () => {
+        setIsAudioPlaying(true);
+        updateMediaSession();
+      });
+
+      audio.addEventListener('pause', () => {
+        setIsAudioPlaying(false);
+        // 자동으로 다시 재생 시도
+        setTimeout(startBlankAudio, 500);
+      });
+
+      document.body.appendChild(audio);
+      blankAudioRef.current = audio;
+
+      // 무음 오디오 재생 시작
+      startBlankAudio();
+    }
+
+    // 주기적으로 미디어 세션 메타데이터 업데이트
+    metadataIntervalRef.current = setInterval(() => {
+      updateMediaSession();
+
+      // 무음 오디오가 정지되었다면 다시 시작
+      if (blankAudioRef.current && blankAudioRef.current.paused) {
+        startBlankAudio();
+      }
+    }, 1000);
+
+    return () => {
+      // 정리
+      if (blankAudioRef.current) {
+        blankAudioRef.current.pause();
+        blankAudioRef.current.remove();
+        blankAudioRef.current = null;
+      }
+
+      if (metadataIntervalRef.current) {
+        clearInterval(metadataIntervalRef.current);
+        metadataIntervalRef.current = null;
+      }
+    };
+  }, []);
+
+  // ReactPlayer 이벤트 핸들러
+  const handleReady = () => {
+    console.log('플레이어 준비 완료');
+    updateMediaSession();
+    startBlankAudio();
+  };
+
+  const handlePlay = () => {
+    console.log('재생 시작');
+    updateMediaSession();
+    startBlankAudio();
+  };
+
+  const handleError = (error: unknown) => {
+    console.error('플레이어 오류:', error);
+    setPlayerError('플레이어를 로드하는 중 오류가 발생했습니다.');
+  };
+
+  // videoId 변경 시마다 무음 오디오 재생 및 메타데이터 재설정
+  useEffect(() => {
+    if (!songUrl) return;
+
+    updateMediaSession();
+    startBlankAudio();
+
+    // 비디오가 변경될 때마다 강제로 메타데이터 여러 번 업데이트
+    const forceUpdateTimes = [0, 500, 1000, 2000, 3000];
+    forceUpdateTimes.forEach(delay => {
+      setTimeout(() => {
+        updateMediaSession();
+        if (blankAudioRef.current && blankAudioRef.current.paused) {
+          startBlankAudio();
+        }
+      }, delay);
+    });
+  }, [songUrl]);
+
   if (!roundInfo) return null;
+  // 조건부 렌더링 수정 (songUrl이 없는 경우 빈 div 반환)
+  if (!songUrl) return <div></div>;
+
   const { round: currentRound } = roundInfo;
 
   return (
     <div className='w-full'>
-      {/* 숨겨진 YouTube 플레이어 */}
-      <div
-        ref={playerContainerRef}
-        className='pointer-events-none absolute h-1 w-1 overflow-hidden opacity-0'
-      >
-        <div id='youtube-player'></div>
+      {/* ReactPlayer 숨기기 */}
+      <div className='pointer-events-none invisible fixed top-[-9999px] left-[-9999px] h-1 w-1 overflow-hidden opacity-0'>
+        <ReactPlayer
+          ref={playerRef}
+          url={songUrl}
+          playing={true}
+          controls={false}
+          width='1px'
+          height='1px'
+          volume={1}
+          muted={false}
+          onReady={handleReady}
+          onPlay={handlePlay}
+          onError={handleError}
+          config={{
+            youtube: {
+              playerVars: {
+                autoplay: 1,
+                controls: 0,
+                disablekb: 1,
+                fs: 0,
+                modestbranding: 1,
+                rel: 0,
+                playsinline: 1,
+                iv_load_policy: 3,
+                enablejsapi: 1,
+                origin: window.location.origin,
+                host: 'https://www.youtube-nocookie.com',
+              },
+              embedOptions: {
+                allow: 'autoplay; encrypted-media',
+              },
+            },
+          }}
+          style={{
+            position: 'fixed',
+            top: '-9999px',
+            left: '-9999px',
+            width: '1px',
+            height: '1px',
+            opacity: 0,
+            pointerEvents: 'none',
+            visibility: 'hidden',
+            zIndex: -9999,
+          }}
+        />
       </div>
 
       {/* 헤더 */}
@@ -211,7 +245,7 @@ const GameMusicPlayer = ({ gameState }: MusicPlayerProps) => {
         </h2>
       </div>
 
-      {/* 메인 컨텐츠 */}
+      {/* 메인 컨텐츠 - 기존 코드와 동일 */}
       {gameState === 'QUIZ_OPEN' && (
         <div className='flex flex-col items-center text-purple-100'>
           {/* 음악 아이콘 애니메이션 */}
@@ -229,6 +263,11 @@ const GameMusicPlayer = ({ gameState }: MusicPlayerProps) => {
               ))}
             </div>
           </div>
+
+          {/* 플레이어 오류 표시 */}
+          {playerError && (
+            <div className='mb-2 text-sm text-red-400'>{playerError}</div>
+          )}
 
           {/* 힌트 정보 */}
           <div className='w-full space-y-4 text-base'>
