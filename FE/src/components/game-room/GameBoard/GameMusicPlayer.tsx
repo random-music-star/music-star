@@ -30,7 +30,7 @@ const GameMusicPlayer = ({ gameState }: MusicPlayerProps) => {
   const { round: currentRound } = roundInfo;
 
   return (
-    <div className='w-full'>
+    <div className='w-full max-w-full'>
       {/* 분리된 플레이어 컴포넌트 */}
       {songUrl && <YoutubePlayer url={songUrl} onError={handleError} />}
 
@@ -43,7 +43,7 @@ const GameMusicPlayer = ({ gameState }: MusicPlayerProps) => {
 
       {/* 메인 컨텐츠 */}
       {gameState === 'QUIZ_OPEN' && (
-        <div className='flex flex-col items-center text-purple-100'>
+        <div className='flex w-full flex-col text-purple-100'>
           {/* 음악 아이콘 애니메이션 */}
           <div className='mb-4 flex justify-center'>
             <div className='flex items-end space-x-2'>
@@ -68,7 +68,9 @@ const GameMusicPlayer = ({ gameState }: MusicPlayerProps) => {
           {/* 힌트 정보 */}
           <div className='w-full space-y-4 text-base'>
             <div className='flex justify-between gap-12'>
-              <span className='font-medium text-purple-200'>가수</span>
+              <span className='min-w-[40px] font-medium text-purple-200'>
+                가수
+              </span>
               <span className='font-bold text-fuchsia-200'>
                 {!gameHint
                   ? '잠시 후 공개'
@@ -79,7 +81,9 @@ const GameMusicPlayer = ({ gameState }: MusicPlayerProps) => {
             </div>
 
             <div className='flex justify-between gap-12'>
-              <span className='font-medium text-purple-200'>제목</span>
+              <span className='min-w-[40px] font-medium text-purple-200'>
+                제목
+              </span>
               <span className='font-bold text-fuchsia-200'>
                 {!gameHint
                   ? '잠시 후 공개'
@@ -91,46 +95,46 @@ const GameMusicPlayer = ({ gameState }: MusicPlayerProps) => {
           </div>
 
           {/* 안내 텍스트 */}
-          <div className='mt-6 text-center text-sm text-purple-200'>
-            <p>
-              채팅창에 정답을 입력하세요 (스킵:{' '}
-              <span className='text-fuchsia-300'>.</span>)
-            </p>
+          <div className='mt-6 flex flex-col items-center text-sm text-purple-200'>
+            <span className='text-fuchsia-300'>채팅창에 정답을 입력하세요</span>
+            <span className='text-fuchsia-300'> (스킵: .)</span>
           </div>
         </div>
       )}
 
       {gameState === 'GAME_RESULT' && gameRoundResult && (
-        <div className='flex flex-col items-center'>
-          <div className='mb-4 text-center'>
+        <div className='flex w-full flex-col items-center px-4'>
+          <div className='mb-8 text-center'>
             <h3 className='text-xl font-bold text-fuchsia-300'>정답 공개!</h3>
           </div>
 
-          <div className='w-full space-y-4 text-base text-purple-100'>
+          <div className='space-y-4 text-base text-purple-100'>
             {/* 우승자 정보 */}
             {gameRoundResult.winner && (
               <div className='mb-5 flex items-center justify-center'>
-                <div className='text-center'>
-                  <span className='mb-1 block text-sm font-medium text-purple-200'>
-                    정답자
-                  </span>
-                  <span className='text-lg font-bold text-yellow-300'>
-                    {gameRoundResult.winner}
-                  </span>
-                </div>
+                <span className='mb-1 block text-sm font-medium text-purple-200'>
+                  정답자
+                </span>
+                <span className='text-lg font-bold text-yellow-300'>
+                  {gameRoundResult.winner}
+                </span>
               </div>
             )}
 
-            <div className='flex justify-between gap-12'>
-              <span className='font-medium text-purple-200'>가수</span>
-              <span className='font-bold text-fuchsia-200'>
+            <div className='flex w-full max-w-full items-center gap-4'>
+              <span className='min-w-[40px] font-medium text-purple-200'>
+                가수
+              </span>
+              <span className='min-w-0 overflow-hidden font-bold break-words text-fuchsia-200'>
                 {gameRoundResult.singer || '정보 없음'}
               </span>
             </div>
 
-            <div className='flex justify-between gap-12'>
-              <span className='font-medium text-purple-200'>제목</span>
-              <span className='font-bold text-fuchsia-200'>
+            <div className='flex w-full max-w-full items-center gap-4'>
+              <span className='min-w-[40px] font-medium text-purple-200'>
+                제목
+              </span>
+              <span className='min-w-0 overflow-hidden font-bold break-words text-fuchsia-200'>
                 {gameRoundResult.songTitle || '정보 없음'}
               </span>
             </div>
