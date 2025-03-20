@@ -52,9 +52,7 @@ export default function GameRoom({
 
   const { setNickname, nickname } = useNicknameStore();
   const { isConnected, updateSubscription, sendMessage } = useWebSocketStore();
-  // const { isBlocked, handleProceed, handleCancel } = usePrompt();
   const { gameRoomInfo } = useGameInfoStore();
-
   const { gameState } = useGameStateStore();
 
   useEffect(() => {
@@ -67,10 +65,17 @@ export default function GameRoom({
     }
   }, [isConnected]);
 
-  // const handleGameProceed = () => {
-  //   router.push('/');
-  //   handleProceed();
-  // };
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
 
   const handleStartGame = () => {
     sendMessage(`/app/channel/1/room/${roomId}/start`, {
@@ -80,9 +85,7 @@ export default function GameRoom({
   };
 
   if (gameState === 'REFUSED') {
-    // refused 상태라면, 로비로 라우팅
-    // 테스트 필요
-    router.push('game/lobby');
+    router.push('/game/lobby');
   }
 
   return (
@@ -96,7 +99,6 @@ export default function GameRoom({
               roomId={roomId}
             />
           ) : (
-            // 게임
             <GameBoard />
           )}
         </div>
