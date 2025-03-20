@@ -103,7 +103,7 @@ export default function GameRoom({
           )}
         </div>
       </AnimatePresence>
-      <div className='flex max-h-screen min-h-screen w-[480px] flex-col items-center gap-5 bg-black/50 text-white'>
+      <div className='flex max-h-screen min-h-screen w-[480px] max-w-[480px] flex-col items-center gap-5 bg-black/50 text-white'>
         <RoomPannel />
         <div className='w-full flex-1 overflow-hidden'>
           <ChatBox currentUserId={nickname} roomId={roomId} />

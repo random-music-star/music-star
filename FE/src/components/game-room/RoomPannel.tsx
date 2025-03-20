@@ -2,8 +2,8 @@ import Image from 'next/image';
 
 import { useGameInfoStore } from '@/stores/websocket/useGameRoomInfoStore';
 
-import TGamePlayPanel from './GameBoard/GamePlayPanel';
-import TRoomInfo from './RoomInfo';
+import GamePlayPanel from './GameBoard/GamePlayPanel';
+import RoomInfo from './RoomInfo';
 
 const RoomPannel = () => {
   const { gameRoomInfo } = useGameInfoStore();
@@ -26,7 +26,7 @@ const RoomPannel = () => {
       </div>
 
       <div className='absolute inset-0 z-10 flex flex-col items-center justify-center'>
-        {status === 'WAITING' ? <TRoomInfo /> : <TGamePlayPanel />}
+        {status === 'WAITING' ? <RoomInfo /> : <GamePlayPanel />}
       </div>
     </div>
   );
