@@ -103,9 +103,11 @@ export default function TGameRoom({
             )}
           </div>
         </AnimatePresence>
-        <div className='flex max-h-screen min-h-screen w-[480px] flex-grow flex-col items-center gap-5 bg-black/50 text-white'>
+        <div className='flex max-h-screen min-h-screen w-[480px] flex-col items-center gap-5 bg-black/50 text-white'>
           <TRoomPannel />
-          <TChatBox currentUserId={nickname} roomId={roomId} />
+          <div className='w-full flex-1 overflow-hidden'>
+            <TChatBox currentUserId={nickname} roomId={roomId} />
+          </div>
         </div>
       </div>
     </SocketLayout>

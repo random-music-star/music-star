@@ -42,8 +42,10 @@ const TChatBox = ({ currentUserId, roomId }: TChatBoxProps) => {
 
   return (
     <div className='flex h-full w-full flex-col'>
-      <div ref={chatContainerRef} className='flex-1 overflow-y-auto px-2 py-1'>
-        {/* 스크롤 로직 추가해야 함  */}
+      <div
+        ref={chatContainerRef}
+        className='neon-scrollbar flex-1 overflow-y-auto px-2 py-1'
+      >
         {gameChattings.map((message, index) => (
           <div key={`${message.sender}-${index}`} className='mb-3'>
             {message.messageType === 'notice' ? (
@@ -67,7 +69,7 @@ const TChatBox = ({ currentUserId, roomId }: TChatBoxProps) => {
         ))}
       </div>
 
-      <div className='pt-2'>
+      <div className='mt-auto pt-2'>
         <form
           onSubmit={handleSendMessage}
           className='flex items-center space-x-2'
