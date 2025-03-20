@@ -12,6 +12,7 @@ import { useGameRoundInfoStore } from './useGameRoundInfoStore';
 import { useGameRoundResultStore } from './useGameRoundResultStore';
 import { useGameScreenStore } from './useGameScreenStore';
 import { useGameStateStore } from './useGameStateStore';
+import { useGameWinnerStore } from './useGameWinnerStore';
 import { usePublicChatStore } from './usePublicChatStore';
 
 export const useWebSocketStore = create<WebSocketState>((set, get) => ({
@@ -65,6 +66,7 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
     useGameScreenStore.getState().resetGameScreenStore();
     useGameStateStore.getState().resetGameState();
     usePublicChatStore.getState().resetPublicChatStore();
+    useGameWinnerStore.getState().resetWinnerStore();
 
     const newSubscriptions: Record<string, StompSubscription> = {};
 
@@ -90,6 +92,7 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
       const gameRoundResult = useGameRoundResultStore.getState();
       const roundInfo = useGameRoundInfoStore.getState();
       const boardInfoStore = useGameBoardInfoStore.getState();
+      const winnerStore = useGameWinnerStore.getState();
 
       newSubscriptions['game-room'] = client.subscribe(
         `/topic/channel/1/room/${roomId}`,
@@ -124,10 +127,6 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
           if (type === 'gameChat') {
             gameChatStore.setGameChattings(response);
           }
-
-          // if (type === 'boardInfo') {
-          //   gameScreenStore.setBoardInfo(response.board);
-          // }
 
           if (type === 'skip') {
             gameChatStore.setGameChattings({
@@ -182,6 +181,11 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
           if (type === 'move') boardInfoStore.updateBoardInfo(response);
 
           if (type === 'refuseEnter') gameStateStore.setGameState('REFUSED');
+
+          if (type === 'gameEnd') {
+            gameStateStore.setGameState('GAME_END');
+            winnerStore.setWinner(response.winner);
+          }
         },
         {
           Authorization: useNicknameStore.getState().nickname,

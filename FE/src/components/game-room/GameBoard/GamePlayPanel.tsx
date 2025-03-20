@@ -1,5 +1,6 @@
 import { useGameStateStore } from '@/stores/websocket/useGameStateStore';
 
+import GameEnd from '../gameEnd';
 import RoundRolling from '../round/RoundRolling';
 import GameMusicPlayer from './GameMusicPlayer';
 
@@ -10,6 +11,7 @@ const GamePlayPanel = () => {
     <div className='game-play-panel'>
       {gameState === 'TIMER_WAIT' && <RoundRolling />}
       {gameState === 'ROUND_OPEN' && <RoundRolling />}
+      {gameState === 'GAME_END' && <GameEnd />}
 
       {(gameState === 'QUIZ_OPEN' || gameState === 'GAME_RESULT') && (
         <GameMusicPlayer gameState={gameState} />

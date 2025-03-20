@@ -6,6 +6,7 @@ type GameStateType =
   | 'ROUND_OPEN'
   | 'GAME_RESULT'
   | 'SCORE_UPDATE'
+  | 'GAME_END'
   | 'REFUSED'
   | null;
 
