@@ -2,10 +2,10 @@ import Image from 'next/image';
 
 import { useGameInfoStore } from '@/stores/websocket/useGameRoomInfoStore';
 
-import TGamePlayPanel from './TGamePlayPanel';
-import TRoomInfo from './TRoomInfo';
+import TGamePlayPanel from './GameBoard/GamePlayPanel';
+import TRoomInfo from './RoomInfo';
 
-const TRoomPannel = () => {
+const RoomPannel = () => {
   const { gameRoomInfo } = useGameInfoStore();
 
   if (!gameRoomInfo) return;
@@ -32,4 +32,4 @@ const TRoomPannel = () => {
   );
 };
 
-export default TRoomPannel;
+export default RoomPannel;

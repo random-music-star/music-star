@@ -1,7 +1,5 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
 
-import { Send } from 'lucide-react';
-
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useGameChatStore } from '@/stores/websocket/useGameChatStore';
@@ -12,7 +10,7 @@ interface ChatBoxProps {
   roomId: string;
 }
 
-export default function ChatBox({ currentUserId, roomId }: ChatBoxProps) {
+const ChatBox = ({ currentUserId, roomId }: ChatBoxProps) => {
   const [inputValue, setInputValue] = useState('');
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
@@ -43,55 +41,66 @@ export default function ChatBox({ currentUserId, roomId }: ChatBoxProps) {
   };
 
   return (
-    <div className='h-2/5 border-t-2 border-gray-200'>
-      <div className='flex h-full flex-col'>
-        <div
-          ref={chatContainerRef}
-          className='flex-1 overflow-y-auto bg-white p-2 text-sm leading-relaxed'
+    <div className='flex h-full w-full flex-col'>
+      <div
+        ref={chatContainerRef}
+        className='neon-scrollbar flex-1 overflow-y-auto px-2 py-1'
+      >
+        {gameChattings.map((message, index) => (
+          <div key={`${message.sender}-${index}`} className='mb-3'>
+            {message.messageType === 'notice' ? (
+              <div className='my-2 text-center'>
+                <span className='inline-block rounded-full bg-black/20 px-3 py-1 text-sm text-white'>
+                  {message.message}
+                </span>
+              </div>
+            ) : (
+              <div className='text-base text-white'>
+                <span className='font-medium'>
+                  {message.sender === currentUserId
+                    ? `${message.sender}(나)`
+                    : message.sender}
+                </span>
+                <span> : </span>
+                <span>{message.message}</span>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      <div className='mt-auto pt-2'>
+        <form
+          onSubmit={handleSendMessage}
+          className='flex items-center space-x-2'
         >
-          {gameChattings.map((message, index) => (
-            <div key={`${message.sender}-${index}`} className='mb-1'>
-              {message.messageType === 'notice' ? (
-                <div className='my-1 text-center'>
-                  <span className='inline-block rounded-full bg-gray-200 px-2 py-0.5 text-xs text-gray-600'>
-                    {message.message}
-                  </span>
-                </div>
-              ) : (
-                <div className='text-gray-800'>
-                  <span
-                    className={`font-semibold ${message.sender === currentUserId ? 'text-indigo-600' : 'text-gray-700'}`}
-                  >
-                    {message.sender === currentUserId ? '나' : message.sender}
-                  </span>
-
-                  <span>: </span>
-                  <span>{message.message}</span>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-
-        <div className='border-t border-gray-200 bg-gray-50 p-2'>
-          <form onSubmit={handleSendMessage} className='flex space-x-1'>
+          <div className='relative flex-1'>
             <Input
               value={inputValue}
               onChange={e => setInputValue(e.target.value)}
               placeholder='메시지 입력...'
-              className='h-8 flex-1 text-xs'
+              className='h-10 w-full !rounded-none !border-0 !border-t-2 !border-t-[#30FFFF] bg-black/30 text-sm text-white placeholder-white/50 !outline-none'
+              style={{
+                boxShadow: 'none',
+                borderTopColor: '#30FFFF',
+                borderTopWidth: '2px',
+                borderTopStyle: 'solid',
+                borderRight: 'none',
+                borderBottom: 'none',
+                borderLeft: 'none',
+              }}
             />
-            <Button
-              type='submit'
-              size='sm'
-              className='h-8 bg-indigo-600 hover:bg-indigo-700'
-            >
-              <Send size={14} className='mr-1' />
-              <span className='text-xs'>전송</span>
-            </Button>
-          </form>
-        </div>
+          </div>
+          <Button
+            type='submit'
+            className='h-10 rounded-[40] bg-[#30FFFF] px-4 text-black hover:bg-[#30FFFF]/80'
+          >
+            <span className='text-sm'>Send</span>
+          </Button>
+        </form>
       </div>
     </div>
   );
-}
+};
+
+export default ChatBox;

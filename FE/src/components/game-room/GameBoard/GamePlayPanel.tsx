@@ -1,18 +1,18 @@
 import { useGameStateStore } from '@/stores/websocket/useGameStateStore';
 
-import TMusicPlayer from './TMusicPlayer';
-import TRoundRolling from './TRoundRolling';
+import RoundRolling from '../round/RoundRolling';
+import GameMusicPlayer from './GameMusicPlayer';
 
-const TGamePlayPanel = () => {
+const GamePlayPanel = () => {
   const { gameState } = useGameStateStore();
 
   return (
     <div className='game-play-panel'>
-      {gameState === 'TIMER_WAIT' && <TRoundRolling />}
-      {gameState === 'ROUND_OPEN' && <TRoundRolling />}
+      {gameState === 'TIMER_WAIT' && <RoundRolling />}
+      {gameState === 'ROUND_OPEN' && <RoundRolling />}
 
       {(gameState === 'QUIZ_OPEN' || gameState === 'GAME_RESULT') && (
-        <TMusicPlayer gameState={gameState} />
+        <GameMusicPlayer gameState={gameState} />
       )}
 
       {/* {gameState === 'SCORE_UPDATE' && <TRoundResult />} */}
@@ -20,7 +20,7 @@ const TGamePlayPanel = () => {
   );
 };
 
-export default TGamePlayPanel;
+export default GamePlayPanel;
 
 /**
  *
