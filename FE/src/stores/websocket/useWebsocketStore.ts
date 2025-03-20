@@ -125,9 +125,9 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
             gameChatStore.setGameChattings(response);
           }
 
-          if (type === 'boardInfo') {
-            gameScreenStore.setBoardInfo(response.board);
-          }
+          // if (type === 'boardInfo') {
+          //   gameScreenStore.setBoardInfo(response.board);
+          // }
 
           if (type === 'skip') {
             gameChatStore.setGameChattings({
@@ -158,10 +158,12 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
             if (response.status === 'IN_PROGRESS') {
               gameStateStore.setGameState('TIMER_WAIT');
 
-              const initialBoard = participantInfoStore.participantInfo.reduce(
-                (acc, participant) => ({ ...acc, [participant.userName]: 0 }),
-                {} as Record<string, number>,
-              );
+              const initialBoard = useParticipantInfoStore
+                .getState()
+                .participantInfo.reduce(
+                  (acc, participant) => ({ ...acc, [participant.userName]: 0 }),
+                  {} as Record<string, number>,
+                );
 
               boardInfoStore.setBoardInfo(initialBoard);
             }

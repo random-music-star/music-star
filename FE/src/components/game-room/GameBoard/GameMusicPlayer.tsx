@@ -50,7 +50,7 @@ declare global {
   }
 }
 
-interface TMusicPlayerProps {
+interface MusicPlayerProps {
   gameState: 'GAME_RESULT' | 'QUIZ_OPEN';
 }
 
@@ -72,7 +72,7 @@ const extractYouTubeVideoId = (url: string): string | null => {
   return null;
 };
 
-const TMusicPlayer = ({ gameState }: TMusicPlayerProps) => {
+const GameMusicPlayer = ({ gameState }: MusicPlayerProps) => {
   const [videoId, setVideoId] = useState<string>('');
   const playerRef = useRef<YouTubePlayer | null>(null);
   const ytApiLoadedRef = useRef<boolean>(false);
@@ -310,4 +310,4 @@ const TMusicPlayer = ({ gameState }: TMusicPlayerProps) => {
   );
 };
 
-export default TMusicPlayer;
+export default GameMusicPlayer;

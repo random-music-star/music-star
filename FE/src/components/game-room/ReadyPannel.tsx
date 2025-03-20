@@ -1,11 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import { motion } from 'framer-motion';
-import { CheckCircle, Clock, Crown, PlayCircle } from 'lucide-react';
+import { Crown, PlayCircle } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { useParticipantInfoStore } from '@/stores/websocket/useGameParticipantStore';
+import { useGameInfoStore } from '@/stores/websocket/useGameRoomInfoStore';
 import { useWebSocketStore } from '@/stores/websocket/useWebsocketStore';
+
+import { Button } from '../ui/button';
 
 interface ReadyPanelProps {
   currentUserId: string;
@@ -13,33 +16,18 @@ interface ReadyPanelProps {
   roomId: string;
 }
 
-export default function ReadyPanel({
+const ReadyPannel = ({
   currentUserId,
   handleStartGame,
   roomId,
-}: ReadyPanelProps) {
-  const {
-    participantInfo,
-    readyPlayers,
-    notReadyPlayers,
-    isAllReady,
-    hostNickname,
-  } = useParticipantInfoStore();
+}: ReadyPanelProps) => {
+  const { participantInfo, isAllReady, hostNickname } =
+    useParticipantInfoStore();
+  const { gameRoomInfo } = useGameInfoStore();
 
   const [transitioning, setTransitioning] = useState<string | null>(null);
   const [direction, setDirection] = useState<boolean>(false);
-  const [isCurrentReady, setIsCurrentReady] = useState<boolean>(false);
   const { sendMessage } = useWebSocketStore();
-
-  useEffect(() => {
-    if (!participantInfo || !currentUserId) return;
-
-    const currentUser = participantInfo.find(
-      user => user.userName === currentUserId,
-    );
-
-    setIsCurrentReady(currentUser ? currentUser.isReady : false);
-  }, [participantInfo]);
 
   const handleToggleReady = () => {
     if (transitioning) return;
@@ -60,207 +48,140 @@ export default function ReadyPanel({
         username: currentUserId,
       });
 
-      setIsCurrentReady(!isReady);
-
       setTimeout(() => {
         setTransitioning(null);
       }, 300);
     }, 300);
   };
 
+  if (!gameRoomInfo) return null;
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { when: 'beforeChildren', staggerChildren: 0.1 },
+    },
+    exit: {
+      opacity: 0,
+      transition: { duration: 0.3 },
+    },
+  };
+
   return (
     <motion.div
-      className='h-full'
-      initial={{ opacity: 1 }}
-      exit={{ x: '-100%', opacity: 0 }}
-      transition={{ duration: 0.5 }}
+      className='flex h-screen w-full flex-col justify-between p-8'
+      variants={containerVariants}
+      initial='hidden'
+      animate='visible'
+      exit='exit'
     >
-      <div className='flex h-full flex-col p-4'>
-        <div className='mb-5 flex items-center justify-between'>
-          <h2 className='text-xl font-bold text-gray-800'>
-            플레이어 준비 상태
-          </h2>
-          <div className='rounded-full bg-indigo-100 px-3 py-1 text-sm font-medium text-indigo-700'>
-            {readyPlayers.length}/{participantInfo.length} 준비 완료
-          </div>
-        </div>
+      <div className='grid h-2/3 grid-cols-5 gap-4'>
+        {participantInfo.map(user => {
+          const isCurrentUser = user.userName === currentUserId;
+          const isUserHost = user.userName === hostNickname;
+          const isTransitioning = transitioning === user.userName;
 
-        <div className='relative flex flex-1 gap-4'>
-          <div className='flex-1 rounded-lg border border-green-200 bg-green-50 p-3'>
-            <div className='mb-3 flex items-center'>
-              <CheckCircle size={16} className='mr-2 text-green-600' />
-              <h3 className='font-medium text-green-700'>준비 완료</h3>
-              <span className='ml-auto rounded-full bg-green-100 px-2 py-0.5 text-xs text-green-700'>
-                {readyPlayers.length}명
-              </span>
-            </div>
-
-            <div className='grid max-h-[220px] grid-cols-3 gap-2 overflow-y-auto pr-1'>
-              {readyPlayers.map(user => {
-                const isCurrentUser = user.userName === currentUserId;
-
-                const isUserHost = user.userName === hostNickname;
-
-                const isTransitioning =
-                  transitioning === user.userName && direction;
-
-                return (
-                  <motion.div
-                    key={user.userName}
-                    initial={{ opacity: 1 }}
-                    animate={{
-                      opacity: isTransitioning ? 0 : 1,
-                      x: isTransitioning ? -30 : 0,
-                    }}
-                    transition={{ duration: 0.2, ease: 'easeOut' }}
-                    className='flex items-center rounded-md border border-green-200 bg-white p-2 transition-colors hover:bg-green-100'
-                  >
-                    <div className='relative'>
-                      <div className='flex h-8 w-8 items-center justify-center rounded-full bg-green-600 text-white'>
-                        {user.userName.charAt(0).toUpperCase()}
-                      </div>
-                      {isUserHost && (
-                        <div className='absolute -top-1 -right-1 rounded-full bg-yellow-400 p-0.5'>
-                          <Crown size={10} className='text-yellow-800' />
-                        </div>
-                      )}
-                    </div>
-
-                    <div className='ml-2 min-w-0 flex-1'>
-                      <p className='truncate text-sm font-medium'>
-                        {user.userName}
-                        {isCurrentUser && (
-                          <span className='ml-1 text-xs text-indigo-600'>
-                            (나)
-                          </span>
-                        )}
-                      </p>
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className='flex-1 rounded-lg border border-gray-200 bg-gray-50 p-3'>
-            <div className='mb-3 flex items-center'>
-              <Clock size={16} className='mr-2 text-gray-500' />
-              <h3 className='font-medium text-gray-700'>대기 중</h3>
-              <span className='ml-auto rounded-full bg-gray-200 px-2 py-0.5 text-xs text-gray-700'>
-                {notReadyPlayers.length}명
-              </span>
-            </div>
-
-            <div className='grid max-h-[220px] grid-cols-3 gap-2 overflow-y-auto pr-1'>
-              {notReadyPlayers.map(user => {
-                const isCurrentUser = user.userName === currentUserId;
-                const isUserHost = user.userName === hostNickname;
-                const isTransitioning =
-                  transitioning === user.userName && !direction;
-
-                return (
-                  <motion.div
-                    key={user.userName}
-                    initial={{ opacity: 1 }}
-                    animate={{
-                      opacity: isTransitioning ? 0 : 1,
-                      x: isTransitioning ? 30 : 0,
-                    }}
-                    transition={{ duration: 0.2, ease: 'easeOut' }}
-                    className='flex items-center rounded-md border border-gray-200 bg-white p-2 transition-colors hover:bg-gray-100'
-                  >
-                    <div className='relative'>
-                      <div className='flex h-8 w-8 items-center justify-center rounded-full bg-gray-400 text-white'>
-                        {user.userName.charAt(0).toUpperCase()}
-                      </div>
-                      {isUserHost && (
-                        <div className='absolute -top-1 -right-1 rounded-full bg-yellow-400 p-0.5'>
-                          <Crown size={10} className='text-yellow-800' />
-                        </div>
-                      )}
-                    </div>
-
-                    <div className='ml-2 min-w-0 flex-1'>
-                      <p className='truncate text-sm font-medium'>
-                        {user.userName}
-                        {isCurrentUser && (
-                          <span className='ml-1 text-xs text-indigo-600'>
-                            (나)
-                          </span>
-                        )}
-                      </p>
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
-        <div className='mt-4 rounded-lg border border-indigo-100 bg-indigo-50 p-3'>
-          <div className='flex items-center justify-between'>
-            <div className='flex items-center'>
-              <div className='relative'>
-                <div
-                  className={`h-10 w-10 rounded-full ${isCurrentReady ? 'bg-green-600' : 'bg-gray-400'} flex items-center justify-center text-white transition-colors duration-300`}
-                >
-                  {currentUserId.charAt(0).toUpperCase()}
+          return (
+            <motion.div
+              key={user.userName}
+              className={cn(
+                'relative flex h-[270px] w-full flex-col items-center justify-between overflow-hidden rounded-2xl border-3 border-cyan-300 bg-black/80 p-2 shadow-[0_0_8px_cyan-400]',
+              )}
+              layout
+              layoutId={`user-${user.userName}`}
+            >
+              {isUserHost && (
+                <div className='absolute top-2 left-2 z-10'>
+                  <Crown
+                    size={24}
+                    className='fill-yellow-400 text-yellow-400'
+                  />
                 </div>
-                {currentUserId === hostNickname && (
-                  <div className='absolute -top-1 -right-1 rounded-full bg-yellow-400 p-0.5'>
-                    <Crown size={12} className='text-yellow-800' />
-                  </div>
-                )}
-              </div>
-              <div className='ml-3'>
-                <p className='font-medium text-gray-800'>
-                  {currentUserId}
-                  {currentUserId === hostNickname && <span>(방장)</span>}
-                </p>
-                <p className='text-xs text-gray-500'>
-                  {isCurrentReady
-                    ? '준비 완료 상태입니다'
-                    : '아직 준비하지 않았습니다'}
-                </p>
-              </div>
-            </div>
+              )}
+              <motion.div
+                className='flex w-full flex-1 items-center justify-center opacity-100'
+                animate={
+                  isTransitioning
+                    ? { y: direction ? 15 : -15, opacity: 0.5 }
+                    : { y: 0, opacity: 1 }
+                }
+                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+              >
+                <div className='flex h-35 w-30 items-center justify-center'>
+                  <object
+                    data='/yellow.svg'
+                    type='image/svg+xml'
+                    className='h-full w-full'
+                  ></object>
+                </div>
+              </motion.div>
 
-            <div className='flex items-center gap-2'>
-              <Button
-                onClick={handleToggleReady}
-                className={`${
-                  isCurrentReady
-                    ? 'bg-green-500 hover:bg-green-600'
-                    : 'bg-gray-500 hover:bg-gray-600'
-                } text-white transition-colors duration-300`}
+              <p
+                className={cn(
+                  user.isReady && 'text-cyan-300',
+                  !user.isReady && 'text-white',
+                  isUserHost && 'text-yellow-300',
+                  isCurrentUser && 'text-purple-300',
+                  'text-center text-xs font-medium',
+                )}
+              >
+                {user.userName} {isUserHost && !isCurrentUser && ' (방장)'}
+                {isCurrentUser && ' (나)'}
+              </p>
+              <motion.div
+                className={cn(
+                  user.isReady && 'bg-cyan-300 text-black/50',
+                  !user.isReady && 'bg-gray-700 text-black/50',
+                  'text-md tracking-super-wide mt-2 w-full rounded-lg px-2 py-1 text-center font-semibold',
+                )}
               >
                 READY
-              </Button>
+              </motion.div>
+            </motion.div>
+          );
+        })}
 
-              {isAllReady && currentUserId === hostNickname && (
-                <Button
-                  onClick={handleStartGame}
-                  className='ml-2 flex items-center gap-1 bg-yellow-500 text-white hover:bg-yellow-600'
-                >
-                  <PlayCircle size={16} />
-                  <span>게임 시작</span>
-                </Button>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {!isAllReady && (
-          <div className='mt-4'>
-            <Button
-              className='w-full cursor-not-allowed bg-gray-400 py-2 font-bold text-white'
-              disabled={true}
-            >
-              모든 플레이어가 준비해야 합니다
-            </Button>
-          </div>
+        {Array.from(
+          { length: gameRoomInfo.maxPlayer - participantInfo.length },
+          (_, i: number) => (
+            <motion.div
+              key={i}
+              className='h-[270px] w-full rounded-2xl bg-black opacity-50'
+            ></motion.div>
+          ),
         )}
       </div>
+
+      <motion.div className='flex gap-4 self-end'>
+        <Button
+          onClick={handleToggleReady}
+          className={cn(
+            !participantInfo.find(user => user.userName === currentUserId)
+              ?.isReady && 'bg-cyan-500 text-black/50 hover:bg-cyan-600',
+            participantInfo.find(user => user.userName === currentUserId)
+              ?.isReady && 'bg-gray-600 text-black/50 hover:bg-gray-700',
+            'tracking-super-wide rounded-3xl px-10 py-[25px] text-xl font-semibold',
+          )}
+        >
+          {participantInfo.find(user => user.userName === currentUserId)
+            ?.isReady
+            ? '준비취소'
+            : '준비하기'}
+        </Button>
+
+        {isAllReady && currentUserId === hostNickname && (
+          <Button
+            onClick={handleStartGame}
+            className='rounded-3xl bg-purple-400 px-10 py-[25px] text-xl hover:bg-purple-500'
+          >
+            <PlayCircle size={16} />
+            <span>게임 시작</span>
+          </Button>
+        )}
+      </motion.div>
     </motion.div>
   );
-}
+};
+
+export default ReadyPannel;

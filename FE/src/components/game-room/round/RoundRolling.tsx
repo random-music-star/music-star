@@ -22,7 +22,7 @@ interface RoundInfo {
   mode: string;
 }
 
-const TRoundRolling: React.FC = () => {
+const RoundRolling: React.FC = () => {
   const { gameRoomInfo } = useGameInfoStore() as {
     gameRoomInfo: GameRoomInfo | null;
   };
@@ -125,4 +125,4 @@ const TRoundRolling: React.FC = () => {
   );
 };
 
-export default TRoundRolling;
+export default RoundRolling;
