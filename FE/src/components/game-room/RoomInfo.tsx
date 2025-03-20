@@ -115,7 +115,7 @@ const GameRoomInfo = () => {
               {yearArray.map((year, index) => (
                 <span
                   key={`year-${index}`}
-                  className='inline-block rounded-full bg-yellow-900/20 px-3 py-1 text-sm font-medium text-yellow-200'
+                  className='inline-block rounded-full bg-yellow-900/20 px-1 py-1 text-xs font-medium text-yellow-200'
                 >
                   {year}
                 </span>

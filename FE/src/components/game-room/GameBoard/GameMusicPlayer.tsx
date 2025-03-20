@@ -108,10 +108,10 @@ const GameMusicPlayer = ({ gameState }: MusicPlayerProps) => {
             <h3 className='text-xl font-bold text-fuchsia-300'>정답 공개!</h3>
           </div>
 
-          <div className='space-y-4 text-base text-purple-100'>
+          <div className='w-full max-w-md space-y-4 text-base text-purple-100'>
             {/* 우승자 정보 */}
             {gameRoundResult.winner && (
-              <div className='mb-5 flex items-center justify-center'>
+              <div className='mb-5 flex flex-col items-center justify-center'>
                 <span className='mb-1 block text-sm font-medium text-purple-200'>
                   정답자
                 </span>
@@ -121,22 +121,24 @@ const GameMusicPlayer = ({ gameState }: MusicPlayerProps) => {
               </div>
             )}
 
-            <div className='flex w-full max-w-full items-center gap-4'>
-              <span className='min-w-[40px] font-medium text-purple-200'>
-                가수
-              </span>
-              <span className='min-w-0 overflow-hidden font-bold break-words text-fuchsia-200'>
-                {gameRoundResult.singer || '정보 없음'}
-              </span>
-            </div>
+            <div className='flex w-full flex-col gap-2'>
+              <div className='flex w-full items-start gap-4'>
+                <span className='w-[40px] flex-shrink-0 font-medium text-purple-200'>
+                  가수
+                </span>
+                <span className='flex-1 font-bold break-words text-fuchsia-200'>
+                  {gameRoundResult.singer || '정보 없음'}
+                </span>
+              </div>
 
-            <div className='flex w-full max-w-full items-center gap-4'>
-              <span className='min-w-[40px] font-medium text-purple-200'>
-                제목
-              </span>
-              <span className='min-w-0 overflow-hidden font-bold break-words text-fuchsia-200'>
-                {gameRoundResult.songTitle || '정보 없음'}
-              </span>
+              <div className='flex w-full items-start gap-4'>
+                <span className='w-[40px] flex-shrink-0 font-medium text-purple-200'>
+                  제목
+                </span>
+                <span className='flex-1 font-bold break-words text-fuchsia-200'>
+                  {gameRoundResult.songTitle || '정보 없음'}
+                </span>
+              </div>
             </div>
           </div>
 
