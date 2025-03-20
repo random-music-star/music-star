@@ -64,33 +64,37 @@ export default function RoomForm({
           )}
         />
 
-        {/* 포맷 선택 */}
-        <FormField
-          control={form.control}
-          name='format'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>포맷 선택</FormLabel>
-              <FormControl>
-                <RadioGroup
-                  value={field.value}
-                  onValueChange={field.onChange}
-                  className='flex gap-4'
-                >
-                  <div className='flex items-center space-x-2'>
-                    <RadioGroupItem value='BOARD' id='format-board' />
-                    <Label htmlFor='format-board'>보드판 모드</Label>
-                  </div>
-                  <div className='flex items-center space-x-2'>
-                    <RadioGroupItem value='GENERAL' id='format-general' />
-                    <Label htmlFor='format-general'>점수판 모드</Label>
-                  </div>
-                </RadioGroup>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {/* 포맷 선택 - 방 생성 모드에서만 사용할 경우 mode === 'create' 로 변경 필요요*/}
+        {mode && (
+          <FormField
+            control={form.control}
+            name='format'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>포맷 선택</FormLabel>
+                <FormControl>
+                  <RadioGroup
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    className='flex gap-4'
+                  >
+                    <div className='flex items-center space-x-2'>
+                      <RadioGroupItem value='BOARD' id='format-board' />
+                      <Label htmlFor='format-board'>보드판 모드</Label>
+                    </div>
+                    {/*
+                      <div className='flex items-center space-x-2'>
+                        <RadioGroupItem value='GENERAL' id='format-general' />
+                        <Label htmlFor='format-general'>점수판 모드</Label>
+                      </div>
+                    */}
+                  </RadioGroup>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
 
         {/* 모드 선택 */}
         <FormField

@@ -18,10 +18,11 @@ interface GameRoomInfo {
 interface ApiRequestData {
   title: string;
   password: string;
-  format: string;
+  format?: string;
   gameModes: string[];
   selectedYears: number[];
-  roomId?: string;
+  roomId?: number; // 방 수정하기 요청에서만 사용
+  channelId?: number; // 방 생성하기 요청에서만 사용
 }
 
 // 소켓 데이터를 폼 데이터로 변환 (GameInfoState -> FormValues)
@@ -53,23 +54,44 @@ export function formToApiData(
   formData: CreateRoomFormValues,
   roomId?: string,
 ): ApiRequestData {
-  const data: Omit<ApiRequestData, 'roomId'> = {
-    title: formData.title,
-    password: '', // 빈 문자열로 설정
-    format: formData.format,
-    gameModes: (formData.modes || []).map((m: string) =>
-      m === '1SEC' ? 'ONE_SEC' : m,
-    ),
-    selectedYears: formData.years || [],
-  };
+  if (roomId) {
+    // 방 수정하기 요청 - API 명세에 맞게 구성
+    const data = {
+      roomId: Number(roomId),
+      title: formData.title,
+      password: '',
+      gameModes: (formData.modes || []).map((m: string) =>
+        m === '1SEC' ? 'ONE_SEC' : m,
+      ),
+      selectedYears: formData.years || [],
+      format: formData.format, // request에서 삭제되면 제거 필요
+    };
 
-  const requestData = roomId ? { ...data, roomId } : data;
+    console.log('폼 데이터를 API 요청 데이터로 변환:', {
+      원본_폼데이터: formData,
+      roomId: roomId,
+      변환된_요청데이터: data,
+    });
 
-  console.log('폼 데이터를 API 요청 데이터로 변환:', {
-    원본_폼데이터: formData,
-    roomId: roomId,
-    변환된_요청데이터: requestData,
-  });
+    return data;
+  } else {
+    // 방 생성하기 요청
+    const data = {
+      channelId: 1, // 현재 참여한 채널 아이디
+      title: formData.title,
+      password: '',
+      format: formData.format,
+      gameModes: (formData.modes || []).map((m: string) =>
+        m === '1SEC' ? 'ONE_SEC' : m,
+      ),
+      selectedYears: formData.years || [],
+    };
 
-  return requestData;
+    console.log('폼 데이터를 API 요청 데이터로 변환:', {
+      원본_폼데이터: formData,
+      변환된_요청데이터: data,
+    });
+
+    return data;
+  }
 }
