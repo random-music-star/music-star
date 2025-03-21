@@ -110,7 +110,7 @@ const ReadyPannel = ({
               >
                 <div className='flex h-35 w-30 items-center justify-center'>
                   <object
-                    data='/yellow.svg'
+                    data={user.character}
                     type='image/svg+xml'
                     className='h-full w-full'
                   ></object>
