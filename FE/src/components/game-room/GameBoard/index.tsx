@@ -107,32 +107,30 @@ const GameBoard = () => {
         setFootholderImage(fhImg);
       };
 
-      // 캐릭터 이미지 로딩 및 유저 캐릭터 생성
-      const characterImg = new Image();
-      characterImg.src = '/yellow.svg';
-      characterImg.onload = () => {
-        // 캐릭터 생성
-        const userCharacters: UserCharacter[] = [];
+      const userCharacters: UserCharacter[] = await Promise.all(
+        participantInfo.map(
+          participant =>
+            new Promise<UserCharacter>(resolve => {
+              const img = new Image();
+              img.src = participant.character; // 직접 경로 사용
+              img.onload = () => {
+                resolve({
+                  name: participant.userName,
+                  position: 0,
+                  image: img,
+                  animationOffset: 0,
+                  isMoving: false,
+                  fromPosition: 0,
+                  toPosition: 0,
+                  moveProgress: 0,
+                });
+              };
+            }),
+        ),
+      );
 
-        participantInfo.forEach(participant => {
-          // 위치 값이 범위를 벗어나지 않도록 확인
-          // 초기값
-
-          userCharacters.push({
-            name: participant.userName,
-            position: 0,
-            image: characterImg,
-            animationOffset: 0, // 초기 애니메이션 오프셋
-            isMoving: false,
-            fromPosition: 0,
-            toPosition: 0,
-            moveProgress: 0,
-          });
-        });
-
-        setCharacters(userCharacters);
-        setIsLoading(false);
-      };
+      setCharacters(userCharacters);
+      setIsLoading(false);
     };
 
     loadImages();

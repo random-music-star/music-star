@@ -1,21 +1,22 @@
 import { create } from 'zustand';
 
 interface ParticipantInfoStore {
-  participantInfo: PariticpantInfo[];
-  setParticipantInfo: (newPariticipantInfo: PariticpantInfo[]) => void;
+  participantInfo: ParticipantInfo[];
+  setParticipantInfo: (newPariticipantInfo: ParticipantInfo[]) => void;
   hostNickname: string | null;
-  readyPlayers: PariticpantInfo[];
-  notReadyPlayers: PariticpantInfo[];
+  readyPlayers: ParticipantInfo[];
+  notReadyPlayers: ParticipantInfo[];
   isAllReady: boolean;
   setIsAllReady: (state: boolean) => void;
-  updateParticipantReadyStates: (userInfoList: PariticpantInfo[]) => void;
+  updateParticipantReadyStates: (userInfoList: ParticipantInfo[]) => void;
   resetParticipantInfo: () => void;
 }
 
-interface PariticpantInfo {
+interface ParticipantInfo {
   userName: string;
   isReady: boolean;
   isHost: boolean;
+  character: string;
 }
 
 const initialState = {
@@ -35,16 +36,25 @@ export const useParticipantInfoStore = create<ParticipantInfoStore>(set => ({
 
   setIsAllReady: (newState: boolean) => set({ isAllReady: newState }),
 
-  setParticipantInfo: (newParticipantInfo: PariticpantInfo[]) => {
-    const host = newParticipantInfo.find(user => user.isHost);
+  setParticipantInfo: (
+    newParticipantInfo: Omit<ParticipantInfo, 'character'>[],
+  ) => {
+    set(() => {
+      const updatedParticipants = newParticipantInfo.map((user, index) => ({
+        ...user,
+        character: `/character/character_${index}.svg`,
+      }));
 
-    set({
-      participantInfo: newParticipantInfo,
-      hostNickname: host?.userName,
+      const host = updatedParticipants.find(user => user.isHost);
+
+      return {
+        participantInfo: updatedParticipants,
+        hostNickname: host?.userName,
+      };
     });
   },
 
-  updateParticipantReadyStates: (userInfoList: PariticpantInfo[]) => {
+  updateParticipantReadyStates: (userInfoList: ParticipantInfo[]) => {
     set({
       readyPlayers: userInfoList.filter(user => user.isReady),
       notReadyPlayers: userInfoList.filter(user => !user.isReady),
