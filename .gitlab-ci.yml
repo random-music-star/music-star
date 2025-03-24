@@ -1,7 +1,9 @@
 stages:
   - deploy
+
 variables:
   SERVER_IP: j12a202.p.ssafy.io
+
 deploy-frontend:
   stage: deploy
   only:
