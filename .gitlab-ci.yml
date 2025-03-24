@@ -1,51 +1,20 @@
 stages:
   - deploy
-variables:
-  SERVER_IP: j12a202.p.ssafy.io
-  SSH_USER: ubuntu
-  PROJECT_DIR: ~/S12P21A202/FE
-  CONTAINER_NAME: nextjs-app
-  IMAGE_NAME: nextjs-app
-  PORT: 3000
+
+before_script:
+  - "which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )"
+  - eval $(ssh-agent -s)
+  - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+  - mkdir -p ~/.ssh
+  - chmod 700 ~/.ssh
+  - ssh-keyscan j12a202.p.ssafy.io >> ~/.ssh/known_hosts
+  - chmod 644 ~/.ssh/known_hosts
 
 deploy-frontend:
   stage: deploy
+  tags: prod
   only:
     - FE
-  tags:
-    - prod
-  before_script:
-    - echo "🔍 Current user: $(whoami)"
-    - echo "🔍 Home directory: $HOME"
-    - sudo -v || true
-    - sudo apt-get update -q || true
-    - sudo apt-get install -y openssh-client
-    - mkdir -p ~/.ssh
-    - chmod 700 ~/.ssh
-    - echo "$SSH_PRIVATE_KEY" | base64 -d > ~/.ssh/id_rsa
-    - chmod 600 ~/.ssh/id_rsa
-    - eval "$(ssh-agent -s)"
-    - ssh-keyscan $SERVER_IP >> ~/.ssh/known_hosts
-    - ssh-add -k ~/.ssh/id_rsa || ssh-add ~/.ssh/id_rsa
   script:
-    - echo "🚀 Starting deployment to $SERVER_IP"
-    - |
-      ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no $SSH_USER@$SERVER_IP << EOF
-        echo "📂 Moving to project directory: $PROJECT_DIR"
-        cd $PROJECT_DIR || { echo '❌ Failed to move to project directory'; exit 1; }
-        echo "🔄 Pulling latest changes from FE branch"
-        git fetch origin FE
-        git reset --hard origin/FE
-        git clean -fd
-        echo "🐳 Building Docker image: $IMAGE_NAME"
-        docker build -t $IMAGE_NAME . || { echo '❌ Docker build failed'; exit 1; }
-        echo "🛑 Stopping existing container: $CONTAINER_NAME"
-        docker stop $CONTAINER_NAME || echo "⚠️ No container to stop"
-        echo "🧹 Removing old container: $CONTAINER_NAME"
-        docker rm $CONTAINER_NAME || echo "⚠️ No container to remove"
-        echo "🚢 Running new container"
-        docker run -d \
-          -p $PORT:$PORT \
-          --restart always \
-          --name $CONTAINER_NAME $IMAGE_NAME || { echo '❌ Docker run failed'; exit 1; }
-        echo "✅ Deployment finished successfully"
+    - echo "Deploying frontend application..."
+    - ssh ubuntu@j12a202.p.ssafy.io "cd ~/S12P21A202 && git fetch && git checkout FE && git pull && cd FE && docker stop nextjs-app || true && docker rm nextjs-app || true && docker build -t nextjs-app . && docker run -d -p 3000:3000 --restart always --name nextjs-app nextjs-app"
