@@ -178,7 +178,10 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
             participantInfoStore.setIsAllReady(response.allReady);
           }
 
-          if (type === 'move') boardInfoStore.updateBoardInfo(response);
+          if (type === 'move') {
+            boardInfoStore.updateBoardInfo(response);
+            gameStateStore.setGameState('SCORE_UPDATE');
+          }
 
           if (type === 'refuseEnter') gameStateStore.setGameState('REFUSED');
 
