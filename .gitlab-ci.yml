@@ -3,61 +3,35 @@ stages:
 
 variables:
   SERVER_IP: j12a202.p.ssafy.io
-  SSH_USER: ubuntu
-  PROJECT_DIR: ~/S12P21A202/FE
-  CONTAINER_NAME: nextjs-app
-  IMAGE_NAME: nextjs-app
-  PORT: 3000
 
 deploy-frontend:
   stage: deploy
-  only:
-    - FE
   tags:
     - prod
-
+  only:
+    - FE
   before_script:
-    - echo "📦 Installing SSH client"
-    - apt-get update -y && apt-get install -y openssh-client
+    - echo "🔧 Updating apt (with sudo)"
+    - sudo apt-get update -y
+    - sudo apt-get install -y openssh-client
     - echo "🔐 Setting up SSH key"
-    - eval $(ssh-agent -s)
-    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
     - mkdir -p ~/.ssh
-    - chmod 700 ~/.ssh
-    - echo "🔑 Adding server to known_hosts"
+    - echo "$SSH_PRIVATE_KEY" | base64 -d > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - eval $(ssh-agent -s)
+    - ssh-add ~/.ssh/id_rsa
     - ssh-keyscan $SERVER_IP >> ~/.ssh/known_hosts
-
   script:
-    - echo "🚀 Starting deployment to $SERVER_IP"
-
-    - echo "🔗 Connecting to server and starting deployment steps"
-    - |
-      ssh -o StrictHostKeyChecking=no $SSH_USER@$SERVER_IP << EOF
-        echo "📂 Moving to project directory: $PROJECT_DIR"
-        cd $PROJECT_DIR || { echo '❌ Failed to move to project directory'; exit 1; }
-
-        echo "🔄 Pulling latest changes from FE branch"
-        git reset --hard
-        git clean -fd
-        git pull origin FE || { echo '❌ Git pull failed'; exit 1; }
-
-        echo "🐳 Building Docker image: $IMAGE_NAME"
-        docker build -t $IMAGE_NAME . || { echo '❌ Docker build failed'; exit 1; }
-
-        echo "🛑 Stopping existing container: $CONTAINER_NAME"
-        docker stop $CONTAINER_NAME || echo "⚠️ No container to stop"
-
-        echo "🧹 Removing old container: $CONTAINER_NAME"
-        docker rm $CONTAINER_NAME || echo "⚠️ No container to remove"
-
-        echo "🚢 Running new container"
-        docker run -d \
-          -p $PORT:$PORT \
-          -e NEXT_PUBLIC_WEBSOCKET_URL=ws://13.124.231.140:8080/ws \
-          -e NEXT_PUBLIC_BASE_URL=http://13.124.231.140:8080 \
-          -e NEXT_PUBLIC_SSE_URL=http://13.124.231.140:8080/sse \
-          --restart always \
-          --name $CONTAINER_NAME $IMAGE_NAME || { echo '❌ Docker run failed'; exit 1; }
-
-        echo "✅ Deployment finished successfully"
-      EOF
+    - echo "🚀 Deploying frontend via SSH"
+    - ssh -o StrictHostKeyChecking=no ubuntu@$SERVER_IP "
+      cd ~/S12P21A202/FE &&
+      git pull origin FE &&
+      docker stop nextjs-app || true &&
+      docker rm nextjs-app || true &&
+      docker build -t nextjs-app . &&
+      docker run -d -p 3000:3000 \
+      -e NEXT_PUBLIC_WEBSOCKET_URL=ws://13.124.231.140:8080/ws \
+      -e NEXT_PUBLIC_BASE_URL=http://13.124.231.140:8080 \
+      -e NEXT_PUBLIC_SSE_URL=http://13.124.231.140:8080/sse \
+      --restart always \
+      --name nextjs-app nextjs-app"
