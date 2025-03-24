@@ -9,24 +9,27 @@ deploy-frontend:
     - FE
   before_script:
     - echo "=== Starting deployment process ==="
-    - echo "=== Checking SSH agent availability ==="
+    - echo "=== Checking SSH agent and installing if needed ==="
     - which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )
     - echo "=== Starting SSH agent ==="
     - eval $(ssh-agent -s)
+    - echo "=== Debug SSH key file ==="
+    - ls -la
+    - echo "=== Debug environment variables ==="
+    - env | grep -i ssh || true
     - echo "=== Setting up SSH key ==="
-    - chmod 400 "$SSH_PRIVATE_KEY"
+    - test -f "$SSH_PRIVATE_KEY" && echo "Key file exists" || echo "Key file does not exist"
+    - chmod 400 "$SSH_PRIVATE_KEY" || echo "Failed to chmod key file"
     - echo "=== Adding SSH key to agent ==="
-    - ssh-add "$SSH_PRIVATE_KEY"
+    - ssh-add "$SSH_PRIVATE_KEY" || echo "Failed to add key to ssh-agent"
     - echo "=== Setting up SSH directory ==="
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
     - echo "=== Adding server to known hosts ==="
     - ssh-keyscan j12a202.p.ssafy.io >> ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
-    - echo "=== Testing SSH connection ==="
-    - ssh -o StrictHostKeyChecking=no ubuntu@j12a202.p.ssafy.io "echo 'SSH Connection successful!'"
   script:
     - echo "=== Starting deployment script ==="
-    - ssh -o StrictHostKeyChecking=no ubuntu@j12a202.p.ssafy.io "cd ~/S12P21A202 && echo 'In project directory' && git fetch && git checkout FE && git pull && cd FE && echo 'In FE directory' && docker stop nextjs-app || true && docker rm nextjs-app || true && docker build -t nextjs-app . && docker run -d -p 3000:3000 --restart always --name nextjs-app nextjs-app && echo 'Container started' && docker ps | grep nextjs-app"
+    - ssh -o StrictHostKeyChecking=no ubuntu@j12a202.p.ssafy.io "echo 'Connected to server' && cd ~/S12P21A202 && git fetch && git checkout FE && git pull && cd FE && docker stop nextjs-app || true && docker rm nextjs-app || true && docker build -t nextjs-app . && docker run -d -p 3000:3000 --restart always --name nextjs-app nextjs-app && docker ps | grep nextjs-app"
   after_script:
     - echo "=== Deployment process finished ==="
