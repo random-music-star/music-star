@@ -1,19 +1,66 @@
 stages:
+  - build
   - deploy
 
-deploy-frontend:
-  stage: deploy
-  only:
-    - FE
+build:
+  stage: build
   tags:
     - prod
   script:
-    - cd ~/S12P21A202/FE
-    - git fetch origin FE
-    - git reset --hard origin/FE
     - cd FE
-    - docker stop nextjs-app || true
-    - docker rm nextjs-app || true
-    - docker build -t nextjs-app .
-    - docker run -d -p 3000:3000 --restart always --name nextjs-app nextjs-app
-    - docker ps | grep nextjs-app
+    - npm install -g pnpm
+    - pnpm install
+    - echo "NEXT_PUBLIC_WEBSOCKET_URL=ws://13.124.231.140:8080/ws" > .env
+    - echo "NEXT_PUBLIC_BASE_URL=http://13.124.231.140:8080" >> .env
+    - echo "NEXT_PUBLIC_SSE_URL=http://13.124.231.140:8080/sse" >> .env
+    - pnpm build
+  only:
+    - FE
+  artifacts:
+    paths:
+      - FE/.next
+      - FE/node_modules
+      - FE/package.json
+      - FE/.env
+
+deploy:
+  stage: deploy
+  tags:
+    - prod
+  before_script:
+    - mkdir -p ~/.ssh
+    - eval $(ssh-agent -s)
+    - cat "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - ssh-add ~/.ssh/id_rsa
+    - ssh-keyscan -H "$SERVER_HOST" >> ~/.ssh/known_hosts
+  script:
+    - |
+      ssh -o StrictHostKeyChecking=no "$SERVER_ADDRESS" "
+        cd ~/frontend
+        docker stop nextjs-app || true
+        docker rm nextjs-app || true
+      "
+    - scp -o StrictHostKeyChecking=no -r FE/.next FE/node_modules FE/package.json FE/.env "$SERVER_ADDRESS:~/frontend/"
+    - scp -o StrictHostKeyChecking=no -r FE/public "$SERVER_ADDRESS:~/frontend/public"
+    - |
+      ssh -o StrictHostKeyChecking=no "$SERVER_ADDRESS" "
+        cd ~/frontend
+        docker build -t nextjs-app -f- . << 'EOF'
+        FROM node:20.9.0
+        WORKDIR /app
+        COPY . .
+        RUN npm install -g pnpm
+        EXPOSE 3000
+        CMD [\"pnpm\", \"start\"]
+        EOF
+        docker run -d -p 3000:3000 --restart always --name nextjs-app nextjs-app
+        
+        if ! docker ps | grep nextjs-app; then
+          echo 'Container failed to start'
+          docker logs nextjs-app
+          exit 1
+        fi
+      "
+  only:
+    - FE
