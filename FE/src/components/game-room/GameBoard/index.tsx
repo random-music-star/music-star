@@ -347,7 +347,7 @@ const GameBoard = () => {
   }, [isLoading, footholderImage, characters]);
 
   return (
-    <canvas ref={canvasRef} className='absolute top-0 left-0 h-full w-full' />
+    <canvas ref={canvasRef} className='absolute top-0 left-0 h-full w-screen' />
   );
 };
 
