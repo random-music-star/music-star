@@ -6,14 +6,11 @@ deploy:
   tags:
     - prod
   script:
-    - cd /home/ubuntu/S12P21A202
-    - git fetch
-    - git checkout FE
-    - git pull origin FE
-    - cd FE
+    - cd $CI_PROJECT_DIR
     - npm config set prefix ~/.npm-global
     - export PATH=~/.npm-global/bin:$PATH
     - npm install -g pnpm
+    - cd FE
     - pnpm install
     - echo "NEXT_PUBLIC_WEBSOCKET_URL=ws://13.124.231.140:8080/ws" > .env
     - echo "NEXT_PUBLIC_BASE_URL=http://13.124.231.140:8080" >> .env
