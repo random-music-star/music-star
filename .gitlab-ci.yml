@@ -6,32 +6,29 @@ variables:
 
 deploy-frontend:
   stage: deploy
-  tags:
-    - prod
   only:
     - FE
+  tags:
+    - prod
   before_script:
-    - echo "🔧 Updating apt (with sudo)"
-    - sudo apt-get update -y
-    - sudo apt-get install -y openssh-client
-    - echo "🔐 Setting up SSH key"
-    - mkdir -p ~/.ssh
-    - echo "$SSH_PRIVATE_KEY" | base64 -d > ~/.ssh/id_rsa
-    - chmod 600 ~/.ssh/id_rsa
+    - apt-get update -y
+    - apt-get install -y openssh-client
     - eval $(ssh-agent -s)
-    - ssh-add ~/.ssh/id_rsa
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
     - ssh-keyscan $SERVER_IP >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
   script:
-    - echo "🚀 Deploying frontend via SSH"
     - ssh -o StrictHostKeyChecking=no ubuntu@$SERVER_IP "
       cd ~/S12P21A202/FE &&
       git pull origin FE &&
+      docker build -t nextjs-app . &&
       docker stop nextjs-app || true &&
       docker rm nextjs-app || true &&
-      docker build -t nextjs-app . &&
-      docker run -d -p 3000:3000 \
-      -e NEXT_PUBLIC_WEBSOCKET_URL=ws://13.124.231.140:8080/ws \
-      -e NEXT_PUBLIC_BASE_URL=http://13.124.231.140:8080 \
-      -e NEXT_PUBLIC_SSE_URL=http://13.124.231.140:8080/sse \
-      --restart always \
+      docker run -d -p 3000:3000
+      -e NEXT_PUBLIC_WEBSOCKET_URL=ws://13.124.231.140:8080/ws
+      -e NEXT_PUBLIC_BASE_URL=http://13.124.231.140:8080
+      -e NEXT_PUBLIC_SSE_URL=http://13.124.231.140:8080/sse
+      --restart always
       --name nextjs-app nextjs-app"
