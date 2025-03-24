@@ -3,55 +3,30 @@ stages:
 
 deploy-frontend:
   stage: deploy
+  tags:
+    - prod
   only:
     - FE
   before_script:
     - echo "=== Starting deployment process ==="
     - echo "=== Checking SSH agent availability ==="
-    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+    - which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )
     - echo "=== Starting SSH agent ==="
     - eval $(ssh-agent -s)
     - echo "=== Setting up SSH key ==="
-    - echo "SSH_PRIVATE_KEY file exists: $(if [ -f "$SSH_PRIVATE_KEY" ]; then echo "Yes"; else echo "No"; fi)"
     - chmod 400 "$SSH_PRIVATE_KEY"
     - echo "=== Adding SSH key to agent ==="
-    - cat "$SSH_PRIVATE_KEY" | head -n 2 # 키의 처음 두 줄만 출력 (보안 유지)
-    - ssh-add -v "$SSH_PRIVATE_KEY"
+    - ssh-add "$SSH_PRIVATE_KEY"
     - echo "=== Setting up SSH directory ==="
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
     - echo "=== Adding server to known hosts ==="
-    - ssh-keyscan -v j12a202.p.ssafy.io >> ~/.ssh/known_hosts
+    - ssh-keyscan j12a202.p.ssafy.io >> ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
     - echo "=== Testing SSH connection ==="
-    - ssh -o StrictHostKeyChecking=no -v ubuntu@j12a202.p.ssafy.io "echo 'SSH Connection successful!'"
+    - ssh -o StrictHostKeyChecking=no ubuntu@j12a202.p.ssafy.io "echo 'SSH Connection successful!'"
   script:
     - echo "=== Starting deployment script ==="
-    - echo "=== Connecting to server ==="
-    - ssh -o StrictHostKeyChecking=no ubuntu@j12a202.p.ssafy.io "
-        echo '=== Connected to server ===' &&
-        echo '=== Changing to project directory ===' &&
-        cd ~/S12P21A202 &&
-        echo '=== Current directory: '\$(pwd) &&
-        echo '=== Fetching latest code ===' &&
-        git fetch &&
-        echo '=== Checking out FE branch ===' &&
-        git checkout FE &&
-        echo '=== Pulling latest changes ===' &&
-        git pull &&
-        echo '=== Changing to FE directory ===' &&
-        cd FE &&
-        echo '=== Current directory: '\$(pwd) &&
-        echo '=== Stopping existing container ===' &&
-        docker stop nextjs-app || true &&
-        echo '=== Removing container ===' &&
-        docker rm nextjs-app || true &&
-        echo '=== Building Docker image ===' &&
-        docker build -t nextjs-app . &&
-        echo '=== Starting new container ===' &&
-        docker run -d -p 3000:3000 --restart always --name nextjs-app nextjs-app &&
-        echo '=== Checking container status ===' &&
-        docker ps | grep nextjs-app"
+    - ssh -o StrictHostKeyChecking=no ubuntu@j12a202.p.ssafy.io "cd ~/S12P21A202 && echo 'In project directory' && git fetch && git checkout FE && git pull && cd FE && echo 'In FE directory' && docker stop nextjs-app || true && docker rm nextjs-app || true && docker build -t nextjs-app . && docker run -d -p 3000:3000 --restart always --name nextjs-app nextjs-app && echo 'Container started' && docker ps | grep nextjs-app"
   after_script:
     - echo "=== Deployment process finished ==="
-  
