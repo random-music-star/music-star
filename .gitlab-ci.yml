@@ -13,6 +13,8 @@ deploy-frontend:
   stage: deploy
   only:
     - FE
+  tags:
+    - prod
 
   before_script:
     - echo "📦 Installing SSH client"
