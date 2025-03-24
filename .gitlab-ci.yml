@@ -3,24 +3,20 @@ stages:
 
 deploy-frontend:
   stage: deploy
-  only:
-    - FE
   tags:
     - prod
-  before_script:
-    - "command -v ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )"
-    - eval $(ssh-agent -s)
-    - echo "Creating SSH directory"
-    - mkdir -p ~/.ssh
-    - chmod 700 ~/.ssh
-    - echo "Writing SSH key"
-    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
-    - chmod 600 ~/.ssh/id_rsa
-    - echo "Adding key to agent"
-    - ssh-add ~/.ssh/id_rsa
-    - echo "Adding known hosts"
-    - ssh-keyscan j12a202.p.ssafy.io >> ~/.ssh/known_hosts
-    - chmod 644 ~/.ssh/known_hosts
+  only:
+    - FE
   script:
-    - echo "Starting deployment"
-    - ssh -o StrictHostKeyChecking=no ubuntu@j12a202.p.ssafy.io "cd ~/S12P21A202 && git fetch && git checkout FE && git pull && cd FE && docker stop nextjs-app || true && docker rm nextjs-app || true && docker build -t nextjs-app . && docker run -d -p 3000:3000 --restart always --name nextjs-app nextjs-app && docker ps | grep nextjs-app"
+    - echo "Starting direct deployment"
+    - cd $CI_PROJECT_DIR
+    - git checkout FE
+    - git pull origin FE
+    - cd FE
+    - echo "Building and deploying Docker container"
+    - docker stop nextjs-app || true
+    - docker rm nextjs-app || true
+    - docker build -t nextjs-app .
+    - docker run -d -p 3000:3000 --restart always --name nextjs-app nextjs-app
+    - echo "Deployment completed successfully"
+    - docker ps | grep nextjs-app
