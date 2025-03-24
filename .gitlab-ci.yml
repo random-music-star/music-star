@@ -15,19 +15,21 @@ deploy-frontend:
   tags:
     - prod
   before_script:
-    - echo "📦 Installing SSH client"
-    - apt-get update -q && apt-get install -y openssh-client
+    - echo "📦 Preparing environment"
+    - sudo apt-get update -q
+    - sudo apt-get install -y openssh-client
     - echo "🔐 Setting up SSH key"
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
-    - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+    - echo "$SSH_PRIVATE_KEY" | base64 -d > ~/.ssh/id_rsa
     - chmod 600 ~/.ssh/id_rsa
-    - eval $(ssh-agent -s)
-    - ssh-add ~/.ssh/id_rsa
+    - eval "$(ssh-agent -s)"
+    - ssh-keyscan $SERVER_IP >> ~/.ssh/known_hosts
+    - ssh-add -k ~/.ssh/id_rsa
   script:
     - echo "🚀 Starting deployment to $SERVER_IP"
     - |
-      ssh -o StrictHostKeyChecking=no $SSH_USER@$SERVER_IP << EOF
+      ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no $SSH_USER@$SERVER_IP << EOF
         echo "📂 Moving to project directory: $PROJECT_DIR"
         cd $PROJECT_DIR || { echo '❌ Failed to move to project directory'; exit 1; }
         echo "🔄 Pulling latest changes from FE branch"
@@ -46,4 +48,4 @@ deploy-frontend:
           --restart always \
           --name $CONTAINER_NAME $IMAGE_NAME || { echo '❌ Docker run failed'; exit 1; }
         echo "✅ Deployment finished successfully"
-      EOF
+
