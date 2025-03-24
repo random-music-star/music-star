@@ -8,7 +8,7 @@ deploy-frontend:
   tags:
     - prod
   script:
-    - cd ~/S12P21A202
+    - cd ~/S12P21A202/FE
     - git fetch origin FE
     - git reset --hard origin/FE
     - cd FE
