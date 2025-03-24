@@ -5,6 +5,8 @@ deploy-frontend:
   stage: deploy
   only:
     - FE
+  tags:
+    - prod
   before_script:
     - "command -v ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )"
     - eval $(ssh-agent -s)
