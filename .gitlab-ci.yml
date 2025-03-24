@@ -16,14 +16,14 @@ deploy-frontend:
     - prod
   before_script:
     - echo "📦 Installing SSH client"
-    - apt-get update -y && apt-get install -y openssh-client
+    - apt-get update -q && apt-get install -y openssh-client
     - echo "🔐 Setting up SSH key"
-    - eval $(ssh-agent -s)
-    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
-    - echo "🔑 Adding server to known_hosts"
-    - ssh-keyscan $SERVER_IP >> ~/.ssh/known_hosts
+    - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - eval $(ssh-agent -s)
+    - ssh-add ~/.ssh/id_rsa
   script:
     - echo "🚀 Starting deployment to $SERVER_IP"
     - |
