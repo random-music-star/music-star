@@ -3,6 +3,8 @@ stages:
 
 deploy-frontend:
   stage: deploy
+  tags:
+    - prod
   only:
     - FE
   before_script:
