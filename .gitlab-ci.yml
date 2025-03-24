@@ -3,24 +3,17 @@ stages:
 
 deploy-frontend:
   stage: deploy
-  tags:
-    - prod
   only:
     - FE
+  tags:
+    - prod
   script:
-    - echo "Starting direct deployment"
-    - echo "Current directory: $(pwd)"
-    - echo "Moving to project directory"
     - cd ~/S12P21A202
-    - echo "Fetching latest code"
     - git fetch origin FE
     - git reset --hard origin/FE
-    - echo "Current directory after checkout: $(pwd)"
     - cd FE
-    - echo "Building and deploying Docker container"
     - docker stop nextjs-app || true
     - docker rm nextjs-app || true
     - docker build -t nextjs-app .
     - docker run -d -p 3000:3000 --restart always --name nextjs-app nextjs-app
-    - echo "Deployment completed successfully"
     - docker ps | grep nextjs-app
