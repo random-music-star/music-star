@@ -1,0 +1,32 @@
+stages:
+  - deploy
+
+variables:
+  SERVER_IP: j12a202.p.ssafy.io
+
+deploy-frontend:
+  stage: deploy
+  only:
+    - FE
+  before_script:
+    - apt-get update -y
+    - apt-get install -y openssh-client
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan $SERVER_IP >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+  script:
+    - ssh -o StrictHostKeyChecking=no ubuntu@$SERVER_IP "
+        cd ~/S12P21A202 &&
+        git pull origin FE &&
+        docker stop nextjs-app || true &&
+        docker rm nextjs-app || true &&
+        docker build -t nextjs-app . &&
+        docker run -d -p 3000:3000 
+          -e NEXT_PUBLIC_WEBSOCKET_URL=ws://13.124.231.140:8080/ws 
+          -e NEXT_PUBLIC_BASE_URL=http://13.124.231.140:8080 
+          -e NEXT_PUBLIC_SSE_URL=http://13.124.231.140:8080/sse 
+          --restart always 
+          --name nextjs-app nextjs-app"
