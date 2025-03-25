@@ -5,6 +5,7 @@ import { WebSocketState } from '@/types/websocket';
 
 import { useNicknameStore } from '../auth/useNicknameStore';
 import { useGameBoardInfoStore } from './useGameBoardInfoStore';
+import { useGameBubbleStore } from './useGameBubbleStore';
 import { useGameChatStore } from './useGameChatStore';
 import { useParticipantInfoStore } from './useGameParticipantStore';
 import { useGameInfoStore } from './useGameRoomInfoStore';
@@ -17,7 +18,6 @@ import { usePublicChatStore } from './usePublicChatStore';
 
 export const useWebSocketStore = create<WebSocketState>((set, get) => ({
   isConnected: false,
-
   client: null,
   subscriptions: {},
   connectWebSocket: () => {
@@ -93,6 +93,7 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
       const roundInfo = useGameRoundInfoStore.getState();
       const boardInfoStore = useGameBoardInfoStore.getState();
       const winnerStore = useGameWinnerStore.getState();
+      const gameBubbleStore = useGameBubbleStore.getState();
 
       newSubscriptions['game-room'] = client.subscribe(
         `/topic/channel/1/room/${roomId}`,
@@ -188,6 +189,25 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
           if (type === 'gameEnd') {
             gameStateStore.setGameState('GAME_END');
             winnerStore.setWinner(response.winner);
+          }
+
+          if (type === 'eventTrigger') {
+            const { trigger } = response;
+            gameBubbleStore.setEventType('MARK');
+            gameBubbleStore.setTriggerUser(trigger);
+          }
+
+          if (type === 'event') {
+            const { eventType, trigger, target } = response;
+            gameBubbleStore.setEventType(eventType);
+            gameBubbleStore.setTargetUser(target);
+            gameBubbleStore.setTriggerUser(trigger);
+          }
+
+          if (type === 'eventEnd') {
+            gameBubbleStore.setEventType(null);
+            gameBubbleStore.setTargetUser(null);
+            gameBubbleStore.setTriggerUser(null);
           }
         },
         {

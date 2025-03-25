@@ -1,12 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { useGameBoardInfoStore } from '@/stores/websocket/useGameBoardInfoStore';
+import {
+  EventType,
+  useGameBubbleStore,
+} from '@/stores/websocket/useGameBubbleStore';
 import { useParticipantInfoStore } from '@/stores/websocket/useGameParticipantStore';
 
 interface FootholderPosition {
   xRatio: number;
   yRatio: number;
-  size?: number; // 발판 크기 배율 (기본값 1.5)
+  size?: number;
 }
 
 interface UserCharacter {
@@ -23,12 +27,36 @@ interface UserCharacter {
 
 const GameBoard = () => {
   const { boardInfo } = useGameBoardInfoStore();
+  const { targetUser, triggerUser, eventType } = useGameBubbleStore();
   const { participantInfo } = useParticipantInfoStore();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const animationFrameRef = useRef<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [footholderImage, setFootholderImage] =
     useState<HTMLImageElement | null>(null);
+  const [bubbleImage, setBubbleImage] = useState<HTMLImageElement | null>(null);
+  const [bubbleLeftImage, setBubbleLeftImage] =
+    useState<HTMLImageElement | null>(null);
+  const [questionImage, setQuestionImage] = useState<HTMLImageElement | null>(
+    null,
+  );
+
+  // 이모지를 다중 상태로 관리
+  const [emojiImages, setEmojiImages] = useState<
+    Record<EventType, HTMLImageElement | null>
+  >({
+    MARK: null,
+    PLUS: null,
+    MINUS: null,
+    BOMB: null,
+    PULL: null,
+    NOTHING: null,
+    OVERLAP: null,
+    CLOVER: null,
+    SWAP: null,
+    WARP: null,
+    MAGNET: null,
+  });
 
   const [characters, setCharacters] = useState<UserCharacter[]>([]);
 
@@ -107,6 +135,91 @@ const GameBoard = () => {
         setFootholderImage(fhImg);
       };
 
+      // 말풍선 이미지 (오른쪽) 로딩
+      const bubbleImg = new Image();
+      bubbleImg.src = '/bubble.svg';
+      bubbleImg.onload = () => {
+        setBubbleImage(bubbleImg);
+      };
+
+      // 말풍선 이미지 (왼쪽) 로딩
+      const bubbleLeftImg = new Image();
+      bubbleLeftImg.src = '/bubble_left.svg';
+      bubbleLeftImg.onload = () => {
+        setBubbleLeftImage(bubbleLeftImg);
+      };
+
+      // 질문 이모지 로딩
+      const qImg = new Image();
+      qImg.src = '/eventemoji/question.svg';
+      qImg.onload = () => {
+        setQuestionImage(qImg);
+      };
+      qImg.onerror = () => {
+        console.error('질문 이모지 이미지 로드 실패: /eventemoji/question.svg');
+      };
+
+      // 모든 이모지 타입 정의
+      const emojiTypes: EventType[] = [
+        'MARK',
+        'PLUS',
+        'MINUS',
+        'BOMB',
+        'PULL',
+        'NOTHING',
+        'OVERLAP',
+        'CLOVER',
+        'SWAP',
+        'WARP',
+        'MAGNET',
+      ];
+
+      // 모든 이모지 이미지 로딩
+      const emojiImagesLoaded: Record<EventType, HTMLImageElement> =
+        {} as Record<EventType, HTMLImageElement>;
+
+      await Promise.all(
+        emojiTypes.map(async type => {
+          const img = new Image();
+          const imagePath = `/eventemoji/${type.toLowerCase()}.svg`;
+          img.src = imagePath;
+
+          try {
+            await new Promise<void>((resolve, reject) => {
+              img.onload = () => {
+                console.log(`이모지 이미지 로드 성공: ${type}`);
+                resolve();
+              };
+              img.onerror = () => {
+                console.error(
+                  `이모지 이미지 로드 실패: ${type} (${imagePath})`,
+                );
+                reject();
+              };
+              // 5초 타임아웃 설정
+              setTimeout(() => reject(), 5000);
+            });
+
+            emojiImagesLoaded[type] = img;
+          } catch {
+            // 이모지 로드 실패 시 fallback으로 vercel.svg 사용
+            const fallbackImg = new Image();
+            fallbackImg.src = '/vercel.svg';
+
+            await new Promise<void>(resolve => {
+              fallbackImg.onload = () => {
+                console.log(`대체 이모지 로드 성공: ${type}`);
+                resolve();
+              };
+            });
+
+            emojiImagesLoaded[type] = fallbackImg;
+          }
+        }),
+      );
+
+      setEmojiImages(emojiImagesLoaded);
+
       const userCharacters: UserCharacter[] = await Promise.all(
         participantInfo.map(
           participant =>
@@ -125,6 +238,22 @@ const GameBoard = () => {
                   moveProgress: 0,
                 });
               };
+              img.onerror = () => {
+                console.error(
+                  '캐릭터 이미지 로딩 실패:',
+                  participant.character,
+                );
+                resolve({
+                  name: participant.userName,
+                  position: 0,
+                  image: null,
+                  animationOffset: 0,
+                  isMoving: false,
+                  fromPosition: 0,
+                  toPosition: 0,
+                  moveProgress: 0,
+                });
+              };
             }),
         ),
       );
@@ -134,9 +263,8 @@ const GameBoard = () => {
     };
 
     loadImages();
-  }, []);
+  }, [participantInfo]);
 
-  // 애니메이션 업데이트 함수
   const updateAnimation = (timestamp: number) => {
     if (!animationTimeRef.current) {
       animationTimeRef.current = timestamp;
@@ -144,16 +272,13 @@ const GameBoard = () => {
 
     const elapsed = timestamp - animationTimeRef.current;
 
-    // 각 캐릭터마다 약간씩 다른 애니메이션 위상을 갖도록 업데이트
     setCharacters(prevCharacters =>
       prevCharacters.map((character, index) => {
-        // 캐릭터 상하 애니메이션
         const phaseOffset = index * 0.5;
         const newOffset =
           Math.sin((elapsed / 1000) * animationSpeedRef.current + phaseOffset) *
           animationRangeRef.current;
 
-        // 캐릭터 이동 애니메이션 업데이트
         let updatedCharacter = {
           ...character,
           animationOffset: newOffset,
@@ -194,10 +319,28 @@ const GameBoard = () => {
       isLoading ||
       !canvasRef.current ||
       !footholderImage ||
-      //   !backgroundImage ||
+      !bubbleImage ||
+      !bubbleLeftImage ||
+      !questionImage ||
+      Object.values(emojiImages).every(img => !img) ||
       characters.length === 0
-    )
+    ) {
+      console.log('캔버스 그리기 조건 불충족:', {
+        isLoading,
+        hasCanvas: !!canvasRef.current,
+        hasFootholderImage: !!footholderImage,
+        hasBubbleImage: !!bubbleImage,
+        hasBubbleLeftImage: !!bubbleLeftImage,
+        hasQuestionImage: !!questionImage,
+        hasEmojiImages: !Object.values(emojiImages).every(img => !img),
+        charactersLength: characters.length,
+      });
       return;
+    }
+
+    // console.log('캔버스 그리기 시작');
+    // console.log('캐릭터 정보:', characters);
+    // console.log('말풍선 정보:', { targetUser, triggerUser, eventType });
 
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
@@ -216,24 +359,25 @@ const GameBoard = () => {
       drawCanvas();
     };
 
-    // 화면 크기 변경 감지
     window.addEventListener('resize', updateCanvasSize);
     updateCanvasSize();
 
-    // Canvas에 그리기
     function drawCanvas() {
-      if (!canvas || !ctx || !footholderImage) return;
-      //   !backgroundImage ||
+      if (
+        !canvas ||
+        !ctx ||
+        !footholderImage ||
+        !bubbleImage ||
+        !bubbleLeftImage ||
+        !questionImage ||
+        Object.values(emojiImages).every(img => !img)
+      )
+        return;
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // 왼쪽 3/4 영역의 너비 계산
       const leftSectionWidth = canvas.width * 0.75;
-
-      // 발판 이미지 그리기
       const baseFootholderWidth = Math.min(48, leftSectionWidth * 0.08); // 기본 발판 크기
-
-      // 발판 좌표 정보 저장 (캐릭터 배치를 위해)
       const footholderPositions: {
         x: number;
         y: number;
@@ -249,26 +393,24 @@ const GameBoard = () => {
         // 발판 크기 (개별 크기 적용, 기본값은 1.5)
         const sizeMultiplier = position.size || 1.5;
         const footholderWidth = baseFootholderWidth * sizeMultiplier;
-        const footholderHeight = footholderWidth; // 정사각형 유지
+        const footholderHeight = footholderWidth;
 
         ctx.drawImage(
           footholderImage,
-          x - footholderWidth / 2, // 중심점 기준으로 좌표 조정
+          x - footholderWidth / 2,
           y - footholderHeight / 2,
           footholderWidth,
           footholderHeight,
         );
 
-        // 발판 위치 정보 저장
         footholderPositions[index] = {
           x,
-          y: y - footholderHeight / 2, // 발판 상단 위치
+          y: y - footholderHeight / 2,
           width: footholderWidth,
           height: footholderHeight,
         };
       });
 
-      // 모든 캐릭터 그리기
       characters.forEach(character => {
         if (!character.image) return;
 
@@ -276,47 +418,38 @@ const GameBoard = () => {
         let characterY = 0;
 
         if (character.isMoving) {
-          // 이동 애니메이션 중인 경우 시작 위치와 목표 위치 사이를 보간
           const fromPos = footholderPositions[character.fromPosition];
           const toPos = footholderPositions[character.toPosition];
 
           if (!fromPos || !toPos) return;
 
-          // 이지잉(Easing) 함수를 적용하여 자연스러운 이동 (이 예제에서는 ease-in-out)
           const t = character.moveProgress;
           const easedProgress =
             t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
 
-          // 시작 위치와 목표 위치 사이를 선형 보간
           characterX = fromPos.x + (toPos.x - fromPos.x) * easedProgress;
           characterY = fromPos.y + (toPos.y - fromPos.y) * easedProgress;
 
-          // 이동 중에는 약간 더 높게 뛰는 효과 추가
           const jumpHeight = 30 * Math.sin(Math.PI * easedProgress);
           characterY -= jumpHeight;
         } else {
-          // 정지 상태인 경우 현재 발판 위치 사용
           const footholderPos = footholderPositions[character.position];
           if (!footholderPos) return;
 
           characterX = footholderPos.x;
           characterY = footholderPos.y;
         }
+        const characterWidth = baseFootholderWidth * 1.5;
+        const characterHeight = characterWidth * 1.25;
 
-        // 고정된 캐릭터 크기 (발판 크기에 관계없이 일정)
-        const characterWidth = baseFootholderWidth * 1.5; // 기본 발판 크기의 1.5배
-        const characterHeight = characterWidth * 1.25; // 높이:너비 비율 = 1.25:1
-
-        // 캐릭터 그리기
         ctx.drawImage(
           character.image,
-          characterX - characterWidth / 2 - 10, // 발판 중앙에 배치 (약간 왼쪽으로)
-          characterY - characterHeight + character.animationOffset, // 애니메이션 오프셋 적용
+          characterX - characterWidth / 2 - 10,
+          characterY - characterHeight + character.animationOffset,
           characterWidth,
           characterHeight,
         );
 
-        // 캐릭터 위에 닉네임 표시
         ctx.font = '14px Arial';
         ctx.fillStyle = 'white';
         ctx.textAlign = 'center';
@@ -337,14 +470,100 @@ const GameBoard = () => {
           characterX,
           characterY - characterHeight - 10 + character.animationOffset,
         );
+
+        // 말풍선 그리기
+        const bubbleWidth = characterWidth * 0.8;
+        const bubbleHeight = bubbleWidth * 0.8;
+        const emojiSize = bubbleWidth * 0.5;
+
+        // targetUser가 현재 캐릭터인 경우 우측 상단에 말풍선 표시
+        if (targetUser === character.name) {
+          const rightBubbleX = characterX + characterWidth / 2 - 10;
+          const rightBubbleY =
+            characterY - characterHeight + character.animationOffset;
+
+          // 우측 말풍선 그리기
+          ctx.drawImage(
+            bubbleImage,
+            rightBubbleX,
+            rightBubbleY,
+            bubbleWidth,
+            bubbleHeight,
+          );
+
+          // 우측 이모지 그리기
+          ctx.drawImage(
+            questionImage,
+            rightBubbleX + bubbleWidth / 2 - emojiSize / 2,
+            rightBubbleY + bubbleHeight / 2 - emojiSize / 2,
+            emojiSize,
+            emojiSize,
+          );
+        }
+
+        // 현재 이벤트 타입에 맞는 이모지 이미지 선택
+        const currentEmoji = emojiImages[eventType as EventType];
+
+        if (!currentEmoji) return; // triggerUser가 현재 캐릭터인 경우 좌측 상단에 말풍선 표시
+
+        if (triggerUser === character.name) {
+          const leftBubbleX =
+            characterX - characterWidth / 2 - bubbleWidth + 10;
+          const leftBubbleY =
+            characterY - characterHeight + character.animationOffset;
+
+          // 좌측 말풍선 그리기
+          ctx.drawImage(
+            bubbleLeftImage,
+            leftBubbleX,
+            leftBubbleY,
+            bubbleWidth,
+            bubbleHeight,
+          );
+
+          // 좌측 이모지
+          ctx.drawImage(
+            currentEmoji,
+            leftBubbleX + bubbleWidth / 2 - emojiSize / 2,
+            leftBubbleY + bubbleHeight / 2 - emojiSize / 2,
+            emojiSize,
+            emojiSize,
+          );
+        }
       });
     }
+
+    // targetUser, triggerUser, eventType이 변경될 때마다 다시 그리기
+    const redrawOnBubbleChange = () => {
+      if (targetUser && triggerUser) {
+        console.log('말풍선 정보가 변경됨:', {
+          targetUser,
+          triggerUser,
+          eventType,
+        });
+      }
+      drawCanvas();
+    };
+
+    // 변수 변경 감지 및 강제 리렌더링
+    redrawOnBubbleChange();
 
     return () => {
       window.removeEventListener('resize', updateCanvasSize);
       cancelAnimationFrame(animationFrameRef.current);
     };
-  }, [isLoading, footholderImage, characters]);
+  }, [
+    isLoading,
+    footholderImage,
+    bubbleImage,
+    bubbleLeftImage,
+    questionImage,
+    emojiImages,
+    characters,
+    targetUser,
+    triggerUser,
+    eventType,
+  ]);
 
   return (
     <canvas ref={canvasRef} className='absolute top-0 left-0 h-full w-screen' />
