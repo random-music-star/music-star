@@ -44,7 +44,7 @@ const ChatBox = ({ currentUserId, roomId }: ChatBoxProps) => {
     <div className='flex h-full w-full flex-col'>
       <div
         ref={chatContainerRef}
-        className='neon-scrollbar flex-1 overflow-y-auto px-2 py-1'
+        className='neon-scrollbar flex-1 flex-wrap overflow-y-auto px-2 py-1'
       >
         {gameChattings.map((message, index) => (
           <div key={`${message.sender}-${index}`} className='mb-3'>

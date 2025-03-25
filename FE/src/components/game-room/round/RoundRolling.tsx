@@ -87,17 +87,16 @@ const RoundRolling: React.FC = () => {
   const displayMode = isSelected ? '한곡듣기' : modeOptions[currentIndex];
 
   return (
-    <div className='h-full w-full p-6'>
-      <div className='flex h-full w-full flex-col rounded-lg px-6 py-4'>
-        <h2 className='mb-3 text-center text-2xl font-bold text-fuchsia-300'>
-          이번 라운드는?
-        </h2>
-
-        <div className='relative overflow-hidden rounded-lg border border-purple-500/30 bg-purple-900/20'>
-          <div className='flex h-20 items-center justify-center'>
+    <div className='w-full'>
+      <h2 className='mb-3 text-center text-lg font-bold text-fuchsia-300'>
+        이번 라운드는?
+      </h2>
+      <div className='flex w-full justify-evenly rounded-lg'>
+        <div className='mr-4 overflow-hidden rounded-lg border border-purple-500/30 bg-purple-900/20 px-8 py-[10px]'>
+          <div className='flex items-center justify-center'>
             <div
-              className={`text-center text-2xl font-bold transition-all duration-300 ${
-                isSelected ? 'scale-150 text-fuchsia-200' : 'text-purple-100'
+              className={`px-8 py-[10px] text-center font-bold transition-all duration-300 ${
+                isSelected ? 'scale-150 text-fuchsia-300' : 'text-purple-100'
               }`}
             >
               {displayMode}
@@ -106,11 +105,11 @@ const RoundRolling: React.FC = () => {
         </div>
 
         {/* 모드 목록 (미니 디스플레이) */}
-        <div className='mt-4 flex justify-center gap-2'>
+        <div className='flex items-center justify-center gap-4'>
           {modeOptions.map((mode, index) => (
             <div
               key={mode}
-              className={`rounded-full px-3 py-1 text-sm transition-all ${
+              className={`h-fit rounded-full px-3 py-1 text-sm transition-all ${
                 index === currentIndex
                   ? 'bg-purple-700/50 text-purple-100'
                   : 'bg-purple-900/30 text-purple-300/70'

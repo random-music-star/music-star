@@ -8,16 +8,15 @@ const GamePlayPanel = () => {
   const { gameState } = useGameStateStore();
 
   return (
-    <div className='game-play-panel'>
-      {gameState === 'TIMER_WAIT' && <RoundRolling />}
-      {gameState === 'ROUND_OPEN' && <RoundRolling />}
+    <div className='game-play-panel flex max-h-[140px] min-h-[140px] min-w-[500px] flex-col items-center justify-center rounded-2xl bg-black/80 p-4'>
+      {(gameState === 'TIMER_WAIT' || gameState === 'ROUND_OPEN') && (
+        <RoundRolling />
+      )}
       {gameState === 'GAME_END' && <GameEnd />}
 
       {(gameState === 'QUIZ_OPEN' || gameState === 'GAME_RESULT') && (
         <GameMusicPlayer gameState={gameState} />
       )}
-
-      {/* {gameState === 'SCORE_UPDATE' && <TRoundResult />} */}
     </div>
   );
 };
