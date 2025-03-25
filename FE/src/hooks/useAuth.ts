@@ -5,14 +5,17 @@ import { useNicknameStore } from '@/stores/auth/useNicknameStore';
 export function useAuth() {
   const { setNickname } = useNicknameStore();
   const login = async () => {
-    const { token } = await fetch(
+    const { username } = await fetch(
       `${process.env.NEXT_PUBLIC_BASE_URL}/member/guest/login`,
     )
       .then(res => res.json())
-      .then(data => data as { token: string });
+      .then(data => data as { username: string });
 
-    setCookie('userNickname', token, { maxAge: 60 * 60 * 24 * 7, path: '/' });
-    setNickname(token);
+    setCookie('userNickname', username, {
+      maxAge: 60 * 60 * 24 * 7,
+      path: '/',
+    });
+    setNickname(username);
   };
 
   const logout = () => {
