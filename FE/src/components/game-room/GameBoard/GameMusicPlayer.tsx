@@ -35,31 +35,26 @@ const GameMusicPlayer = ({ gameState }: MusicPlayerProps) => {
       {songUrl && <YoutubePlayer url={songUrl} onError={handleError} />}
 
       {/* 헤더 */}
-      <div className='mb-4 text-center'>
+      <div className='mb-2 flex items-center justify-between text-center'>
         <h2 className='text-xl font-bold text-fuchsia-300'>
           라운드 {currentRound}
         </h2>
+        <div className='flex flex-col items-center text-sm text-purple-200'>
+          {gameState === 'GAME_RESULT' ? (
+            <span className='text-fuchsia-300'>
+              다음 문제를 풀고싶다면 . 을 눌러주세요!
+            </span>
+          ) : (
+            <span className='text-fuchsia-300'>
+              채팅창에 정답을 입력하세요! (스킵: .)
+            </span>
+          )}
+        </div>
       </div>
 
       {/* 메인 컨텐츠 */}
       {gameState === 'QUIZ_OPEN' && (
         <div className='flex w-full flex-col text-purple-100'>
-          {/* 음악 아이콘 애니메이션 */}
-          <div className='mb-4 flex justify-center'>
-            <div className='flex items-end space-x-2'>
-              {[1, 2, 3, 4].map(bar => (
-                <div
-                  key={bar}
-                  className='w-3 animate-pulse bg-fuchsia-500/70'
-                  style={{
-                    height: `${16 + bar * 8}px`,
-                    animationDelay: `${bar * 0.2}s`,
-                  }}
-                ></div>
-              ))}
-            </div>
-          </div>
-
           {/* 플레이어 오류 표시 */}
           {playerError && (
             <div className='mb-2 text-sm text-red-400'>{playerError}</div>
@@ -95,55 +90,43 @@ const GameMusicPlayer = ({ gameState }: MusicPlayerProps) => {
           </div>
 
           {/* 안내 텍스트 */}
-          <div className='mt-6 flex flex-col items-center text-sm text-purple-200'>
-            <span className='text-fuchsia-300'>채팅창에 정답을 입력하세요</span>
-            <span className='text-fuchsia-300'> (스킵: .)</span>
-          </div>
         </div>
       )}
 
       {gameState === 'GAME_RESULT' && gameRoundResult && (
-        <div className='flex w-full flex-col items-center px-4'>
-          <div className='mb-8 text-center'>
-            <h3 className='text-xl font-bold text-fuchsia-300'>정답 공개!</h3>
-          </div>
+        <div className='flex w-full items-center justify-evenly'>
+          {gameRoundResult.winner && (
+            <div className='mr-4 flex flex-col items-center justify-center gap-2'>
+              <span className='text-sm font-medium text-white'>
+                {gameRoundResult.winner}
+              </span>
+              <h3 className='text-3xl font-bold tracking-wide text-cyan-400'>
+                정 답 !
+              </h3>
+            </div>
+          )}
+          <div>
+            <div className='space-y-4 text-base text-purple-100'>
+              <div className='flex w-full flex-col gap-2'>
+                <div className='flex w-full items-start gap-4'>
+                  <span className='w-[40px] flex-shrink-0 font-medium text-purple-200'>
+                    가수
+                  </span>
+                  <span className='flex-1 font-bold break-words text-cyan-100'>
+                    {gameRoundResult.singer || '정보 없음'}
+                  </span>
+                </div>
 
-          <div className='w-full max-w-md space-y-4 text-base text-purple-100'>
-            {/* 우승자 정보 */}
-            {gameRoundResult.winner && (
-              <div className='mb-5 flex flex-col items-center justify-center'>
-                <span className='mb-1 block text-sm font-medium text-purple-200'>
-                  정답자
-                </span>
-                <span className='text-lg font-bold text-yellow-300'>
-                  {gameRoundResult.winner}
-                </span>
-              </div>
-            )}
-
-            <div className='flex w-full flex-col gap-2'>
-              <div className='flex w-full items-start gap-4'>
-                <span className='w-[40px] flex-shrink-0 font-medium text-purple-200'>
-                  가수
-                </span>
-                <span className='flex-1 font-bold break-words text-fuchsia-200'>
-                  {gameRoundResult.singer || '정보 없음'}
-                </span>
-              </div>
-
-              <div className='flex w-full items-start gap-4'>
-                <span className='w-[40px] flex-shrink-0 font-medium text-purple-200'>
-                  제목
-                </span>
-                <span className='flex-1 font-bold break-words text-fuchsia-200'>
-                  {gameRoundResult.songTitle || '정보 없음'}
-                </span>
+                <div className='flex w-full items-start gap-4'>
+                  <span className='w-[40px] flex-shrink-0 font-medium text-purple-200'>
+                    제목
+                  </span>
+                  <span className='flex-1 font-bold break-words text-cyan-100'>
+                    {gameRoundResult.songTitle || '정보 없음'}
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
-
-          <div className='mt-6 text-center text-sm text-fuchsia-200'>
-            노래는 재생 중...
           </div>
         </div>
       )}

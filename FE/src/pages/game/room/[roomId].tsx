@@ -7,9 +7,9 @@ import { useRouter } from 'next/router';
 
 import ChatBox from '@/components/game-room/ChatBox';
 import GameBoard from '@/components/game-room/GameBoard';
-import GamePlayPanel from '@/components/game-room/GameBoard/GamePlayPanel';
 import ReadyPannel from '@/components/game-room/ReadyPannel';
 import RoomPannel from '@/components/game-room/RoomPannel';
+import GamePlay from '@/components/game-room/gamePlay';
 import { cn } from '@/lib/utils';
 import { useNicknameStore } from '@/stores/auth/useNicknameStore';
 import { useGameInfoStore } from '@/stores/websocket/useGameRoomInfoStore';
@@ -102,9 +102,17 @@ export default function GameRoom({
             />
           ) : (
             <>
-              <div className='relative h-full w-full overflow-hidden'>
-                <GamePlayPanel />
-
+              <div className='relative h-screen w-full overflow-hidden'>
+                <div
+                  className={cn(
+                    gameState === 'SCORE_UPDATE' || gameState === 'GAME_END'
+                      ? '-translate-y-full'
+                      : 'translate-y-0',
+                    'duration-700 ease-in-out',
+                  )}
+                >
+                  <GamePlay />
+                </div>
                 <div
                   className={cn(
                     'absolute top-0 left-0 h-full w-full transition-transform duration-700 ease-in-out',
@@ -120,7 +128,7 @@ export default function GameRoom({
           )}
         </div>
       </AnimatePresence>
-      <div className='flex max-h-screen min-h-screen w-[480px] max-w-[480px] flex-col items-center gap-5 bg-black/50 text-white'>
+      <div className='flex max-h-screen min-h-screen w-[480px] max-w-[480px] flex-col flex-wrap items-center gap-5 bg-black/50 text-white'>
         {gameRoomInfo?.status === 'WAITING' && <RoomPannel />}
         <div className='w-full flex-1 overflow-hidden'>
           <ChatBox currentUserId={nickname} roomId={roomId} />
