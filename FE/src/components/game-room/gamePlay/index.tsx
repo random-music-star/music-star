@@ -190,7 +190,7 @@ const GamePlay = () => {
                 transform: 'translateY(-100%)',
               }}
             >
-              <SpeechBubble text={char.chatting} />
+              <SpeechBubble text={char.chatting} isInProgress={true} />
             </div>
           );
         })}

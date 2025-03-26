@@ -7,7 +7,7 @@ import { useRouter } from 'next/router';
 
 import ChatBox from '@/components/game-room/ChatBox';
 import GameBoard from '@/components/game-room/GameBoard';
-import ReadyPannel from '@/components/game-room/ReadyPannel';
+import ReadyPanel from '@/components/game-room/ReadyPanel';
 import RoomPannel from '@/components/game-room/RoomPannel';
 import GamePlay from '@/components/game-room/gamePlay';
 import { cn } from '@/lib/utils';
@@ -95,7 +95,7 @@ export default function GameRoom({
       <AnimatePresence mode='wait'>
         <div className='w-full'>
           {gameRoomInfo === null || gameRoomInfo.status === 'WAITING' ? (
-            <ReadyPannel
+            <ReadyPanel
               currentUserId={nickname}
               handleStartGame={handleStartGame}
               roomId={roomId}
