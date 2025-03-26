@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 
 const initialState = {
-  remainTime: null, // 제거
+  remainTime: 3, // 제거
   songUrl: null,
   boardInfo: null, // 게임 시작할 때 유저데이터 순환하면서 초기화 해야 함
   gameHint: null,
@@ -15,8 +15,8 @@ export interface GameHint {
 export type Board = Record<string, number>;
 
 interface GameScreenState {
-  remainTime: number | null;
-  setRemainTime: (remainTime: number | null) => void;
+  remainTime: number;
+  setRemainTime: (remainTime: number) => void;
   songUrl: string | null;
   setSongUrl: (songUrl: string | null) => void;
   boardInfo: Board | null;
@@ -27,8 +27,8 @@ interface GameScreenState {
 }
 
 export const useGameScreenStore = create<GameScreenState>(set => ({
-  remainTime: null,
-  setRemainTime: (remainTime: number | null) => set({ remainTime }),
+  remainTime: 0,
+  setRemainTime: (remainTime: number) => set({ remainTime }),
 
   songUrl: null,
   setSongUrl: (songUrl: string | null) => set({ songUrl }),

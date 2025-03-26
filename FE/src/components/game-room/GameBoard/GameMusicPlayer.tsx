@@ -1,28 +1,17 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 import { useGameRoundInfoStore } from '@/stores/websocket/useGameRoundInfoStore';
 import { useGameRoundResultStore } from '@/stores/websocket/useGameRoundResultStore';
 import { useGameScreenStore } from '@/stores/websocket/useGameScreenStore';
-
-import YoutubePlayer from './YoutubePlayer';
-
-// 분리된 플레이어 컴포넌트 임포트
 
 interface MusicPlayerProps {
   gameState: 'GAME_RESULT' | 'QUIZ_OPEN';
 }
 
 const GameMusicPlayer = ({ gameState }: MusicPlayerProps) => {
-  const [playerError, setPlayerError] = useState<string | null>(null);
-
   const { songUrl, gameHint } = useGameScreenStore();
   const { roundInfo } = useGameRoundInfoStore();
   const { gameRoundResult } = useGameRoundResultStore();
-
-  const handleError = (error: unknown) => {
-    console.error('플레이어 오류:', error);
-    setPlayerError('플레이어를 로드하는 중 오류가 발생했습니다.');
-  };
 
   if (!roundInfo) return null;
   if (!songUrl) return <div></div>;
@@ -32,7 +21,6 @@ const GameMusicPlayer = ({ gameState }: MusicPlayerProps) => {
   return (
     <div className='w-full max-w-full'>
       {/* 분리된 플레이어 컴포넌트 */}
-      {songUrl && <YoutubePlayer url={songUrl} onError={handleError} />}
 
       {/* 헤더 */}
       <div className='mb-2 flex items-center justify-between text-center'>
@@ -55,11 +43,6 @@ const GameMusicPlayer = ({ gameState }: MusicPlayerProps) => {
       {/* 메인 컨텐츠 */}
       {gameState === 'QUIZ_OPEN' && (
         <div className='flex w-full flex-col text-purple-100'>
-          {/* 플레이어 오류 표시 */}
-          {playerError && (
-            <div className='mb-2 text-sm text-red-400'>{playerError}</div>
-          )}
-
           {/* 힌트 정보 */}
           <div className='w-full space-y-4 text-base'>
             <div className='flex justify-between gap-12'>
