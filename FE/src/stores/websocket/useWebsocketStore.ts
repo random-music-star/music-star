@@ -106,6 +106,10 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
             if (response.remainTime === 1) {
               gameStateStore.setGameState('ROUND_OPEN');
             }
+
+            if (response.remainTime === 0) {
+              gameStateStore.setGameState('QUIZ_OPEN');
+            }
           }
 
           if (type === 'roundInfo') {
@@ -122,7 +126,6 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
 
           if (type === 'quizInfo') {
             gameScreenStore.setSongUrl(response.songUrl);
-            gameStateStore.setGameState('QUIZ_OPEN');
           }
 
           if (type === 'gameChat') {
