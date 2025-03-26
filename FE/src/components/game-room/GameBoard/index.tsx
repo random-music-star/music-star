@@ -1,10 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useGameBoardInfoStore } from '@/stores/websocket/useGameBoardInfoStore';
-import {
-  EventType,
-  useGameBubbleStore,
-} from '@/stores/websocket/useGameBubbleStore';
+import { useGameBubbleStore } from '@/stores/websocket/useGameBubbleStore';
 import { useParticipantInfoStore } from '@/stores/websocket/useGameParticipantStore';
 
 interface FootholderPosition {
@@ -16,7 +13,7 @@ interface FootholderPosition {
 interface UserCharacter {
   name: string;
   position: number; // 발판 인덱스
-  image: HTMLImageElement | null;
+  imageSrc: string; // 캐릭터 이미지 경로
   animationOffset: number;
   // 캐릭터 이동 애니메이션을 위한 추가 속성
   isMoving: boolean;
@@ -29,48 +26,21 @@ const GameBoard = () => {
   const { boardInfo } = useGameBoardInfoStore();
   const { targetUser, triggerUser, eventType } = useGameBubbleStore();
   const { participantInfo } = useParticipantInfoStore();
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const animationFrameRef = useRef<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [footholderImage, setFootholderImage] =
-    useState<HTMLImageElement | null>(null);
-  const [bubbleImage, setBubbleImage] = useState<HTMLImageElement | null>(null);
-  const [bubbleLeftImage, setBubbleLeftImage] =
-    useState<HTMLImageElement | null>(null);
-  const [questionImage, setQuestionImage] = useState<HTMLImageElement | null>(
-    null,
-  );
-
-  // 이모지를 다중 상태로 관리
-  const [emojiImages, setEmojiImages] = useState<
-    Record<EventType, HTMLImageElement | null>
-  >({
-    MARK: null,
-    PLUS: null,
-    MINUS: null,
-    BOMB: null,
-    PULL: null,
-    NOTHING: null,
-    OVERLAP: null,
-    CLOVER: null,
-    SWAP: null,
-    WARP: null,
-    MAGNET: null,
+  const [characters, setCharacters] = useState<UserCharacter[]>([]);
+  const [windowSize, setWindowSize] = useState({
+    width: typeof window !== 'undefined' ? window.innerWidth : 1920,
+    height: typeof window !== 'undefined' ? window.innerHeight : 1080,
   });
 
-  const [characters, setCharacters] = useState<UserCharacter[]>([]);
-
   // 애니메이션 상태 관리
-  const animationTimeRef = useRef<number>(0);
-  const animationSpeedRef = useRef<number>(5); // 애니메이션 속도 조절 (높을수록 빠름)
-  const animationRangeRef = useRef<number>(10); // 애니메이션 이동 범위 (픽셀)
-  const moveAnimationDurationRef = useRef<number>(250); // 이동 애니메이션 시간 (밀리초)
-  const moveStartTimeRef = useRef<number>(0);
+  const [animationTime, setAnimationTime] = useState(0);
+  const animationSpeed = 5; // 애니메이션 속도 조절 (높을수록 빠름)
+  const animationRange = 10; // 애니메이션 이동 범위 (픽셀)
+  const moveAnimationDuration = 250; // 이동 애니메이션 시간 (밀리초)
+  const [moveStartTime, setMoveStartTime] = useState(0);
 
   // 발판 위치를 비율로 정의 (0~1 사이의 값)
-  // x는 3/4 영역 기준의 비율 (0: 왼쪽 끝, 1: 오른쪽 끝)
-  // y는 전체 높이 기준의 비율 (0: 상단, 1: 하단)
-  // size는 발판 크기 배율 (기본값 1.5)
   const footholderRatios: FootholderPosition[] = [
     // 하단 행 (왼쪽에서 오른쪽으로) - 0~6
     { xRatio: 0.08, yRatio: 0.92, size: 2 }, // 0
@@ -99,6 +69,24 @@ const GameBoard = () => {
     { xRatio: 0.92, yRatio: 0.14, size: 2 }, // 19
   ];
 
+  // 윈도우 크기 변경 감지
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    };
+
+    window.addEventListener('resize', handleResize);
+    handleResize(); // 초기화 시 한 번 호출
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+  // 캐릭터 이동 처리
   const moveBoard = () => {
     setCharacters(prevCharacters => {
       return prevCharacters.map(character => {
@@ -117,456 +105,279 @@ const GameBoard = () => {
     });
 
     // 이동 시작 시간 기록
-    moveStartTimeRef.current = performance.now();
+    setMoveStartTime(performance.now());
   };
 
   useEffect(() => {
     // 이동
-    moveBoard();
+    if (Object.keys(boardInfo).length > 0) {
+      moveBoard();
+    }
   }, [boardInfo]);
 
-  // 이미지 로딩
+  // 캐릭터 초기화
   useEffect(() => {
-    const loadImages = async (): Promise<void> => {
-      // 발판 이미지 로딩
-      const fhImg = new Image();
-      fhImg.src = '/footholder.svg';
-      fhImg.onload = () => {
-        setFootholderImage(fhImg);
-      };
+    if (participantInfo.length > 0) {
+      const initialCharacters = participantInfo.map(participant => ({
+        name: participant.userName,
+        position: 0, // 초기 위치
+        imageSrc: participant.character,
+        animationOffset: 0,
+        isMoving: false,
+        fromPosition: 0,
+        toPosition: 0,
+        moveProgress: 0,
+      }));
 
-      // 말풍선 이미지 (오른쪽) 로딩
-      const bubbleImg = new Image();
-      bubbleImg.src = '/bubble.svg';
-      bubbleImg.onload = () => {
-        setBubbleImage(bubbleImg);
-      };
-
-      // 말풍선 이미지 (왼쪽) 로딩
-      const bubbleLeftImg = new Image();
-      bubbleLeftImg.src = '/bubble_left.svg';
-      bubbleLeftImg.onload = () => {
-        setBubbleLeftImage(bubbleLeftImg);
-      };
-
-      // 질문 이모지 로딩
-      const qImg = new Image();
-      qImg.src = '/eventemoji/question.svg';
-      qImg.onload = () => {
-        setQuestionImage(qImg);
-      };
-      qImg.onerror = () => {
-        console.error('질문 이모지 이미지 로드 실패: /eventemoji/question.svg');
-      };
-
-      // 모든 이모지 타입 정의
-      const emojiTypes: EventType[] = [
-        'MARK',
-        'PLUS',
-        'MINUS',
-        'BOMB',
-        'PULL',
-        'NOTHING',
-        'OVERLAP',
-        'CLOVER',
-        'SWAP',
-        'WARP',
-        'MAGNET',
-      ];
-
-      // 모든 이모지 이미지 로딩
-      const emojiImagesLoaded: Record<EventType, HTMLImageElement> =
-        {} as Record<EventType, HTMLImageElement>;
-
-      await Promise.all(
-        emojiTypes.map(async type => {
-          const img = new Image();
-          const imagePath = `/eventemoji/${type.toLowerCase()}.svg`;
-          img.src = imagePath;
-
-          try {
-            await new Promise<void>((resolve, reject) => {
-              img.onload = () => {
-                console.log(`이모지 이미지 로드 성공: ${type}`);
-                resolve();
-              };
-              img.onerror = () => {
-                console.error(
-                  `이모지 이미지 로드 실패: ${type} (${imagePath})`,
-                );
-                reject();
-              };
-              // 5초 타임아웃 설정
-              setTimeout(() => reject(), 5000);
-            });
-
-            emojiImagesLoaded[type] = img;
-          } catch {
-            // 이모지 로드 실패 시 fallback으로 vercel.svg 사용
-            const fallbackImg = new Image();
-            fallbackImg.src = '/vercel.svg';
-
-            await new Promise<void>(resolve => {
-              fallbackImg.onload = () => {
-                console.log(`대체 이모지 로드 성공: ${type}`);
-                resolve();
-              };
-            });
-
-            emojiImagesLoaded[type] = fallbackImg;
-          }
-        }),
-      );
-
-      setEmojiImages(emojiImagesLoaded);
-
-      const userCharacters: UserCharacter[] = await Promise.all(
-        participantInfo.map(
-          participant =>
-            new Promise<UserCharacter>(resolve => {
-              const img = new Image();
-              img.src = participant.character; // 직접 경로 사용
-              img.onload = () => {
-                resolve({
-                  name: participant.userName,
-                  position: 0,
-                  image: img,
-                  animationOffset: 0,
-                  isMoving: false,
-                  fromPosition: 0,
-                  toPosition: 0,
-                  moveProgress: 0,
-                });
-              };
-              img.onerror = () => {
-                console.error(
-                  '캐릭터 이미지 로딩 실패:',
-                  participant.character,
-                );
-                resolve({
-                  name: participant.userName,
-                  position: 0,
-                  image: null,
-                  animationOffset: 0,
-                  isMoving: false,
-                  fromPosition: 0,
-                  toPosition: 0,
-                  moveProgress: 0,
-                });
-              };
-            }),
-        ),
-      );
-
-      setCharacters(userCharacters);
+      setCharacters(initialCharacters);
       setIsLoading(false);
-    };
-
-    loadImages();
+    }
   }, [participantInfo]);
 
-  const updateAnimation = (timestamp: number) => {
-    if (!animationTimeRef.current) {
-      animationTimeRef.current = timestamp;
-    }
+  // 애니메이션 효과
+  useEffect(() => {
+    let animationId: number;
+    let lastTimestamp = 0;
 
-    const elapsed = timestamp - animationTimeRef.current;
+    const animate = (timestamp: number) => {
+      if (!lastTimestamp) {
+        lastTimestamp = timestamp;
+      }
 
-    setCharacters(prevCharacters =>
-      prevCharacters.map((character, index) => {
-        const phaseOffset = index * 0.5;
-        const newOffset =
-          Math.sin((elapsed / 1000) * animationSpeedRef.current + phaseOffset) *
-          animationRangeRef.current;
+      const deltaTime = timestamp - lastTimestamp;
+      setAnimationTime(prev => prev + deltaTime);
 
-        let updatedCharacter = {
-          ...character,
-          animationOffset: newOffset,
-        };
+      // 캐릭터 애니메이션 업데이트
+      setCharacters(prevCharacters => {
+        return prevCharacters.map((character, index) => {
+          const phaseOffset = index * 0.5;
+          const newOffset =
+            Math.sin((animationTime / 1000) * animationSpeed + phaseOffset) *
+            animationRange;
 
-        // 캐릭터가 이동 중이면 이동 진행도 업데이트
-        if (character.isMoving) {
-          const moveElapsed = timestamp - moveStartTimeRef.current;
-          const progress = Math.min(
-            moveElapsed / moveAnimationDurationRef.current,
-            1,
-          );
+          let updatedCharacter = {
+            ...character,
+            animationOffset: newOffset,
+          };
 
-          updatedCharacter.moveProgress = progress;
+          // 이동 중인 캐릭터의 이동 진행도 업데이트
+          if (character.isMoving) {
+            const moveElapsed = timestamp - moveStartTime;
+            const progress = Math.min(moveElapsed / moveAnimationDuration, 1);
 
-          // 이동이 완료되면 이동 상태 초기화
-          if (progress >= 1) {
             updatedCharacter = {
               ...updatedCharacter,
-              isMoving: false,
-              position: updatedCharacter.toPosition,
-              fromPosition: updatedCharacter.toPosition,
+              moveProgress: progress,
             };
+
+            // 이동 완료 시 상태 업데이트
+            if (progress >= 1) {
+              updatedCharacter = {
+                ...updatedCharacter,
+                isMoving: false,
+                position: updatedCharacter.toPosition,
+                fromPosition: updatedCharacter.toPosition,
+              };
+            }
+          }
+
+          return updatedCharacter;
+        });
+      });
+
+      lastTimestamp = timestamp;
+      animationId = requestAnimationFrame(animate);
+    };
+
+    animationId = requestAnimationFrame(animate);
+
+    return () => {
+      cancelAnimationFrame(animationId);
+    };
+  }, [animationTime, moveStartTime]);
+
+  if (isLoading) {
+    return (
+      <div className='flex h-full w-full items-center justify-center'>
+        로딩 중...
+      </div>
+    );
+  }
+  return (
+    <div className='absolute top-0 left-0 h-full w-full overflow-hidden'>
+      {/* 발판 렌더링 */}
+      {footholderRatios.map((position, index) => {
+        const leftSectionWidth = windowSize.width * 0.75;
+        const baseSize = Math.min(48, leftSectionWidth * 0.08);
+        const size = baseSize * (position.size || 1.5);
+        const x = position.xRatio * leftSectionWidth;
+        const y = position.yRatio * windowSize.height;
+
+        return (
+          <div
+            key={`footholder-${index}`}
+            className='absolute bg-contain bg-center bg-no-repeat'
+            style={{
+              left: `${x - size / 2}px`,
+              top: `${y - size / 2}px`,
+              width: `${size}px`,
+              height: `${size}px`,
+              backgroundImage: 'url(/footholder.svg)',
+              zIndex: 1,
+            }}
+          />
+        );
+      })}
+
+      {/* 캐릭터 렌더링 */}
+      {characters.map((character, charIndex) => {
+        // 캐릭터의 기본 위치를 계산 (애니메이션 오프셋 제외)
+        const leftSectionWidth = windowSize.width * 0.75;
+        const baseSize = Math.min(48, leftSectionWidth * 0.08);
+        const charWidth = baseSize * 1.5;
+        const charHeight = charWidth * 1.25;
+        const characterYOffset = 20; // 발판에서 위로 올린 값
+
+        let x = 0;
+        let y = 0;
+
+        if (character.isMoving) {
+          const fromPosition = footholderRatios[character.fromPosition];
+          const toPosition = footholderRatios[character.toPosition];
+
+          if (fromPosition && toPosition) {
+            const t = character.moveProgress;
+            const easedT =
+              t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+
+            const fromX = fromPosition.xRatio * leftSectionWidth;
+            const fromY = fromPosition.yRatio * windowSize.height;
+            const toX = toPosition.xRatio * leftSectionWidth;
+            const toY = toPosition.yRatio * windowSize.height;
+
+            x = fromX + (toX - fromX) * easedT;
+            y = fromY + (toY - fromY) * easedT;
+
+            // 점프 효과
+            const jumpHeight = 30 * Math.sin(Math.PI * easedT);
+            y -= jumpHeight;
+          }
+        } else {
+          const position = footholderRatios[character.position];
+          if (position) {
+            x = position.xRatio * leftSectionWidth;
+            y = position.yRatio * windowSize.height;
           }
         }
 
-        return updatedCharacter;
-      }),
-    );
+        // 캐릭터 이미지 위치 계산
+        const characterX = x - charWidth / 2 - 10;
+        const characterY = y - charHeight - characterYOffset;
 
-    // 다음 프레임 요청
-    animationFrameRef.current = requestAnimationFrame(updateAnimation);
-  };
+        // 이름 위치 계산
+        const nameX = x;
+        const nameY = y - charHeight - 30 - characterYOffset;
 
-  // Canvas 그리기
-  useEffect(() => {
-    if (
-      isLoading ||
-      !canvasRef.current ||
-      !footholderImage ||
-      !bubbleImage ||
-      !bubbleLeftImage ||
-      !questionImage ||
-      Object.values(emojiImages).every(img => !img) ||
-      characters.length === 0
-    ) {
-      console.log('캔버스 그리기 조건 불충족:', {
-        isLoading,
-        hasCanvas: !!canvasRef.current,
-        hasFootholderImage: !!footholderImage,
-        hasBubbleImage: !!bubbleImage,
-        hasBubbleLeftImage: !!bubbleLeftImage,
-        hasQuestionImage: !!questionImage,
-        hasEmojiImages: !Object.values(emojiImages).every(img => !img),
-        charactersLength: characters.length,
-      });
-      return;
-    }
-
-    // console.log('캔버스 그리기 시작');
-    // console.log('캐릭터 정보:', characters);
-    // console.log('말풍선 정보:', { targetUser, triggerUser, eventType });
-
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-
-    if (!ctx) return;
-
-    // 애니메이션 시작
-    animationFrameRef.current = requestAnimationFrame(updateAnimation);
-
-    // Canvas 크기 설정 (화면 크기에 맞게)
-    const updateCanvasSize = () => {
-      if (!canvas || !ctx) return;
-
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      drawCanvas();
-    };
-
-    window.addEventListener('resize', updateCanvasSize);
-    updateCanvasSize();
-
-    function drawCanvas() {
-      if (
-        !canvas ||
-        !ctx ||
-        !footholderImage ||
-        !bubbleImage ||
-        !bubbleLeftImage ||
-        !questionImage ||
-        Object.values(emojiImages).every(img => !img)
-      )
-        return;
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      const leftSectionWidth = canvas.width * 0.75;
-      const baseFootholderWidth = Math.min(48, leftSectionWidth * 0.08); // 기본 발판 크기
-      const footholderPositions: {
-        x: number;
-        y: number;
-        width: number;
-        height: number;
-      }[] = [];
-
-      footholderRatios.forEach((position, index) => {
-        // 비율을 실제 픽셀 좌표로 변환
-        const x = position.xRatio * leftSectionWidth;
-        const y = position.yRatio * canvas.height;
-
-        // 발판 크기 (개별 크기 적용, 기본값은 1.5)
-        const sizeMultiplier = position.size || 1.5;
-        const footholderWidth = baseFootholderWidth * sizeMultiplier;
-        const footholderHeight = footholderWidth;
-
-        ctx.drawImage(
-          footholderImage,
-          x - footholderWidth / 2,
-          y - footholderHeight / 2,
-          footholderWidth,
-          footholderHeight,
-        );
-
-        footholderPositions[index] = {
-          x,
-          y: y - footholderHeight / 2,
-          width: footholderWidth,
-          height: footholderHeight,
-        };
-      });
-
-      characters.forEach(character => {
-        if (!character.image) return;
-
-        let characterX = 0;
-        let characterY = 0;
-
-        if (character.isMoving) {
-          const fromPos = footholderPositions[character.fromPosition];
-          const toPos = footholderPositions[character.toPosition];
-
-          if (!fromPos || !toPos) return;
-
-          const t = character.moveProgress;
-          const easedProgress =
-            t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
-
-          characterX = fromPos.x + (toPos.x - fromPos.x) * easedProgress;
-          characterY = fromPos.y + (toPos.y - fromPos.y) * easedProgress;
-
-          const jumpHeight = 30 * Math.sin(Math.PI * easedProgress);
-          characterY -= jumpHeight;
-        } else {
-          const footholderPos = footholderPositions[character.position];
-          if (!footholderPos) return;
-
-          characterX = footholderPos.x;
-          characterY = footholderPos.y;
-        }
-        const characterWidth = baseFootholderWidth * 1.5;
-        const characterHeight = characterWidth * 1.25;
-
-        ctx.drawImage(
-          character.image,
-          characterX - characterWidth / 2 - 10,
-          characterY - characterHeight + character.animationOffset,
-          characterWidth,
-          characterHeight,
-        );
-
-        ctx.font = '14px Arial';
-        ctx.fillStyle = 'white';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'bottom';
-
-        // 텍스트에 외곽선 추가하여 가독성 향상
-        ctx.strokeStyle = 'black';
-        ctx.lineWidth = 3;
-        ctx.strokeText(
-          character.name,
-          characterX,
-          characterY - characterHeight - 10 + character.animationOffset,
-        );
-
-        // 글자 그리기
-        ctx.fillText(
-          character.name,
-          characterX,
-          characterY - characterHeight - 10 + character.animationOffset,
-        );
-
-        // 말풍선 그리기
-        const bubbleWidth = characterWidth * 0.8;
+        // 말풍선 위치 계산
+        const bubbleWidth = charWidth * 0.8;
         const bubbleHeight = bubbleWidth * 0.8;
-        const emojiSize = bubbleWidth * 0.5;
 
-        // targetUser가 현재 캐릭터인 경우 우측 상단에 말풍선 표시
-        if (targetUser === character.name) {
-          const rightBubbleX = characterX + characterWidth / 2 - 10;
-          const rightBubbleY =
-            characterY - characterHeight + character.animationOffset;
+        // 수정: 말풍선을 오른쪽에 배치 (+ 부호로 변경)
+        const rightBubbleX = x + charWidth / 2 + 5;
+        const rightBubbleY = y - charHeight - characterYOffset;
 
-          // 우측 말풍선 그리기
-          ctx.drawImage(
-            bubbleImage,
-            rightBubbleX,
-            rightBubbleY,
-            bubbleWidth,
-            bubbleHeight,
-          );
+        const leftBubbleX = x - charWidth / 2 - bubbleWidth + 5;
+        const leftBubbleY = y - charHeight - characterYOffset;
 
-          // 우측 이모지 그리기
-          ctx.drawImage(
-            questionImage,
-            rightBubbleX + bubbleWidth / 2 - emojiSize / 2,
-            rightBubbleY + bubbleHeight / 2 - emojiSize / 2,
-            emojiSize,
-            emojiSize,
-          );
-        }
+        return (
+          <div
+            key={`character-container-${charIndex}`}
+            className='absolute'
+            style={{
+              // 중요: 전체 그룹에 애니메이션 오프셋 적용
+              transform: `translateY(${character.animationOffset}px)`,
+              zIndex: 10,
+            }}
+          >
+            {/* 캐릭터 이름 - 이름을 bold 처리 */}
+            <div
+              className='absolute text-center text-sm font-bold whitespace-nowrap text-white'
+              style={{
+                left: `${nameX}px`,
+                top: `${nameY}px`,
+                transform: 'translateX(-50%)',
+                zIndex: 12,
+              }}
+            >
+              {character.name}
+            </div>
 
-        // 현재 이벤트 타입에 맞는 이모지 이미지 선택
-        const currentEmoji = emojiImages[eventType as EventType];
+            {/* 캐릭터 이미지 */}
+            <div
+              className='absolute bg-contain bg-center bg-no-repeat'
+              style={{
+                left: `${characterX}px`,
+                top: `${characterY}px`,
+                width: `${charWidth}px`,
+                height: `${charHeight}px`,
+                backgroundImage: `url(${character.imageSrc})`,
+                zIndex: 11,
+              }}
+            />
 
-        if (!currentEmoji) return; // triggerUser가 현재 캐릭터인 경우 좌측 상단에 말풍선 표시
+            {/* 우측 말풍선 (targetUser) */}
+            {targetUser === character.name && (
+              <div
+                className='absolute bg-contain bg-center bg-no-repeat'
+                style={{
+                  left: `${rightBubbleX}px`,
+                  top: `${rightBubbleY}px`,
+                  width: `${bubbleWidth}px`,
+                  height: `${bubbleHeight}px`,
+                  backgroundImage: 'url(/bubble.svg)',
+                  zIndex: 13,
+                }}
+              >
+                {/* 질문 이모지 */}
+                <div
+                  className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-contain bg-center bg-no-repeat'
+                  style={{
+                    width: `${bubbleWidth * 0.5}px`,
+                    height: `${bubbleHeight * 0.5}px`,
+                    backgroundImage: 'url(/eventemoji/question.svg)',
+                  }}
+                />
+              </div>
+            )}
 
-        if (triggerUser === character.name) {
-          const leftBubbleX =
-            characterX - characterWidth / 2 - bubbleWidth + 10;
-          const leftBubbleY =
-            characterY - characterHeight + character.animationOffset;
-
-          // 좌측 말풍선 그리기
-          ctx.drawImage(
-            bubbleLeftImage,
-            leftBubbleX,
-            leftBubbleY,
-            bubbleWidth,
-            bubbleHeight,
-          );
-
-          // 좌측 이모지
-          ctx.drawImage(
-            currentEmoji,
-            leftBubbleX + bubbleWidth / 2 - emojiSize / 2,
-            leftBubbleY + bubbleHeight / 2 - emojiSize / 2,
-            emojiSize,
-            emojiSize,
-          );
-        }
-      });
-    }
-
-    // targetUser, triggerUser, eventType이 변경될 때마다 다시 그리기
-    const redrawOnBubbleChange = () => {
-      if (targetUser && triggerUser) {
-        console.log('말풍선 정보가 변경됨:', {
-          targetUser,
-          triggerUser,
-          eventType,
-        });
-      }
-      drawCanvas();
-    };
-
-    // 변수 변경 감지 및 강제 리렌더링
-    redrawOnBubbleChange();
-
-    return () => {
-      window.removeEventListener('resize', updateCanvasSize);
-      cancelAnimationFrame(animationFrameRef.current);
-    };
-  }, [
-    isLoading,
-    footholderImage,
-    bubbleImage,
-    bubbleLeftImage,
-    questionImage,
-    emojiImages,
-    characters,
-    targetUser,
-    triggerUser,
-    eventType,
-  ]);
-
-  return (
-    <canvas ref={canvasRef} className='absolute top-0 left-0 h-full w-screen' />
+            {/* 좌측 말풍선 (triggerUser) */}
+            {triggerUser === character.name && (
+              <div
+                className='absolute bg-contain bg-center bg-no-repeat'
+                style={{
+                  left: `${leftBubbleX}px`,
+                  top: `${leftBubbleY}px`,
+                  width: `${bubbleWidth}px`,
+                  height: `${bubbleHeight}px`,
+                  backgroundImage: 'url(/bubble_left.svg)',
+                  zIndex: 13,
+                }}
+              >
+                {/* 이벤트 이모지 */}
+                <div
+                  className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-contain bg-center bg-no-repeat'
+                  style={{
+                    width: `${bubbleWidth * 0.5}px`,
+                    height: `${bubbleHeight * 0.5}px`,
+                    backgroundImage: `url(/eventemoji/${(eventType || 'NOTHING').toLowerCase()}.svg)`,
+                  }}
+                />
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
   );
 };
 
