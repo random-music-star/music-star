@@ -1,14 +1,19 @@
+import { useGameScreenStore } from '@/stores/websocket/useGameScreenStore';
 import { useGameStateStore } from '@/stores/websocket/useGameStateStore';
 
 import GameEnd from '../gameEnd';
 import RoundRolling from '../round/RoundRolling';
 import GameMusicPlayer from './GameMusicPlayer';
+import YoutubePlayer from './YoutubePlayer';
 
 const GamePlayPanel = () => {
   const { gameState } = useGameStateStore();
+  const { songUrl } = useGameScreenStore();
 
   return (
     <div className='game-play-panel flex max-h-[140px] min-h-[140px] min-w-[500px] flex-col items-center justify-center rounded-2xl bg-black/80 p-4'>
+      {songUrl && <YoutubePlayer url={songUrl} />}
+
       {(gameState === 'TIMER_WAIT' || gameState === 'ROUND_OPEN') && (
         <RoundRolling />
       )}

@@ -142,6 +142,7 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
 
           if (type === 'next') {
             if (gameRoundResult.gameRoundResult) {
+              gameScreenStore.setRemainTime(3);
               gameStateStore.setGameState('SCORE_UPDATE');
             }
           }
