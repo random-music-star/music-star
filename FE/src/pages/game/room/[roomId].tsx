@@ -105,7 +105,7 @@ export default function GameRoom({
             <div className='relative h-screen w-full overflow-hidden'>
               <div
                 className={cn(
-                  gameState === 'SCORE_UPDATE' || gameState === 'GAME_END'
+                  gameState === 'SCORE_UPDATE'
                     ? '-translate-y-full'
                     : 'translate-y-0',
                   'duration-700 ease-in-out',
@@ -116,7 +116,7 @@ export default function GameRoom({
               <div
                 className={cn(
                   'absolute top-0 left-0 h-full w-full transition-transform duration-700 ease-in-out',
-                  gameState === 'SCORE_UPDATE' || gameState === 'GAME_END'
+                  gameState === 'SCORE_UPDATE'
                     ? 'translate-y-0'
                     : 'translate-y-full',
                 )}

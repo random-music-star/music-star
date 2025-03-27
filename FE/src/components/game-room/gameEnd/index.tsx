@@ -12,7 +12,7 @@ const GameEnd = () => {
           <span className='mb-2 rounded-4xl bg-cyan-400 p-4 py-[1px] text-lg font-medium text-white'>
             WINNER
           </span>
-          <span className='white animate-pulse px-8 py-4 text-2xl font-bold'>
+          <span className='animate-pulse px-8 py-4 text-2xl font-bold text-white'>
             {winner}
           </span>
         </div>
