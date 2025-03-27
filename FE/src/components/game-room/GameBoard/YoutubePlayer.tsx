@@ -124,6 +124,12 @@ const YoutubePlayer: React.FC<YoutubePlayerProps> = ({ url }) => {
     hasStartedRef.current = true;
     wasPlayingRef.current = true;
 
+    // 현재 시간 기록
+    const now = new Date();
+    const timeString = now.toLocaleTimeString();
+    const milliseconds = now.getMilliseconds();
+    console.log(`노래 재생 시작 시간: ${timeString}.${milliseconds}`);
+
     const commands = [
       JSON.stringify({
         event: 'command',
@@ -139,6 +145,9 @@ const YoutubePlayer: React.FC<YoutubePlayerProps> = ({ url }) => {
     commands.forEach(command => {
       iframeRef.current?.contentWindow?.postMessage(command, '*');
     });
+
+    // 명령이 성공적으로 전송되었음을 로그에 기록
+    console.log(`재생 명령 전송 완료: ${timeString}.${milliseconds}`);
   };
 
   const pauseVideo = () => {
