@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { useGameBoardInfoStore } from '@/stores/websocket/useGameBoardInfoStore';
 import { useGameBubbleStore } from '@/stores/websocket/useGameBubbleStore';
@@ -20,6 +20,7 @@ interface UserCharacter {
   fromPosition: number;
   toPosition: number;
   moveProgress: number; // 0(시작 위치)에서 1(목표 위치)까지의 진행도
+  moveStartTime: number; // 각 캐릭터별 이동 시작 시간 저장
 }
 
 const GameBoard = () => {
@@ -33,12 +34,26 @@ const GameBoard = () => {
     height: typeof window !== 'undefined' ? window.innerHeight : 1080,
   });
 
+  // 디버깅을 위한 로그 추가
+  const currentTargetUserRef = useRef(targetUser);
+  const currentTriggerUserRef = useRef(triggerUser);
+
+  // targetUser, triggerUser 변경 감지
+  useEffect(() => {
+    console.log('말풍선 업데이트:', { targetUser, triggerUser, eventType });
+    currentTargetUserRef.current = targetUser;
+    currentTriggerUserRef.current = triggerUser;
+  }, [targetUser, triggerUser, eventType]);
+
   // 애니메이션 상태 관리
   const [animationTime, setAnimationTime] = useState(0);
   const animationSpeed = 5; // 애니메이션 속도 조절 (높을수록 빠름)
-  const animationRange = 10; // 애니메이션 이동 범위 (픽셀)
-  const moveAnimationDuration = 250; // 이동 애니메이션 시간 (밀리초)
-  const [moveStartTime, setMoveStartTime] = useState(0);
+  const animationRange = 5; // 애니메이션 이동 범위 (픽셀)
+  const moveAnimationDuration = 200; // 이동 애니메이션 시간 (밀리초) - 더 빠르게 설정
+
+  // REF를 사용하여 기존 애니메이션 완료 보장
+  const animationInProgressRef = useRef(false);
+  const prevBoardInfoRef = useRef<Record<string, number>>({});
 
   // 발판 위치를 비율로 정의 (0~1 사이의 값)
   const footholderRatios: FootholderPosition[] = [
@@ -86,38 +101,61 @@ const GameBoard = () => {
     };
   }, []);
 
-  // 캐릭터 이동 처리
-  const moveBoard = () => {
+  // boardInfo가 변경될 때 캐릭터 이동 처리
+  useEffect(() => {
+    // boardInfo가 비어있으면 처리하지 않음
+    if (Object.keys(boardInfo).length === 0) return;
+
+    // 이전 boardInfo와 현재 boardInfo가 같으면 처리하지 않음
+    const isSameBoardInfo = Object.entries(boardInfo).every(
+      ([name, position]) => prevBoardInfoRef.current[name] === position,
+    );
+    if (isSameBoardInfo) return;
+
+    // 현재 boardInfo 저장
+    prevBoardInfoRef.current = { ...boardInfo };
+
+    const now = performance.now();
+
+    // 애니메이션 진행 중인 캐릭터의 정보를 큐에 담는 접근법
     setCharacters(prevCharacters => {
       return prevCharacters.map(character => {
+        // 각 캐릭터에 대해 무조건 처리 (name in boardInfo 대신)
         const toPosition = boardInfo[character.name];
-        if (character.position !== toPosition) {
-          return {
-            ...character,
-            fromPosition: character.position,
-            toPosition,
-            isMoving: true,
-            moveProgress: 0,
-          };
+
+        // boardInfo에 해당 캐릭터 정보가 있고 위치가 다른 경우에만 이동
+        if (toPosition !== undefined && character.position !== toPosition) {
+          // 이미 이동 중인 경우 곧바로 새 위치로 이동
+          if (character.isMoving) {
+            return {
+              ...character,
+              position: toPosition,
+              fromPosition: toPosition,
+              toPosition: toPosition,
+              isMoving: false,
+              moveProgress: 1,
+            };
+          } else {
+            // 이동 중이 아닐 때만 새 애니메이션 시작
+            return {
+              ...character,
+              fromPosition: character.position,
+              toPosition,
+              isMoving: true,
+              moveProgress: 0,
+              moveStartTime: now,
+            };
+          }
         }
         return character;
       });
     });
-
-    // 이동 시작 시간 기록
-    setMoveStartTime(performance.now());
-  };
-
-  useEffect(() => {
-    // 이동
-    if (Object.keys(boardInfo).length > 0) {
-      moveBoard();
-    }
   }, [boardInfo]);
 
-  // 캐릭터 초기화
+  // 참가자 정보가 로드되면 캐릭터 초기화
   useEffect(() => {
     if (participantInfo.length > 0) {
+      const now = performance.now();
       const initialCharacters = participantInfo.map(participant => ({
         name: participant.userName,
         position: 0, // 초기 위치
@@ -127,6 +165,7 @@ const GameBoard = () => {
         fromPosition: 0,
         toPosition: 0,
         moveProgress: 0,
+        moveStartTime: now,
       }));
 
       setCharacters(initialCharacters);
@@ -134,7 +173,7 @@ const GameBoard = () => {
     }
   }, [participantInfo]);
 
-  // 애니메이션 효과
+  // 애니메이션 루프
   useEffect(() => {
     let animationId: number;
     let lastTimestamp = 0;
@@ -145,11 +184,16 @@ const GameBoard = () => {
       }
 
       const deltaTime = timestamp - lastTimestamp;
+      lastTimestamp = timestamp;
+
       setAnimationTime(prev => prev + deltaTime);
 
-      // 캐릭터 애니메이션 업데이트
+      // 둥실거리는 애니메이션과 이동 애니메이션 처리
       setCharacters(prevCharacters => {
-        return prevCharacters.map((character, index) => {
+        let anyCharacterMoving = false;
+
+        const updatedCharacters = prevCharacters.map((character, index) => {
+          // 둥실거리는 애니메이션 (숨쉬는 효과)
           const phaseOffset = index * 0.5;
           const newOffset =
             Math.sin((animationTime / 1000) * animationSpeed + phaseOffset) *
@@ -160,17 +204,19 @@ const GameBoard = () => {
             animationOffset: newOffset,
           };
 
-          // 이동 중인 캐릭터의 이동 진행도 업데이트
+          // 이동 애니메이션 처리
           if (character.isMoving) {
-            const moveElapsed = timestamp - moveStartTime;
+            const moveElapsed = timestamp - character.moveStartTime;
             const progress = Math.min(moveElapsed / moveAnimationDuration, 1);
+
+            anyCharacterMoving = anyCharacterMoving || progress < 1;
 
             updatedCharacter = {
               ...updatedCharacter,
               moveProgress: progress,
             };
 
-            // 이동 완료 시 상태 업데이트
+            // 애니메이션 완료 시 상태 업데이트
             if (progress >= 1) {
               updatedCharacter = {
                 ...updatedCharacter,
@@ -183,9 +229,13 @@ const GameBoard = () => {
 
           return updatedCharacter;
         });
+
+        // 애니메이션 상태 업데이트
+        animationInProgressRef.current = anyCharacterMoving;
+
+        return updatedCharacters;
       });
 
-      lastTimestamp = timestamp;
       animationId = requestAnimationFrame(animate);
     };
 
@@ -194,7 +244,38 @@ const GameBoard = () => {
     return () => {
       cancelAnimationFrame(animationId);
     };
-  }, [animationTime, moveStartTime]);
+  }, [animationTime]);
+
+  // 위치 보간 함수 - 부드러운 이동 및 점프 효과 계산
+  const interpolatePosition = (
+    fromPos: FootholderPosition,
+    toPos: FootholderPosition,
+    progress: number,
+    leftSectionWidth: number,
+    windowHeight: number,
+  ) => {
+    // 이징 함수 적용 (ease-in-out)
+    const easedT =
+      progress < 0.5
+        ? 2 * progress * progress // ease-in
+        : 1 - Math.pow(-2 * progress + 2, 2) / 2; // ease-out
+
+    // 시작점과 끝점 좌표 계산
+    const fromX = fromPos.xRatio * leftSectionWidth;
+    const fromY = fromPos.yRatio * windowHeight;
+    const toX = toPos.xRatio * leftSectionWidth;
+    const toY = toPos.yRatio * windowHeight;
+
+    // 선형 보간
+    const x = fromX + (toX - fromX) * easedT;
+    let y = fromY + (toY - fromY) * easedT;
+
+    // 점프 효과 - 사인 함수로 부드러운 아치형 궤적 생성
+    const jumpHeight = 30 * Math.sin(Math.PI * easedT);
+    y -= jumpHeight;
+
+    return { x, y };
+  };
 
   if (isLoading) {
     return (
@@ -203,8 +284,15 @@ const GameBoard = () => {
       </div>
     );
   }
+
+  // 강제 리렌더링용 키 생성 - 말풍선 업데이트를 보장하기 위함
+  const renderKey = `${targetUser}-${triggerUser}-${eventType}`;
+
   return (
-    <div className='absolute top-0 left-0 h-full w-full overflow-hidden'>
+    <div
+      key={renderKey}
+      className='absolute top-0 left-0 h-full w-full overflow-hidden'
+    >
       {/* 발판 렌더링 */}
       {footholderRatios.map((position, index) => {
         const leftSectionWidth = windowSize.width * 0.75;
@@ -231,12 +319,11 @@ const GameBoard = () => {
 
       {/* 캐릭터 렌더링 */}
       {characters.map((character, charIndex) => {
-        // 캐릭터의 기본 위치를 계산 (애니메이션 오프셋 제외)
         const leftSectionWidth = windowSize.width * 0.75;
         const baseSize = Math.min(48, leftSectionWidth * 0.08);
         const charWidth = baseSize * 1.5;
         const charHeight = charWidth * 1.25;
-        const characterYOffset = 20; // 발판에서 위로 올린 값
+        const characterYOffset = 20;
 
         let x = 0;
         let y = 0;
@@ -246,21 +333,17 @@ const GameBoard = () => {
           const toPosition = footholderRatios[character.toPosition];
 
           if (fromPosition && toPosition) {
-            const t = character.moveProgress;
-            const easedT =
-              t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+            // 부드러운 이동 및 점프 효과 계산
+            const pos = interpolatePosition(
+              fromPosition,
+              toPosition,
+              character.moveProgress,
+              leftSectionWidth,
+              windowSize.height,
+            );
 
-            const fromX = fromPosition.xRatio * leftSectionWidth;
-            const fromY = fromPosition.yRatio * windowSize.height;
-            const toX = toPosition.xRatio * leftSectionWidth;
-            const toY = toPosition.yRatio * windowSize.height;
-
-            x = fromX + (toX - fromX) * easedT;
-            y = fromY + (toY - fromY) * easedT;
-
-            // 점프 효과
-            const jumpHeight = 30 * Math.sin(Math.PI * easedT);
-            y -= jumpHeight;
+            x = pos.x;
+            y = pos.y;
           }
         } else {
           const position = footholderRatios[character.position];
@@ -270,36 +353,36 @@ const GameBoard = () => {
           }
         }
 
-        // 캐릭터 이미지 위치 계산
         const characterX = x - charWidth / 2 - 10;
         const characterY = y - charHeight - characterYOffset;
 
-        // 이름 위치 계산
         const nameX = x;
         const nameY = y - charHeight - 30 - characterYOffset;
 
-        // 말풍선 위치 계산
         const bubbleWidth = charWidth * 0.8;
         const bubbleHeight = bubbleWidth * 0.8;
 
-        // 수정: 말풍선을 오른쪽에 배치 (+ 부호로 변경)
         const rightBubbleX = x + charWidth / 2 + 5;
         const rightBubbleY = y - charHeight - characterYOffset;
 
         const leftBubbleX = x - charWidth / 2 - bubbleWidth + 5;
         const leftBubbleY = y - charHeight - characterYOffset;
 
+        // 캐릭터별 렌더링 키 생성 - targetUser나 triggerUser에 맞춰 강제 리렌더링
+        const characterRenderKey = `char-${charIndex}-${character.name === targetUser}-${character.name === triggerUser}`;
+
         return (
           <div
-            key={`character-container-${charIndex}`}
+            key={characterRenderKey}
             className='absolute'
             style={{
-              // 중요: 전체 그룹에 애니메이션 오프셋 적용
               transform: `translateY(${character.animationOffset}px)`,
               zIndex: 10,
+              willChange: 'transform', // 브라우저에게 변환을 미리 준비하도록 힌트 제공
+              opacity: 1, // 항상 보이도록 설정
             }}
           >
-            {/* 캐릭터 이름 - 이름을 bold 처리 */}
+            {/* 캐릭터 이름 */}
             <div
               className='absolute text-center text-sm font-bold whitespace-nowrap text-white'
               style={{
@@ -325,8 +408,8 @@ const GameBoard = () => {
               }}
             />
 
-            {/* 우측 말풍선 (targetUser) */}
-            {targetUser === character.name && (
+            {/* 대상 사용자 버블 (오른쪽) - 조건식 단순화 */}
+            {character.name === targetUser && (
               <div
                 className='absolute bg-contain bg-center bg-no-repeat'
                 style={{
@@ -338,7 +421,6 @@ const GameBoard = () => {
                   zIndex: 13,
                 }}
               >
-                {/* 질문 이모지 */}
                 <div
                   className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-contain bg-center bg-no-repeat'
                   style={{
@@ -350,8 +432,8 @@ const GameBoard = () => {
               </div>
             )}
 
-            {/* 좌측 말풍선 (triggerUser) */}
-            {triggerUser === character.name && (
+            {/* 트리거 사용자 버블 (왼쪽) - 조건식 단순화 */}
+            {character.name === triggerUser && (
               <div
                 className='absolute bg-contain bg-center bg-no-repeat'
                 style={{
@@ -363,7 +445,6 @@ const GameBoard = () => {
                   zIndex: 13,
                 }}
               >
-                {/* 이벤트 이모지 */}
                 <div
                   className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-contain bg-center bg-no-repeat'
                   style={{
