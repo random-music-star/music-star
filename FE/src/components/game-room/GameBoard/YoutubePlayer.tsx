@@ -6,27 +6,39 @@ interface YoutubePlayerProps {
   url: string;
 }
 
-const YoutubePlayer: React.FC<YoutubePlayerProps> = ({ url }) => {
+const YoutubePlayer: React.FC<YoutubePlayerProps> = () => {
   const remainTime = useGameScreenStore(state => state.remainTime);
+  const url = useGameScreenStore(state => state.songUrl);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const playerReadyRef = useRef<boolean>(false);
   const hasStartedRef = useRef<boolean>(false);
   const wasPlayingRef = useRef<boolean>(false);
   const [currentVideoId, setCurrentVideoId] = useState<string>('');
 
-  // URL이 변경되면 비디오 ID 업데이트
+  const getTimeString = () => {
+    const now = new Date();
+    return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}.${now.getMilliseconds().toString().padStart(3, '0')}`;
+  };
+
   useEffect(() => {
+    if (!url) return;
     const videoId = getYoutubeId(url);
-    if (videoId !== currentVideoId) {
+    if (videoId && videoId !== currentVideoId) {
       setCurrentVideoId(videoId);
+
       hasStartedRef.current = false;
       wasPlayingRef.current = false;
       playerReadyRef.current = false;
+
+      setTimeout(() => {
+        pauseVideo();
+      }, 500);
     }
   }, [url, currentVideoId]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
+
     if (navigator?.mediaSession) {
       navigator.mediaSession.metadata = new MediaMetadata({});
     }
@@ -35,10 +47,12 @@ const YoutubePlayer: React.FC<YoutubePlayerProps> = ({ url }) => {
     const aud = new Audio(blindSound);
     aud.volume = 0;
     aud.loop = true;
+    aud.play();
 
-    aud.play().catch(err => {
-      console.warn('무음 오디오 재생 오류:', err);
-    });
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
 
     const handleMessage = (event: MessageEvent) => {
       if (typeof event.data === 'string') {
@@ -46,6 +60,11 @@ const YoutubePlayer: React.FC<YoutubePlayerProps> = ({ url }) => {
         if (data.event === 'onReady') {
           playerReadyRef.current = true;
           checkAndPlayOrPause();
+        } else if (data.event === 'onStateChange') {
+          if (data.info === 1) {
+            hasStartedRef.current = true;
+            wasPlayingRef.current = true;
+          }
         }
       }
     };
@@ -53,11 +72,22 @@ const YoutubePlayer: React.FC<YoutubePlayerProps> = ({ url }) => {
     window.addEventListener('message', handleMessage);
 
     return () => {
+      console.log(`[${getTimeString()}][YouTube] 컴포넌트 언마운트`);
       aud.pause();
       aud.src = '';
       window.removeEventListener('message', handleMessage);
     };
   }, []);
+
+  useEffect(() => {
+    if (currentVideoId && !playerReadyRef.current) {
+      playerReadyRef.current = true;
+
+      if (remainTime > 0) {
+        pauseVideo();
+      }
+    }
+  }, [currentVideoId, remainTime]);
 
   const handleIframeLoad = () => {
     if (iframeRef.current && iframeRef.current.contentWindow) {
@@ -69,31 +99,24 @@ const YoutubePlayer: React.FC<YoutubePlayerProps> = ({ url }) => {
         '*',
       );
 
-      setTimeout(() => {
-        if (!playerReadyRef.current) {
-          playerReadyRef.current = true;
-          checkAndPlayOrPause();
-        }
-      }, 1000);
+      playerReadyRef.current = true;
+      pauseVideo();
     }
   };
 
   useEffect(() => {
-    checkAndPlayOrPause();
+    if (remainTime === 3) {
+      console.log(`[${getTimeString()}][YouTube] 새 라운드 시작, 상태 초기화`);
+      hasStartedRef.current = false;
+      wasPlayingRef.current = false;
+    }
 
-    if (remainTime <= 0 && !hasStartedRef.current) {
-      setTimeout(() => {
-        if (!hasStartedRef.current && remainTime <= 0) {
-          playerReadyRef.current = true;
-          checkAndPlayOrPause();
-        }
-      }, 500);
-    } else if (remainTime > 0 && wasPlayingRef.current) {
-      setTimeout(() => {
-        if (remainTime > 0 && wasPlayingRef.current) {
-          pauseVideo();
-        }
-      }, 500);
+    if (remainTime === 0) {
+      playerReadyRef.current = true;
+      hasStartedRef.current = false; // 재생을 위해 강제로 false로 설정
+      playVideo();
+    } else if (remainTime > 0) {
+      pauseVideo();
     }
   }, [remainTime]);
 
@@ -103,51 +126,67 @@ const YoutubePlayer: React.FC<YoutubePlayerProps> = ({ url }) => {
       typeof window === 'undefined' ||
       !currentVideoId
     ) {
+      console.log(`[${getTimeString()}][YouTube] iframe 또는 비디오 ID 없음`);
       return;
     }
 
     if (remainTime <= 0) {
-      if (
-        !hasStartedRef.current &&
-        (playerReadyRef.current || document.readyState === 'complete')
-      ) {
-        playVideo();
-      }
+      playVideo();
     } else {
-      if (wasPlayingRef.current) {
-        pauseVideo();
-      }
+      pauseVideo();
     }
   };
 
   const playVideo = () => {
+    if (remainTime > 0) {
+      console.log(
+        `[${getTimeString()}][YouTube] 재생 중단: remainTime이 ${remainTime}으로 0보다 큼`,
+      );
+      return;
+    }
+
     hasStartedRef.current = true;
     wasPlayingRef.current = true;
 
-    // 현재 시간 기록
-    const now = new Date();
-    const timeString = now.toLocaleTimeString();
-    const milliseconds = now.getMilliseconds();
-    console.log(`노래 재생 시작 시간: ${timeString}.${milliseconds}`);
+    try {
+      if (iframeRef.current?.contentWindow) {
+        iframeRef.current.contentWindow.postMessage(
+          '{"event":"command","func":"pauseVideo","args":""}',
+          '*',
+        );
 
-    const commands = [
-      JSON.stringify({
-        event: 'command',
-        func: 'playVideo',
-        args: [],
-      }),
-      JSON.stringify({
-        method: 'play',
-      }),
-      '{"event":"command","func":"playVideo","args":""}',
-    ];
+        setTimeout(() => {
+          if (remainTime > 0) {
+            console.log(
+              `[${getTimeString()}][YouTube] 재생 취소, remainTime이 ${remainTime}으로 변경됨`,
+            );
+            wasPlayingRef.current = false;
+            return;
+          }
 
-    commands.forEach(command => {
-      iframeRef.current?.contentWindow?.postMessage(command, '*');
-    });
+          // 볼륨 설정 및 음소거 해제
+          iframeRef.current?.contentWindow?.postMessage(
+            '{"event":"command","func":"unMute","args":""}',
+            '*',
+          );
+          iframeRef.current?.contentWindow?.postMessage(
+            '{"event":"command","func":"setVolume","args":[100]}',
+            '*',
+          );
 
-    // 명령이 성공적으로 전송되었음을 로그에 기록
-    console.log(`재생 명령 전송 완료: ${timeString}.${milliseconds}`);
+          // 재생 명령
+          iframeRef.current?.contentWindow?.postMessage(
+            '{"event":"command","func":"playVideo","args":""}',
+            '*',
+          );
+          console.log(
+            `[${getTimeString()}][YouTube] 재생 명령 전송 완료, wasPlaying=true`,
+          );
+        }, 100);
+      }
+    } catch (error) {
+      console.error(`[${getTimeString()}] YouTube 재생 명령 실패:`, error);
+    }
   };
 
   const pauseVideo = () => {
@@ -166,6 +205,7 @@ const YoutubePlayer: React.FC<YoutubePlayerProps> = ({ url }) => {
     commands.forEach(command => {
       iframeRef.current?.contentWindow?.postMessage(command, '*');
     });
+
     wasPlayingRef.current = false;
   };
 
@@ -182,7 +222,7 @@ const YoutubePlayer: React.FC<YoutubePlayerProps> = ({ url }) => {
     return null;
   }
 
-  const embedUrl = `https://www.youtube-nocookie.com/embed/${currentVideoId}?autoplay=0&controls=0&disablekb=1&fs=0&modestbranding=1&rel=0&playsinline=1&iv_load_policy=3&enablejsapi=1&origin=${typeof window !== 'undefined' ? window.location.origin : ''}&widgetid=1`;
+  const embedUrl = `https://www.youtube-nocookie.com/embed/${currentVideoId}?autoplay=1&mute=0&start=0&controls=0&disablekb=1&fs=0&modestbranding=1&rel=0&playsinline=1&iv_load_policy=3&enablejsapi=1&origin=${typeof window !== 'undefined' ? window.location.origin : ''}&widgetid=1`;
 
   return (
     <div className='pointer-events-none invisible fixed top-[-9999px] left-[-9999px] h-1 w-1 overflow-hidden opacity-0'>
@@ -193,6 +233,7 @@ const YoutubePlayer: React.FC<YoutubePlayerProps> = ({ url }) => {
         height='1'
         allow='autoplay; encrypted-media'
         onLoad={handleIframeLoad}
+        title='YouTube music player'
         style={{
           position: 'fixed',
           top: '-9999px',
