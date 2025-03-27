@@ -97,7 +97,7 @@ export default function SignupForm({ onSuccess }: SignupFormProps) {
               <FormControl>
                 <Input
                   {...field}
-                  className={`bg-white ${
+                  className={`bg-white text-black ${
                     form.formState.errors.username ? 'border-red-400' : ''
                   }`}
                 />
@@ -125,7 +125,7 @@ export default function SignupForm({ onSuccess }: SignupFormProps) {
                 <Input
                   type='password'
                   {...field}
-                  className={`bg-white ${
+                  className={`bg-white text-black ${
                     form.formState.errors.password ? 'border-red-400' : ''
                   }`}
                 />
