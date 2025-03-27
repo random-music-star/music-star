@@ -41,9 +41,9 @@ const LobbyPage = ({ userNickname }: { userNickname: string }) => {
   }, [userNickname, setNickname]);
 
   return (
-    <div className='flex h-screen flex-col bg-gray-100'>
-      <Header />
+    <div className='flex h-screen flex-col bg-[url(/background.svg)] bg-cover bg-center'>
       <div className='flex flex-1 overflow-hidden'>
+        <Header />
         <div className='flex flex-1 flex-col p-6'>
           <div className='mb-6 flex items-center justify-between'>
             <h1 className='text-2xl font-bold text-gray-900'>게임 방 목록</h1>
@@ -55,7 +55,7 @@ const LobbyPage = ({ userNickname }: { userNickname: string }) => {
           </div>
         </div>
 
-        <div className='w-80 border-l border-gray-300 bg-white'>
+        <div className='w-80 bg-black/50 text-white'>
           <ChatBox />
         </div>
       </div>

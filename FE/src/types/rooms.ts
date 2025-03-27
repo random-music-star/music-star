@@ -15,9 +15,9 @@ export interface CreateRoomResponse {
 
 export const createRoomFormSchema = z.object({
   title: z.string().min(1, '방 이름을 설정해주세요'),
-  format: z.string().min(1, '포맷을 선택해주세요'),
-  modes: z.array(z.string()).min(1, '모드는 최소 한 개 이상 선택해야 합니다'),
-  years: z.array(z.number()).min(1, '연도는 최소 한 개 이상 선택해야 합니다'),
+  format: z.string().min(1, '맵을 선택해주세요'),
+  modes: z.array(z.string()).min(1, '모드를 선택해주세요'),
+  years: z.array(z.number()).min(1, '연도를 선택해주세요'),
 });
 
 export type CreateRoomFormValues = z.infer<typeof createRoomFormSchema>;

@@ -1,5 +1,6 @@
 import { ChevronDown } from 'lucide-react';
 
+import AccountFormDialog from '@/components/auth/AccountFormDialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,16 +10,14 @@ import {
 import { useAuth } from '@/hooks/useAuth';
 import { useNicknameStore } from '@/stores/auth/useNicknameStore';
 
-import { Button } from '../ui/button';
-
 export default function Header() {
-  const { login, logout } = useAuth();
+  const { logout } = useAuth();
   const { nickname } = useNicknameStore();
 
   return (
     <header className='bg-[hsl(var(--color-header-bg))] p-4 text-black shadow-md'>
-      <div className='container mx-auto flex items-center justify-between'>
-        <h1 className='text-xl font-bold text-black'>알송달송</h1>
+      <div className='container mx-auto flex flex-col items-center'>
+        <h1 className='mb-2 text-xl font-bold text-black'>알송달송</h1>
 
         <div className='flex items-center gap-2'>
           {nickname ? (
@@ -37,9 +36,7 @@ export default function Header() {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <main className='row-start-2 flex flex-col items-center gap-8 sm:items-start'>
-              <Button onClick={() => login()}>게스트 로그인</Button>
-            </main>
+            <AccountFormDialog />
           )}
         </div>
       </div>
