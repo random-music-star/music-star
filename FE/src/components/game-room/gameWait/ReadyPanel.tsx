@@ -91,14 +91,6 @@ const ReadyPanel = ({
     }
   }, [gameChattings]);
 
-  useEffect(() => {
-    const newReadyState: Record<string, boolean> = {};
-
-    participantInfo.forEach(participant => {
-      newReadyState[participant.userName] = participant.isReady;
-    });
-  }, [participantInfo]);
-
   if (!gameRoomInfo) return null;
 
   const getStaffPosition = (index: number) => {
