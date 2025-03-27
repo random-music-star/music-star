@@ -135,6 +135,16 @@ const GamePlay = () => {
           className='object-cover'
         />
 
+        <motion.div
+          className='absolute -left-40 h-[300px] w-[300px] -translate-y-8 overflow-hidden rounded-full lg:-left-38 lg:-translate-y-12'
+          animate={{ rotate: 360, opacity: 1 }}
+          transition={{ repeat: Infinity, duration: 1.5, ease: 'linear' }}
+        >
+          <div className='h-full w-full rounded-full'>
+            <Image src='/lp.svg' alt='lp' fill className='object-cover' />
+          </div>
+        </motion.div>
+
         {participantInfo.map((participant, index) => {
           const position = getStaffPosition(index);
           const isShaking = shakingMap[participant.userName];

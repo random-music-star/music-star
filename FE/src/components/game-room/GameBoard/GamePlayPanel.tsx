@@ -1,8 +1,8 @@
 import { useGameScreenStore } from '@/stores/websocket/useGameScreenStore';
 import { useGameStateStore } from '@/stores/websocket/useGameStateStore';
 
+import RoundRolling from '../GameRound/RoundRolling';
 import GameEnd from '../gameEnd';
-import RoundRolling from '../round/RoundRolling';
 import GameMusicPlayer from './GameMusicPlayer';
 import YoutubePlayer from './YoutubePlayer';
 

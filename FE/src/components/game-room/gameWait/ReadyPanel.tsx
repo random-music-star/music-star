@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useGameChatStore } from '@/stores/websocket/useGameChatStore';
 import { useParticipantInfoStore } from '@/stores/websocket/useGameParticipantStore';
@@ -10,8 +11,7 @@ import { useGameInfoStore } from '@/stores/websocket/useGameRoomInfoStore';
 import { useWebSocketStore } from '@/stores/websocket/useWebsocketStore';
 import { Chatting } from '@/types/websocket';
 
-import { Button } from '../ui/button';
-import SpeechBubble from './gamePlay/SpeechBubble';
+import SpeechBubble from '../gamePlay/SpeechBubble';
 
 interface ReadyPanelProps {
   currentUserId: string;
@@ -212,7 +212,7 @@ const ReadyPanel = ({
         })}
       </div>
 
-      <div className='absolute bottom-10 left-1/2 z-20 flex -translate-x-1/2 gap-5'>
+      <div className='absolute bottom-6 left-1/2 z-20 flex -translate-x-1/2 gap-5'>
         <Button
           onClick={handleToggleReady}
           className={cn(
