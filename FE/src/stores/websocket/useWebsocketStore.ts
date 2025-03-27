@@ -67,6 +67,7 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
     useGameStateStore.getState().resetGameState();
     usePublicChatStore.getState().resetPublicChatStore();
     useGameWinnerStore.getState().resetWinnerStore();
+    useParticipantInfoStore.getState().resetParticipantInfo();
 
     const newSubscriptions: Record<string, StompSubscription> = {};
 
