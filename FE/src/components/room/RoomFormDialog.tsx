@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
@@ -35,7 +34,7 @@ export default function RoomFormDialog({
   mode,
   roomId,
   buttonText,
-  buttonClassName = 'bg-blue-600 text-white hover:bg-blue-700',
+  buttonClassName = 'bg-[#9FFCFE] text-black hover:bg-opacity-80 rounded-full px-6',
   onDialogClose,
 }: RoomFormDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -94,16 +93,19 @@ export default function RoomFormDialog({
       </Button>
 
       <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-        <DialogContent className='sm:max-w-[425px]'>
-          <DialogHeader>
-            <DialogTitle>
-              {mode === 'create' ? '새로운 게임방 생성' : '게임방 정보 수정'}
+        <DialogContent
+          showCloseButton={false}
+          className='bg-opacity-100 w-full rounded-lg border-4 border-white bg-gradient-to-b from-[#9F89EB] to-[#5D42AA] sm:max-w-[60vw] lg:max-w-[850px]'
+        >
+          <DialogHeader className='absolute top-[-25px] left-[20px]'>
+            <DialogTitle
+              className='text-4xl font-bold text-white'
+              style={{
+                textShadow: `-3px -3px 0 #6548B9, 3px -3px 0 #6548B9, -3px 3px 0 #6548B9, 3px 3px 0 #6548B9`,
+              }}
+            >
+              {mode === 'create' ? 'NEW GAME' : 'EDIT GAME'}
             </DialogTitle>
-            <DialogDescription>
-              {mode === 'create'
-                ? '게임할 방의 정보를 입력해주세요.'
-                : '방 정보를 수정해주세요.'}
-            </DialogDescription>
           </DialogHeader>
           <RoomForm
             mode={mode}

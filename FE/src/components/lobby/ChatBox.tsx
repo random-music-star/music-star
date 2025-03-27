@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { useNicknameStore } from '@/stores/auth/useNicknameStore';
 import { usePublicChatStore } from '@/stores/websocket/usePublicChatStore';
 import { useWebSocketStore } from '@/stores/websocket/useWebsocketStore';
@@ -51,30 +52,37 @@ export default function ChatBox() {
   };
 
   return (
-    <div className='flex h-full flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm'>
-      <div className='rounded-t-lg bg-blue-600 px-4 py-3 text-white shadow-sm'>
-        <h2 className='text-lg font-semibold'>로비 채팅</h2>
+    <div className='flex h-full flex-col overflow-hidden rounded-lg shadow-sm'>
+      <div className='rounded-t-lg border-b border-[#30FFFF] px-4 py-3 text-white shadow-sm'>
+        <h2 className='text-lg font-semibold'>전체 채팅</h2>
       </div>
 
       <div
         ref={chatContainerRef}
-        className='flex-1 space-y-2 overflow-y-auto bg-white p-4'
+        className='neon-scrollbar flex-1 space-y-2 overflow-y-auto bg-black/30 p-4'
       >
         {publicChattings.length === 0 ? (
-          <div className='py-6 text-center text-gray-500'>
+          <div className='py-6 text-center text-[#30FFFF]/50'>
             채팅 메시지가 없습니다.
           </div>
         ) : (
           publicChattings.map((chat, index) => (
-            <div key={index} className='text-sm leading-relaxed'>
+            <div key={index} className='mb-3 text-sm leading-relaxed'>
               {chat.messageType === 'NOTICE' ? (
-                <div className='my-2 rounded bg-gray-100 px-3 py-1 text-center text-gray-700'>
-                  <span className='font-semibold text-red-500'>[공지]</span>{' '}
-                  {chat.message}
+                <div className='my-2 text-center'>
+                  <span className='inline-block rounded-full bg-black/20 px-3 py-1 text-sm text-white'>
+                    <span className='font-semibold text-[#30FFFF]'>[공지]</span>{' '}
+                    {chat.message}
+                  </span>
                 </div>
               ) : (
-                <div className='flex'>
-                  <span className='mr-1 font-medium'>{chat.sender}:</span>
+                <div className='text-base text-white'>
+                  <span className='font-medium'>
+                    {chat.sender === nickname
+                      ? `${chat.sender}(나)`
+                      : chat.sender}
+                  </span>
+                  <span> : </span>
                   <span>{chat.message}</span>
                 </div>
               )}
@@ -83,23 +91,35 @@ export default function ChatBox() {
         )}
       </div>
 
-      <div className='border-t border-gray-200 bg-white p-3'>
-        <form onSubmit={handleSubmit} className='flex gap-2'>
-          <div className='flex-1'>
-            <input
+      <div className='mt-auto pt-2'>
+        <form
+          onSubmit={handleSubmit}
+          className='flex items-center space-x-2 p-3'
+        >
+          <div className='relative flex-1'>
+            <Input
               type='text'
               value={newMessage}
               onChange={e => setNewMessage(e.target.value)}
               placeholder='메시지를 입력하세요...'
-              className='h-10 w-full rounded-lg border border-gray-300 px-3 text-sm focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none'
+              className='h-10 w-full !rounded-none !border-0 !border-t-2 !border-t-[#30FFFF] bg-black/30 text-sm text-white placeholder-white/50 !outline-none'
+              style={{
+                boxShadow: 'none',
+                borderTopColor: '#30FFFF',
+                borderTopWidth: '2px',
+                borderTopStyle: 'solid',
+                borderRight: 'none',
+                borderBottom: 'none',
+                borderLeft: 'none',
+              }}
             />
           </div>
           <Button
             type='submit'
             disabled={!newMessage.trim()}
-            className='h-10 self-end rounded-lg bg-blue-600 px-4 text-white transition-colors hover:bg-blue-700'
+            className='h-10 rounded-[40] bg-[#30FFFF] px-4 text-black hover:bg-[#30FFFF]/80'
           >
-            전송
+            <span className='text-sm'>전송</span>
           </Button>
         </form>
       </div>

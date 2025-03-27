@@ -9,7 +9,7 @@ export default function CreateRoomButton({ onSuccess }: CreateRoomButtonProps) {
     <RoomFormDialog
       mode='create'
       buttonText='방 생성'
-      buttonClassName='bg-blue-600 text-white hover:bg-blue-700'
+      buttonClassName='bg-[#9FFCFE] text-black font-bold hover:bg-opacity-80 rounded-full px-6'
       onDialogClose={onSuccess}
     />
   );
