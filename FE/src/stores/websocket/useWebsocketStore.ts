@@ -194,7 +194,6 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
           if (type === 'gameEnd') {
             gameStateStore.setGameState('GAME_END');
             winnerStore.setWinner(response.winner);
-            useParticipantInfoStore.getState().resetParticipantInfo();
           }
 
           if (type === 'eventTrigger') {

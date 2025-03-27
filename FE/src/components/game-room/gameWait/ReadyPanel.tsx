@@ -95,12 +95,12 @@ const ReadyPanel = ({
 
   const getStaffPosition = (index: number) => {
     const basePositions = [
-      { x: 15, y: 120 },
-      { x: 30, y: 220 },
-      { x: 45, y: 140 },
-      { x: 60, y: 160 },
-      { x: 73, y: 240 },
-      { x: 82, y: 112 },
+      { x: 15, y: 125 },
+      { x: 30, y: 225 },
+      { x: 45, y: 145 },
+      { x: 60, y: 165 },
+      { x: 73, y: 245 },
+      { x: 82, y: 117 },
     ];
 
     return {
@@ -140,12 +140,13 @@ const ReadyPanel = ({
 
   return (
     <div className='relative h-full w-full overflow-hidden'>
-      <div className='relative mt-[100px] h-[300px] w-full'>
+      <div className='relative mt-[100px] h-[40%] w-full'>
         <Image
-          src='/staff.svg'
+          src='/staff.png'
           alt='Musical Staff'
           fill
           className='object-cover'
+          priority
         />
       </div>
       <div className='absolute inset-0'>

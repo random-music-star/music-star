@@ -3,9 +3,12 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 
+import { cn } from '@/lib/utils';
 import { useGameChatStore } from '@/stores/websocket/useGameChatStore';
 import { useParticipantInfoStore } from '@/stores/websocket/useGameParticipantStore';
 import { useGameInfoStore } from '@/stores/websocket/useGameRoomInfoStore';
+import { useGameStateStore } from '@/stores/websocket/useGameStateStore';
+import { useGameWinnerStore } from '@/stores/websocket/useGameWinnerStore';
 import { Chatting } from '@/types/websocket';
 
 import GamePlayPanel from '../GameBoard/GamePlayPanel';
@@ -15,6 +18,8 @@ const GamePlay = () => {
   const { participantInfo } = useParticipantInfoStore();
   const { gameRoomInfo } = useGameInfoStore();
   const { gameChattings } = useGameChatStore();
+  const { gameState } = useGameStateStore();
+  const { winner } = useGameWinnerStore();
 
   const [chattingMap, setChattingMap] = useState<
     Record<string, { message: string; timestamp: number }>
@@ -78,12 +83,12 @@ const GamePlay = () => {
 
   const getStaffPosition = (index: number) => {
     const basePositions = [
-      { x: 15, y: 20 },
-      { x: 30, y: 120 },
-      { x: 45, y: 40 },
-      { x: 60, y: 60 },
-      { x: 73, y: 140 },
-      { x: 82, y: 12 },
+      { x: 15, y: 25 },
+      { x: 30, y: 125 },
+      { x: 45, y: 45 },
+      { x: 60, y: 65 },
+      { x: 73, y: 145 },
+      { x: 82, y: 17 },
     ];
 
     return {
@@ -105,10 +110,10 @@ const GamePlay = () => {
   };
 
   return (
-    <div className='relative h-full w-full overflow-hidden'>
+    <div className='relative h-screen w-full overflow-hidden'>
       {animationStarted && (
         <motion.div
-          className='h-[300px] w-full'
+          className='h-[40%] w-full'
           initial={{ height: 0, opacity: 0 }}
           animate={{ height: 200, opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.2 }}
@@ -120,7 +125,7 @@ const GamePlay = () => {
       )}
 
       <motion.div
-        className='relative mt-[100px] h-[300px] w-full'
+        className='relative mt-[100px] h-[40%] w-full'
         transition={{
           type: 'spring',
           stiffness: 120,
@@ -129,10 +134,11 @@ const GamePlay = () => {
         }}
       >
         <Image
-          src='/staff.svg'
+          src='/staff.png'
           alt='Musical Staff'
           fill
           className='object-cover'
+          priority
         />
 
         <motion.div
@@ -171,7 +177,12 @@ const GamePlay = () => {
                   )}
                 </div>
                 <motion.div
-                  className='relative h-20 w-16 md:h-24 md:w-20'
+                  className={cn(
+                    gameState === 'GAME_END' && participant.userName === winner
+                      ? 'h-28 w-24 md:h-32 md:w-28'
+                      : 'h-20 w-16 md:h-24 md:w-20',
+                    'relative',
+                  )}
                   animate={isShaking ? shakeAnimation : {}}
                 >
                   <Image
