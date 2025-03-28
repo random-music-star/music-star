@@ -227,7 +227,7 @@ export default function RoomList({
           {!sseConnected && (
             <Alert className='mb-4 border-amber-200 bg-amber-50'>
               <AlertDescription className='text-sm text-amber-700'>
-                ⚠️ 실시간 연결이 불가능합니다. 샘플 데이터를 표시합니다.
+                ⚠️ 실시간 연결이 불가능합니다.
               </AlertDescription>
             </Alert>
           )}

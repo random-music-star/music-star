@@ -25,12 +25,12 @@ const MAPS: MapData[] = [
   {
     id: 'BOARD',
     name: '보드판',
-    image: '/eventemoji/overlap.svg',
+    image: '/boardMap.svg',
   },
   {
     id: 'GENERAL',
     name: '점수판',
-    image: '/eventemoji/magnet.svg',
+    image: '/scoreMap.svg',
   },
 ];
 
@@ -80,30 +80,29 @@ export default function MapSelector({ form, error }: MapSelectorProps) {
           <FormControl>
             <div className='relative flex flex-col items-center overflow-hidden rounded-lg'>
               {/* 맵 이미지 컨테이너 - 반응형으로 수정 */}
-              <div className='relative w-full overflow-hidden rounded-lg bg-slate-800'>
+              <div className='relative w-full overflow-hidden rounded-lg bg-slate-800 sm:h-24 md:h-40 lg:h-48'>
                 {/* 화면 크기에 따라 높이 조절 - 더 작은 크기로 조정 */}
-                <div className='xs:h-28 relative h-24 w-full sm:h-24 md:h-40 lg:h-48'>
-                  <Image
-                    src={currentMap.image}
-                    alt={currentMap.name}
-                    fill
-                    sizes='(max-width: 480px) 80vw, (max-width: 768px) 60vw, (max-width: 1200px) 30vw, 25vw'
-                    className='object-contain p-2'
-                    priority
-                  />
-                </div>
+                <Image
+                  src={currentMap.image}
+                  alt={currentMap.name}
+                  fill
+                  className='h-full object-contain'
+                  priority
+                />
 
                 {/* 네비게이션 버튼 */}
                 <button
                   onClick={handlePrev}
-                  className='absolute top-1/2 left-2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-white hover:bg-black sm:h-10 sm:w-10'
+                  className='absolute top-1/2 left-2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-[#9F89EB] text-white hover:bg-[#5D42AA]
+                  
+                  sm:h-10 sm:w-10'
                   aria-label='이전 맵'
                 >
                   <ChevronLeft size={20} className='sm:h-6 sm:w-6' />
                 </button>
                 <button
                   onClick={handleNext}
-                  className='absolute top-1/2 right-2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-white hover:bg-black sm:h-10 sm:w-10'
+                  className='absolute top-1/2 right-2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-[#9F89EB] text-white hover:bg-[#5D42AA] sm:h-10 sm:w-10'
                   aria-label='다음 맵'
                 >
                   <ChevronRight size={20} className='sm:h-6 sm:w-6' />
