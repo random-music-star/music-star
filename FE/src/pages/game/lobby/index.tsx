@@ -13,7 +13,7 @@ export type Room = {
   id: number;
   title: string;
   hostName: string;
-  format: string;
+  format: 'BOARD' | 'GENERAL';
   maxPlayer: number;
   currentPlayers: number;
   maxGameRound: number;
@@ -21,6 +21,7 @@ export type Room = {
   status: string;
   hasPassword: boolean;
   gameModes: string[] | null;
+  selectedYears: number[];
 };
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {

@@ -179,7 +179,7 @@ export default function LoginForm({
             variant='outline'
             onClick={handleGuestLogin}
             disabled={isLoading}
-            className='border-[0.5px] border-white bg-[#433c92] shadow-md transition-colors duration-300 ease-in-out hover:bg-[#352f74] disabled:hover:bg-[#433c92]'
+            className='border-[0.5px] border-white bg-[#433c92] shadow-md transition-colors duration-300 ease-in-out hover:bg-[#352f74] hover:text-white disabled:hover:bg-[#433c92]'
           >
             비회원 로그인
           </Button>

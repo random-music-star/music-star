@@ -1,6 +1,8 @@
 import { useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { DoorOpen } from 'lucide-react';
+import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
@@ -37,10 +39,25 @@ interface RoomItemProps {
   room: Room;
 }
 
+// 맵 이미지 및 데이터 정의
+const formatMapData = {
+  BOARD: {
+    className: 'bg-blue-100 text-blue-800 border-blue-200',
+    name: '보드판',
+    image: '/boardMap.svg',
+  },
+  GENERAL: {
+    className: 'bg-pink-100 text-pink-800 border-pink-200',
+    name: '점수판',
+    image: '/scoreMap.svg',
+  },
+};
+
 const modeBadgeVariants: Record<string, string> = {
   '전곡 모드': 'bg-purple-100 text-purple-800 border-purple-200',
   '1초 모드': 'bg-amber-100 text-amber-800 border-amber-200',
   'AI 모드': 'bg-emerald-100 text-emerald-800 border-emerald-200',
+  FULL: 'bg-purple-100 text-purple-800 border-purple-200',
 };
 
 const statusConfig: Record<string, { className: string; text: string }> = {
@@ -63,10 +80,14 @@ export default function RoomItem({ room }: RoomItemProps) {
   const [error, setError] = useState('');
 
   const isFull = room.currentPlayers >= room.maxPlayer;
-
   const currentStatus = room.status || 'WAITING';
-
   const statusDisplay = statusConfig[currentStatus] || statusConfig['WAITING'];
+  const formatType = room.format as keyof typeof formatMapData;
+  const formatData = formatMapData[formatType] || {
+    className: defaultBadgeStyle,
+    name: '점수판',
+    image: '/scoreMap.svg',
+  };
 
   const form = useForm<PasswordFormValues>({
     resolver: zodResolver(passwordSchema),
@@ -123,102 +144,188 @@ export default function RoomItem({ room }: RoomItemProps) {
   const usagePercentage = (room.currentPlayers / room.maxPlayer) * 100;
 
   const getCapacityStyle = () => {
-    if (currentStatus === 'IN_PROGRESS') return 'bg-green-50 border-green-200';
+    if (currentStatus === 'IN_PROGRESS') return 'border-green-200';
+    if (isFull) return 'border-red-200';
+    if (usagePercentage > 75) return 'border-amber-200';
+    if (usagePercentage > 50) return 'border-blue-200';
+    return 'border-slate-200';
+  };
 
-    if (isFull) return 'bg-red-50 border-red-200';
-    if (usagePercentage > 75) return 'bg-amber-50 border-amber-200';
-    if (usagePercentage > 50) return 'bg-blue-50 border-blue-200';
-    return 'bg-white border-slate-200';
+  const formatYearLabel = (years: number[]) => {
+    if (!years || years.length === 0) return '모든 연도';
+
+    // Sort years in ascending order
+    const sortedYears = [...years].sort((a, b) => a - b);
+
+    if (sortedYears.length === 1) return `${sortedYears[0]}년대`;
+
+    // Group consecutive years
+    const ranges: { start: number; end: number }[] = [];
+    let currentRange = { start: sortedYears[0], end: sortedYears[0] };
+
+    for (let i = 1; i < sortedYears.length; i++) {
+      if (
+        sortedYears[i] === sortedYears[i - 1] + 10 ||
+        // Special case for consecutive years after 2020
+        (sortedYears[i - 1] >= 2020 &&
+          sortedYears[i] === sortedYears[i - 1] + 1)
+      ) {
+        currentRange.end = sortedYears[i];
+      } else {
+        ranges.push(currentRange);
+        currentRange = { start: sortedYears[i], end: sortedYears[i] };
+      }
+    }
+    ranges.push(currentRange);
+
+    // Format the ranges
+    return ranges
+      .map(range => {
+        if (range.start === range.end) {
+          return range.start >= 2020
+            ? `${range.start}년`
+            : `${range.start}년대`;
+        } else if (range.start >= 2020) {
+          return `${range.start}-${range.end}년`;
+        } else {
+          return `${range.start}-${range.end}년대`;
+        }
+      })
+      .join(', ');
   };
 
   return (
     <>
       <Card
-        className={`overflow-hidden transition-all duration-200 hover:shadow-md ${getCapacityStyle()} ${
+        className={`overflow-hidden rounded-none bg-black/70 text-white transition-all duration-200 hover:shadow-md ${getCapacityStyle()} ${
           isFull
             ? 'cursor-not-allowed opacity-70'
             : 'cursor-pointer hover:scale-[1.02]'
         }`}
         onClick={handleRoomClick}
       >
-        <CardHeader className='flex flex-row items-start justify-between p-4 pb-2'>
-          <div className='flex-1'>
-            <CardTitle className='truncate text-lg' title={room.title}>
-              {room.title}
-            </CardTitle>
-            <div className='text-muted-foreground text-sm'>
-              방 번호 {room.id}
-            </div>
-          </div>
-          <div className='ml-2 flex items-center space-x-2'>
-            {/* 상태 뱃지 추가 */}
-            <Badge
-              variant='outline'
-              className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusDisplay.className}`}
-            >
-              {statusDisplay.text}
-            </Badge>
-
-            {room.hasPassword && (
-              <div className='flex items-center'>
-                <span className='text-xs font-bold text-amber-500'>🔒</span>
-              </div>
-            )}
-          </div>
+        <CardHeader>
+          <CardTitle className='truncate text-lg' title={room.title}>
+            <span>
+              {room.title.length > 20
+                ? `${room.title.slice(0, 20)}...`
+                : room.title}
+            </span>
+          </CardTitle>
         </CardHeader>
+        <CardContent>
+          <section>
+            {/* 게임 맵 정보 - 이미지가 가로 전체를 차지하도록 변경 */}
+            <div>
+              <div className='relative overflow-hidden rounded-lg border'>
+                {/* 맵 이미지 - 높이 증가 및 가로 전체 차지 */}
+                <div className='relative h-36 w-full overflow-hidden'>
+                  <Image
+                    src={formatData.image}
+                    alt={formatData.name}
+                    fill
+                    sizes='100%'
+                    className='h-full object-contain'
+                  />
+                </div>
 
-        <CardContent className='p-4 pt-2'>
-          {/* 사용자 수 표시 */}
-          <div className='mb-3'>
-            <div className='mb-1 flex items-center justify-between'>
-              <div className='flex items-center text-sm'>
-                <span className='mr-1'>👥</span>
+                <section className='absolute top-2 flex w-full justify-between px-3'>
+                  {/* 좌측 상단: 대기 상태 표시 */}
+                  <Badge
+                    variant='outline'
+                    className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusDisplay.className}`}
+                  >
+                    {statusDisplay.text}
+                  </Badge>
+
+                  {/* 우측 상단: 잠김 유무 표시 */}
+                  {room.hasPassword ? (
+                    <span className='rounded-full bg-amber-100 p-1.5 text-xs font-bold text-amber-500'>
+                      🔒
+                    </span>
+                  ) : (
+                    <span className='rounded-full bg-green-100 p-1.5'>
+                      <DoorOpen size={16} className='text-green-500' />
+                    </span>
+                  )}
+                </section>
+
+                {/* 맵 이름 하단에 표시 */}
+                <div className='absolute right-0 bottom-0 left-0 bg-black/60 p-1 text-center'>
+                  <span className='text-sm font-medium text-white'>
+                    {formatData.name}
+                  </span>
+                </div>
+
+                {/* 음악 년도 정보 - 이미지 위에 추가 */}
+                {room.selectedYears && room.selectedYears.length > 0 && (
+                  <div className='absolute right-0 bottom-8 left-0 bg-black/40 p-1 text-center'>
+                    <span className='text-xs text-gray-200'>
+                      {formatYearLabel(room.selectedYears)}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </section>
+
+          <section className='mt-3'>
+            {/* 게임 모드 뱃지 */}
+            <div className='flex justify-end'>
+              <div className='flex flex-wrap gap-1.5'>
+                {room.gameModes &&
+                  Array.isArray(room.gameModes) &&
+                  room.gameModes.map(mode => (
+                    <Badge
+                      key={mode}
+                      variant='outline'
+                      className={`rounded-full border px-2 py-0.5 text-xs font-medium ${modeBadgeVariants[mode] || defaultBadgeStyle}`}
+                    >
+                      {mode}
+                    </Badge>
+                  ))}
+              </div>
+            </div>
+
+            {/* 사용자 수 표시 */}
+            <div className='mt-2'>
+              <div className='mb-1 flex items-center justify-between'>
+                <div className='flex items-center text-sm'>
+                  <span className='mr-1'>👨‍👩‍👦</span>
+                  <span
+                    className={
+                      isFull ? 'font-medium text-red-600' : 'text-white'
+                    }
+                  >
+                    {room.currentPlayers} / {room.maxPlayer}
+                  </span>
+                </div>
                 <span
-                  className={
-                    isFull ? 'font-medium text-red-600' : 'text-slate-600'
-                  }
+                  className={`text-xs ${isFull ? 'text-red-600' : 'text-white'}`}
                 >
-                  {room.currentPlayers} / {room.maxPlayer}
+                  {isFull
+                    ? '정원 초과'
+                    : usagePercentage > 75
+                      ? '거의 찼음'
+                      : ''}
                 </span>
               </div>
-              <span
-                className={`text-xs ${isFull ? 'text-red-600' : 'text-slate-500'}`}
-              >
-                {isFull ? '정원 초과' : usagePercentage > 75 ? '거의 찼음' : ''}
-              </span>
-            </div>
 
-            {/* 사용률 진행 표시줄 */}
-            <div className='h-1.5 w-full overflow-hidden rounded-full bg-gray-200'>
-              <div
-                className={`h-full rounded-full ${
-                  isFull
-                    ? 'bg-red-500'
-                    : usagePercentage > 75
-                      ? 'bg-amber-500'
-                      : 'bg-blue-500'
-                }`}
-                style={{ width: `${usagePercentage}%` }}
-              />
+              {/* 사용률 진행 표시줄 */}
+              <div className='h-1.5 w-full overflow-hidden rounded-full bg-white'>
+                <div
+                  className={`h-full rounded-full ${
+                    isFull
+                      ? 'bg-red-500'
+                      : usagePercentage > 75
+                        ? 'bg-amber-500'
+                        : 'bg-[#905AE5]'
+                  }`}
+                  style={{ width: `${usagePercentage}%` }}
+                />
+              </div>
             </div>
-          </div>
-
-          {/* 게임 모드 뱃지 */}
-          <div className='mt-2'>
-            <div className='flex flex-wrap gap-1.5'>
-              {room.gameModes &&
-                Array.isArray(room.gameModes) &&
-                room.gameModes.map(mode => (
-                  <Badge
-                    key={mode}
-                    variant='outline'
-                    className={`rounded-full border px-2 py-0.5 text-xs font-medium ${modeBadgeVariants[mode] || defaultBadgeStyle}`}
-                  >
-                    {mode}
-                  </Badge>
-                ))}
-            </div>
-          </div>
+          </section>
         </CardContent>
       </Card>
 
