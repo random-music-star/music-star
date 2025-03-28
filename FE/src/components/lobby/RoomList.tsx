@@ -28,7 +28,7 @@ interface RoomListProps {
 export default function RoomList({
   currentPage: initialCurrentPage = 0,
   totalPages: initialTotalPages = 1,
-  pageSize = 8,
+  pageSize = 6,
 }: RoomListProps) {
   const [rooms, setRooms] = useState<Room[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
