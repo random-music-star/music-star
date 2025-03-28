@@ -99,7 +99,6 @@ export default function RoomList({
 
       eventSource.onopen = () => {
         setSseConnected(true);
-        setIsLoading(false);
       };
       eventSource.onerror = () => {
         setSseConnected(false);
@@ -109,7 +108,6 @@ export default function RoomList({
       eventSource.addEventListener(SSE_EVENTS.CONNECT, event => {
         handleEventData(event, SSE_EVENTS.CONNECT);
         setSseConnected(true);
-        setIsLoading(false);
       });
 
       eventSource.addEventListener(SSE_EVENTS.ROOM_LIST, event => {
