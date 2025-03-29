@@ -7,22 +7,25 @@ interface UserCredentials {
   password: string;
 }
 
+interface GuestLoginResponse {
+  token: string;
+}
+
 export function useAuth() {
   const { setNickname } = useNicknameStore();
 
   // 비회원 로그인
   const guestLogin = async () => {
-    const { username } = await fetch(
+    const response = await fetch(
       `${process.env.NEXT_PUBLIC_BASE_URL}/member/guest/login`,
-    )
-      .then(res => res.json())
-      .then(data => data as { username: string });
+    );
+    const { token }: GuestLoginResponse = await response.json();
 
-    setCookie('userNickname', username, {
+    setCookie('userNickname', token, {
       maxAge: 60 * 60 * 24 * 7,
       path: '/',
     });
-    setNickname(username);
+    setNickname(token);
   };
 
   // 회원 가입

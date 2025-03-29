@@ -39,7 +39,7 @@ export default function LoginForm({
   onSuccess,
   initialUsername,
 }: LoginFormProps) {
-  const { userLogin, guestLogin } = useAuth();
+  const { userLogin } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
 
   // 로그인 폼
@@ -80,28 +80,6 @@ export default function LoginForm({
       // 에러 상황에서도 폼 필드 리셋하지만 username은 유지
       const username = form.getValues('username');
       form.reset({ username, password: '' });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // 게스트 로그인 핸들러
-  const handleGuestLogin = async () => {
-    setIsLoading(true);
-
-    try {
-      await guestLogin();
-
-      // 성공은 toast로만 표시
-      toast.success('게스트 로그인', {
-        description: '게스트로 로그인했습니다.',
-      });
-
-      // 성공 콜백 호출
-      onSuccess?.();
-    } catch (error) {
-      console.error('게스트 로그인 실패:', error);
-      // 에러는 콘솔에만 로깅하고 사용자에게는 표시하지 않음
     } finally {
       setIsLoading(false);
     }
@@ -169,19 +147,9 @@ export default function LoginForm({
           <Button
             type='submit'
             disabled={isLoading}
-            className='border-[0.5px] border-white bg-[#433c92] shadow-md transition-colors duration-300 ease-in-out hover:bg-[#352f74] disabled:hover:bg-[#433c92]'
+            className='rounded-3xl bg-gradient-to-b from-[#5a4ca1] to-[#352f74] p-2 py-5 text-white shadow-md shadow-white/10 transition-transform duration-300 ease-in-out hover:-translate-y-1 hover:from-[#4a4586] disabled:opacity-50'
           >
             {isLoading ? '로그인 중...' : '회원 로그인'}
-          </Button>
-
-          <Button
-            type='button'
-            variant='outline'
-            onClick={handleGuestLogin}
-            disabled={isLoading}
-            className='border-[0.5px] border-white bg-[#433c92] shadow-md transition-colors duration-300 ease-in-out hover:bg-[#352f74] hover:text-white disabled:hover:bg-[#433c92]'
-          >
-            비회원 로그인
           </Button>
         </div>
       </form>
