@@ -134,11 +134,11 @@ export default function SignupForm({ onSuccess }: SignupFormProps) {
           )}
         />
 
-        <div className='my-8 flex flex-col gap-2 pt-2'>
+        <div className='flex flex-col gap-2 pt-2'>
           <Button
             type='submit'
             disabled={isLoading}
-            className='border-[0.5px] border-white bg-[#433c92] shadow-md transition-colors duration-300 ease-in-out hover:bg-[#352f74] disabled:hover:bg-[#433c92]'
+            className='rounded-3xl bg-gradient-to-b from-[#5a4ca1] to-[#352f74] px-2 py-5 text-white shadow-md shadow-white/10 transition-transform duration-300 ease-in-out hover:-translate-y-1 hover:from-[#4a4586] disabled:opacity-50'
           >
             {isLoading ? '처리 중...' : '회원가입'}
           </Button>

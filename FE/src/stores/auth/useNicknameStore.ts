@@ -4,7 +4,13 @@ interface NicknameStore {
   nickname: string;
   setNickname: (nickname: string) => void;
 }
-export const useNicknameStore = create<NicknameStore>(set => ({
+export const useNicknameStore = create<NicknameStore>((set, get) => ({
   nickname: '',
-  setNickname: (newNickname: string) => set({ nickname: newNickname }),
+  setNickname: (newNickname: string) => {
+    const currentNickname = get().nickname;
+
+    if (currentNickname !== newNickname) {
+      set({ nickname: newNickname });
+    }
+  },
 }));
