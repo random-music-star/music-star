@@ -1,39 +1,11 @@
 import { useState } from 'react';
 
-import { zodResolver } from '@hookform/resolvers/zod';
-import { DoorOpen } from 'lucide-react';
 import Image from 'next/image';
-import { useRouter } from 'next/router';
-import { useForm } from 'react-hook-form';
-import * as z from 'zod';
 
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
 import { Room } from '@/pages/game/lobby/[channelId]';
 
-const passwordSchema = z.object({
-  password: z.string().min(1, { message: '비밀번호를 입력해주세요' }),
-});
-
-type PasswordFormValues = z.infer<typeof passwordSchema>;
+import RoomDialog from './RoomDialog';
 
 interface RoomItemProps {
   room: Room;
@@ -53,11 +25,18 @@ const formatMapData = {
   },
 };
 
+// 게임 모드 매핑
+const gameModeLabels: Record<string, string> = {
+  FULL: '전곡',
+  '1SEC': '1초',
+  AI: 'AI',
+};
+
+// 게임 모드 배지 스타일
 const modeBadgeVariants: Record<string, string> = {
-  '전곡 모드': 'bg-purple-100 text-purple-800 border-purple-200',
-  '1초 모드': 'bg-amber-100 text-amber-800 border-amber-200',
-  'AI 모드': 'bg-emerald-100 text-emerald-800 border-emerald-200',
   FULL: 'bg-purple-100 text-purple-800 border-purple-200',
+  '1SEC': 'bg-amber-100 text-amber-800 border-amber-200',
+  AI: 'bg-emerald-100 text-emerald-800 border-emerald-200',
 };
 
 const statusConfig: Record<string, { className: string; text: string }> = {
@@ -74,10 +53,8 @@ const statusConfig: Record<string, { className: string; text: string }> = {
 const defaultBadgeStyle = 'bg-gray-100 text-gray-800 border-gray-200';
 
 export default function RoomItem({ room }: RoomItemProps) {
-  const router = useRouter();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [isHovering, setIsHovering] = useState(false);
 
   const isFull = room.currentPlayers >= room.maxPlayer;
   const currentStatus = room.status || 'WAITING';
@@ -89,84 +66,29 @@ export default function RoomItem({ room }: RoomItemProps) {
     image: '/scoreMap.svg',
   };
 
-  const form = useForm<PasswordFormValues>({
-    resolver: zodResolver(passwordSchema),
-    defaultValues: {
-      password: '',
-    },
-  });
-
+  // 방 클릭 처리
   const handleRoomClick = () => {
     if (isFull) return;
 
-    if (currentStatus === 'IN_PROGRESS') {
-      setError('');
-      setIsDialogOpen(true);
-      return;
-    }
-
-    setError('');
-    form.reset();
     setIsDialogOpen(true);
   };
 
-  const onPasswordSubmit = async (values: PasswordFormValues) => {
-    setIsLoading(true);
-    setError('');
-
-    try {
-      const response = await fetch(`/api/rooms/${room.id}/verify-password`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: values.password }),
-      });
-
-      if (!response.ok) {
-        throw new Error('비밀번호가 틀렸습니다.');
-      }
-
-      setIsDialogOpen(false);
-      router.push(`/game/room/${room.id}`);
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다.';
-      setError(errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleEnterOpenRoom = () => {
-    setIsDialogOpen(false);
-    router.push(`/game/room/${room.id}`);
-  };
-
-  const usagePercentage = (room.currentPlayers / room.maxPlayer) * 100;
-
-  const getCapacityStyle = () => {
-    if (currentStatus === 'IN_PROGRESS') return 'border-green-200';
-    if (isFull) return 'border-red-200';
-    if (usagePercentage > 75) return 'border-amber-200';
-    if (usagePercentage > 50) return 'border-blue-200';
-    return 'border-slate-200';
-  };
-
+  // 년도 정보에 대한 전처리
   const formatYearLabel = (years: number[]) => {
     if (!years || years.length === 0) return '모든 연도';
 
-    // Sort years in ascending order
+    // 년도 오름차순 정렬
     const sortedYears = [...years].sort((a, b) => a - b);
 
     if (sortedYears.length === 1) return `${sortedYears[0]}년대`;
 
-    // Group consecutive years
+    // 연속된 년도 그룹화
     const ranges: { start: number; end: number }[] = [];
     let currentRange = { start: sortedYears[0], end: sortedYears[0] };
 
     for (let i = 1; i < sortedYears.length; i++) {
       if (
         sortedYears[i] === sortedYears[i - 1] + 10 ||
-        // Special case for consecutive years after 2020
         (sortedYears[i - 1] >= 2020 &&
           sortedYears[i] === sortedYears[i - 1] + 1)
       ) {
@@ -178,7 +100,7 @@ export default function RoomItem({ room }: RoomItemProps) {
     }
     ranges.push(currentRange);
 
-    // Format the ranges
+    // 년도 값 내려올 경우 2020 이전은 년대로 표현현
     return ranges
       .map(range => {
         if (range.start === range.end) {
@@ -196,259 +118,130 @@ export default function RoomItem({ room }: RoomItemProps) {
 
   return (
     <>
-      <Card
-        className={`overflow-hidden rounded-none bg-black/70 text-white transition-all duration-200 hover:shadow-md ${getCapacityStyle()} ${
-          isFull
-            ? 'cursor-not-allowed opacity-70'
-            : 'cursor-pointer hover:scale-[1.02]'
-        }`}
+      <article
+        className='flex cursor-pointer flex-col'
         onClick={handleRoomClick}
+        onMouseEnter={() => setIsHovering(true)}
+        onMouseLeave={() => setIsHovering(false)}
       >
-        <CardHeader>
-          <CardTitle className='truncate text-lg' title={room.title}>
-            <span>
-              {room.title.length > 20
-                ? `${room.title.slice(0, 20)}...`
-                : room.title}
-            </span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <section>
-            {/* 게임 맵 정보 - 이미지가 가로 전체를 차지하도록 변경 */}
-            <div>
-              <div className='relative overflow-hidden rounded-lg border'>
-                {/* 맵 이미지 - 높이 증가 및 가로 전체 차지 */}
-                <div className='relative h-36 w-full overflow-hidden'>
-                  <Image
-                    src={formatData.image}
-                    alt={formatData.name}
-                    fill
-                    sizes='100%'
-                    className='h-full object-contain'
-                  />
-                </div>
+        {/* 상단 */}
+        <section className='relative flex w-full'>
+          {/* CD 배치 */}
+          <div
+            className='absolute top-[5%] left-[30%] z-0 aspect-square w-[55%]'
+            style={{
+              transform: isHovering ? 'translateX(10%)' : 'translateX(0)',
+              transition: 'transform 0.5s ease-in-out',
+            }}
+          >
+            <Image
+              src='/lp.svg'
+              alt='CD'
+              fill
+              style={{
+                animation: isHovering
+                  ? 'spin 3s linear infinite'
+                  : currentStatus === 'IN_PROGRESS'
+                    ? 'spin 10s linear infinite' // 게임 중일 경우 천천히 회전
+                    : 'none', // 대기 중일 경우 회전 없음
+                transition: 'all 0.7s ease-in-out',
+              }}
+            />
+          </div>
 
-                <section className='absolute top-2 flex w-full justify-between px-3'>
-                  {/* 좌측 상단: 대기 상태 표시 */}
-                  <Badge
-                    variant='outline'
-                    className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusDisplay.className}`}
-                  >
-                    {statusDisplay.text}
-                  </Badge>
-
-                  {/* 우측 상단: 잠김 유무 표시 */}
-                  {room.hasPassword ? (
-                    <span className='rounded-full bg-amber-100 p-1.5 text-xs font-bold text-amber-500'>
-                      🔒
-                    </span>
-                  ) : (
-                    <span className='rounded-full bg-green-100 p-1.5'>
-                      <DoorOpen size={16} className='text-green-500' />
-                    </span>
-                  )}
-                </section>
-
-                {/* 맵 이름 하단에 표시 */}
-                <div className='absolute right-0 bottom-0 left-0 bg-black/60 p-1 text-center'>
-                  <span className='text-sm font-medium text-white'>
-                    {formatData.name}
-                  </span>
-                </div>
-
-                {/* 음악 년도 정보 - 이미지 위에 추가 */}
-                {room.selectedYears && room.selectedYears.length > 0 && (
-                  <div className='absolute right-0 bottom-8 left-0 bg-black/40 p-1 text-center'>
-                    <span className='text-xs text-gray-200'>
-                      {formatYearLabel(room.selectedYears)}
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </section>
-
-          <section className='mt-3'>
+          {/* CD 케이스 (왼쪽 60%, CD 일부를 가림) */}
+          <div className='relative z-10 flex aspect-square w-3/5 flex-col justify-between bg-white p-2'>
             {/* 게임 모드 뱃지 */}
-            <div className='flex justify-end'>
-              <div className='flex flex-wrap gap-1.5'>
-                {room.gameModes &&
-                  Array.isArray(room.gameModes) &&
-                  room.gameModes.map(mode => (
-                    <Badge
-                      key={mode}
-                      variant='outline'
-                      className={`rounded-full border px-2 py-0.5 text-xs font-medium ${modeBadgeVariants[mode] || defaultBadgeStyle}`}
-                    >
-                      {mode}
-                    </Badge>
-                  ))}
-              </div>
-            </div>
-
-            {/* 사용자 수 표시 */}
-            <div className='mt-2'>
-              <div className='mb-1 flex items-center justify-between'>
-                <div className='flex items-center text-sm'>
-                  <span className='mr-1'>👨‍👩‍👦</span>
-                  <span
-                    className={
-                      isFull ? 'font-medium text-red-600' : 'text-white'
-                    }
+            <div className='flex justify-center'>
+              {room.gameModes &&
+                Array.isArray(room.gameModes) &&
+                room.gameModes.map(mode => (
+                  <Badge
+                    key={mode}
+                    variant='outline'
+                    className={`rounded-full border px-2 text-xs ${modeBadgeVariants[mode] || defaultBadgeStyle}`}
                   >
-                    {room.currentPlayers} / {room.maxPlayer}
-                  </span>
-                </div>
+                    {gameModeLabels[mode] || mode}
+                  </Badge>
+                ))}
+            </div>
+            {/* 선택한 맵 */}
+            <div className='relative h-24 w-full overflow-hidden'>
+              <Image
+                src={formatData.image}
+                alt={formatData.name}
+                fill
+                sizes='100%'
+                className='h-full object-contain'
+              />
+            </div>
+            <div className='flex items-center justify-between'>
+              {/* 방 상태 표시 */}
+              <div>
                 <span
-                  className={`text-xs ${isFull ? 'text-red-600' : 'text-white'}`}
+                  className={`rounded-full px-2 py-1 text-xs ${statusDisplay.className}`}
                 >
-                  {isFull
-                    ? '정원 초과'
-                    : usagePercentage > 75
-                      ? '거의 찼음'
-                      : ''}
+                  {statusDisplay.text}
                 </span>
               </div>
-
-              {/* 사용률 진행 표시줄 */}
-              <div className='h-1.5 w-full overflow-hidden rounded-full bg-white'>
-                <div
-                  className={`h-full rounded-full ${
-                    isFull
-                      ? 'bg-red-500'
-                      : usagePercentage > 75
-                        ? 'bg-amber-500'
-                        : 'bg-[#905AE5]'
-                  }`}
-                  style={{ width: `${usagePercentage}%` }}
-                />
+              {/* 방 인원 */}
+              <div className='flex justify-end'>
+                <span className='mr-1 text-xs'>👨‍👩‍👦</span>
+                <span
+                  className={`${isFull ? 'text-red-600' : 'text-black'} text-xs`}
+                >
+                  {room.currentPlayers} / {room.maxPlayer}
+                </span>
               </div>
             </div>
-          </section>
-        </CardContent>
-      </Card>
+            {/* 선택 년도 - 라벨 */}
+            <div className='text-xs'>
+              {room.selectedYears && room.selectedYears.length > 0 && (
+                <span className='text-xs'>
+                  {formatYearLabel(room.selectedYears)}
+                </span>
+              )}
+              <span>2024</span>
+            </div>
+          </div>
+        </section>
 
-      {/* 방 입장 다이얼로그 */}
-      <Dialog
-        open={isDialogOpen}
-        onOpenChange={open => !open && setIsDialogOpen(false)}
-      >
-        <DialogContent className='sm:max-w-[400px]'>
-          <DialogHeader>
-            <DialogTitle
-              className={
-                currentStatus === 'IN_PROGRESS'
-                  ? 'text-green-600'
-                  : room.hasPassword
-                    ? 'text-amber-600'
-                    : 'text-blue-600'
-              }
+        {/* 하단 : 방 이름, 번호, 잠금 여부 */}
+        <section className='mt-2 flex items-center justify-between'>
+          <div className='flex items-center'>
+            {/* 방 번호 */}
+            <div className='mr-2 rounded-md bg-gradient-to-b from-[#8352D1] to-[#5B3A91] px-2 py-1 text-white'>
+              {String(room.roomNumber).padStart(3, '0')}
+            </div>
+            {/* 잠금방 아이콘 표시 */}
+            {room.hasPassword ? (
+              <span className='rounded-full bg-amber-100 p-1.5 text-xs font-bold text-amber-500'>
+                🔒
+              </span>
+            ) : (
+              <span></span>
+            )}
+            {/* 방 이름 */}
+            <span
+              className='my-4 truncate text-2xl font-bold text-white'
+              style={{
+                textShadow: `-3px -3px 0 #6548B9, 3px -3px 0 #6548B9, -3px 3px 0 #6548B9, 3px 3px 0 #6548B9`,
+              }}
             >
-              {currentStatus === 'IN_PROGRESS' ? (
-                <div className='flex items-center'>게임 진행 중</div>
-              ) : room.hasPassword ? (
-                <div className='flex items-center'>비밀번호 입력</div>
-              ) : (
-                '방 입장'
-              )}
-            </DialogTitle>
-            <DialogDescription>
-              {currentStatus === 'IN_PROGRESS'
-                ? `'${room.title}' 방은 현재 게임이 진행 중입니다. 게임이 끝날 때까지 입장할 수 없습니다.`
-                : room.hasPassword
-                  ? `'${room.title}' 방에 입장하기 위해 비밀번호를 입력해주세요.`
-                  : `'${room.title}' 방에 입장하시겠습니까?`}
-            </DialogDescription>
-          </DialogHeader>
+              {room.title.length > 10
+                ? `${room.title.slice(0, 10)}...`
+                : room.title}
+            </span>
+          </div>
+        </section>
+      </article>
 
-          {currentStatus === 'IN_PROGRESS' ? (
-            // 게임 진행 중일 때는 확인 버튼만 표시
-            <DialogFooter className='pt-4'>
-              <Button variant='outline' onClick={() => setIsDialogOpen(false)}>
-                확인
-              </Button>
-            </DialogFooter>
-          ) : room.hasPassword ? (
-            // 비밀번호가 있는 방
-            <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onPasswordSubmit)}
-                className='space-y-4'
-              >
-                <FormField
-                  control={form.control}
-                  name='password'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>비밀번호</FormLabel>
-                      <FormControl>
-                        <Input
-                          type='password'
-                          placeholder='방 비밀번호를 입력하세요'
-                          autoFocus
-                          className='focus-visible:ring-amber-500'
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* 오류 메시지 표시 영역 */}
-                {error && (
-                  <div className='rounded border border-red-100 bg-red-50 p-2 text-sm font-medium text-red-500'>
-                    {error}
-                  </div>
-                )}
-
-                <DialogFooter className='pt-2'>
-                  <Button
-                    variant='outline'
-                    type='button'
-                    onClick={() => setIsDialogOpen(false)}
-                  >
-                    취소
-                  </Button>
-                  <Button
-                    type='submit'
-                    disabled={isLoading}
-                    className={`bg-amber-600 text-white hover:bg-amber-700 ${isLoading ? 'opacity-70' : ''}`}
-                  >
-                    {isLoading ? '처리 중...' : '입장'}
-                  </Button>
-                </DialogFooter>
-              </form>
-            </Form>
-          ) : (
-            // 일반 방
-            <>
-              {/* 오류 메시지 표시 영역 (열린 방) */}
-              {error && (
-                <div className='mt-2 mb-4 rounded border border-red-100 bg-red-50 p-2 text-sm font-medium text-red-500'>
-                  {error}
-                </div>
-              )}
-
-              <DialogFooter className='pt-4'>
-                <Button
-                  variant='outline'
-                  onClick={() => setIsDialogOpen(false)}
-                >
-                  취소
-                </Button>
-                <Button
-                  onClick={handleEnterOpenRoom}
-                  className='bg-blue-600 text-white hover:bg-blue-700'
-                >
-                  입장
-                </Button>
-              </DialogFooter>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* 방 입장 시 나오는 dialog */}
+      <RoomDialog
+        room={room}
+        isOpen={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+      />
     </>
   );
 }

@@ -5,7 +5,7 @@ import { GetServerSideProps } from 'next';
 
 import ChatBox from '@/components/lobby/ChatBox';
 import CreateRoomButton from '@/components/lobby/CreateRoomButton';
-import Header from '@/components/lobby/Header';
+import Header from '@/components/lobby/Footer';
 import RoomList from '@/components/lobby/RoomList';
 import { useNicknameStore } from '@/stores/auth/useNicknameStore';
 
@@ -22,6 +22,7 @@ export type Room = {
   hasPassword: boolean;
   gameModes: string[] | null;
   selectedYears: number[];
+  roomNumber: number;
 };
 
 export const getServerSideProps: GetServerSideProps = async ({
@@ -64,23 +65,25 @@ const LobbyPage = ({ userNickname, channelId }: LobbyServerProps) => {
 
   return (
     <div className='flex h-screen flex-col bg-[url(/background.svg)] bg-cover bg-center'>
-      <div className='flex flex-1 overflow-hidden'>
-        <Header />
-        <div className='flex flex-1 flex-col p-6'>
+      {/* main */}
+      <main className='flex flex-1 overflow-hidden'>
+        {/* section - 게임 방 목록 */}
+        <section className='m-10 flex flex-1 flex-col bg-gradient-to-r from-[#4F719C]/80 to-[#5F4EA0]/80 p-6'>
           <div className='mb-6 flex items-center justify-between'>
-            <h1 className='text-2xl font-bold text-gray-900'>게임 방 목록</h1>
+            <h1 className='text-2xl font-bold text-white'>게임 방 목록</h1>
             <CreateRoomButton />
           </div>
+          <RoomList channelId={channelId} />
+        </section>
 
-          <div className='flex-1 overflow-y-auto'>
-            <RoomList />
-          </div>
-        </div>
-
-        <div className='w-80 bg-black/50 text-white'>
+        {/* section - 채팅 */}
+        <section className='w-2/10 bg-black/50 text-white'>
           <ChatBox />
-        </div>
-      </div>
+        </section>
+      </main>
+
+      {/* footer */}
+      <Header channelId={channelId} />
     </div>
   );
 };
