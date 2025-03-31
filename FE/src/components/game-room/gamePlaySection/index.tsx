@@ -11,6 +11,7 @@ import { useGameStateStore } from '@/stores/websocket/useGameStateStore';
 import { useGameWinnerStore } from '@/stores/websocket/useGameWinnerStore';
 import { Chatting } from '@/types/websocket';
 
+import RotatingLP from './RotatingLP';
 import RoundInformation from './RoundInfomation';
 import SpeechBubble from './SpeechBubble';
 
@@ -141,15 +142,7 @@ const GamePlaySection = () => {
           priority
         />
 
-        <motion.div
-          className='absolute -left-40 h-[300px] w-[300px] -translate-y-8 overflow-hidden rounded-full lg:-left-38 lg:-translate-y-12'
-          animate={{ rotate: 360, opacity: 1 }}
-          transition={{ repeat: Infinity, duration: 1.5, ease: 'linear' }}
-        >
-          <div className='h-full w-full rounded-full'>
-            <Image src='/lp.svg' alt='lp' fill className='object-cover' />
-          </div>
-        </motion.div>
+        <RotatingLP />
 
         {participantInfo.map((participant, index) => {
           const position = getStaffPosition(index);
