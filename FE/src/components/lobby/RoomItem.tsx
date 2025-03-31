@@ -27,7 +27,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Room } from '@/pages/game/lobby';
+import { Room } from '@/pages/game/lobby/[channelId]';
 
 const passwordSchema = z.object({
   password: z.string().min(1, { message: '비밀번호를 입력해주세요' }),
