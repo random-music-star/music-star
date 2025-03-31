@@ -1,20 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import axios from 'axios';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
 import { Room } from '@/pages/game/lobby/[channelId]';
 
 import RoomItem from './RoomItem';
 
-const SSE_ENDPOINT = `${process.env.NEXT_PUBLIC_SSE_URL}/lobby`;
 const API_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
 const SSE_EVENTS = {
   CONNECT: 'CONNECT',
-  ROOM_LIST: 'ROOM_LIST',
   ROOM_UPDATED: 'ROOM_UPDATED',
   ROOM_DELETE: 'ROOM_DELETE',
 } as const;
@@ -23,12 +19,14 @@ interface RoomListProps {
   currentPage?: number;
   totalPages?: number;
   pageSize?: number;
+  channelId: string;
 }
 
 export default function RoomList({
   currentPage: initialCurrentPage = 0,
   totalPages: initialTotalPages = 1,
   pageSize = 6,
+  channelId,
 }: RoomListProps) {
   const [rooms, setRooms] = useState<Room[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -37,15 +35,46 @@ export default function RoomList({
   const [totalPages, setTotalPages] = useState<number>(initialTotalPages);
   const currentPageRef = useRef<number>(initialCurrentPage);
 
+  const SSE_ENDPOINT = `${process.env.NEXT_PUBLIC_SSE_URL}/${channelId}`;
+
   useEffect(() => {
     currentPageRef.current = currentPage;
   }, [currentPage]);
 
+  // 페이지 로딩 시 GET 요청으로 방 목록 가져옴옴
+  useEffect(() => {
+    setIsLoading(true);
+    const fetchInitialRooms = async () => {
+      try {
+        const response = await axios.get(`${API_URL}/room`, {
+          params: {
+            channelId: channelId,
+            page: initialCurrentPage,
+            size: pageSize,
+          },
+        });
+
+        const data = response.data;
+        setRooms(data.content || []);
+        setCurrentPage(data.number || 0);
+        setTotalPages(data.totalPages || 1);
+        setIsLoading(false);
+      } catch (error) {
+        console.error('초기 방 목록 가져오기 오류:', error);
+        setIsLoading(false);
+      }
+    };
+
+    fetchInitialRooms();
+  }, [channelId, initialCurrentPage, pageSize]);
+
+  // 페이지 전환 시 GET 요청 받아서 값 처리리
   const handlePageChange = async (newPage: number) => {
     try {
       setIsLoading(true);
       const response = await axios.get(`${API_URL}/room`, {
         params: {
+          channelId: channelId,
           page: newPage,
           size: pageSize,
         },
@@ -69,11 +98,6 @@ export default function RoomList({
 
         if (eventName === SSE_EVENTS.CONNECT) {
           data = event.data;
-          return data;
-        }
-
-        if (eventName === SSE_EVENTS.ROOM_LIST) {
-          data = JSON.parse(event.data);
           return data;
         }
 
@@ -110,23 +134,6 @@ export default function RoomList({
         setSseConnected(true);
       });
 
-      eventSource.addEventListener(SSE_EVENTS.ROOM_LIST, event => {
-        const data = handleEventData(event, SSE_EVENTS.ROOM_LIST);
-        if (data && data.rooms) {
-          const rooms = data.rooms;
-          const totalPages = data.totalPages;
-          const currentPage = data.currentPage;
-
-          setRooms(rooms);
-          setTotalPages(totalPages);
-          setCurrentPage(currentPage);
-          setIsLoading(false);
-        } else {
-          setRooms([]);
-          setIsLoading(false);
-        }
-      });
-
       eventSource.addEventListener(SSE_EVENTS.ROOM_UPDATED, event => {
         const data = handleEventData(event, SSE_EVENTS.ROOM_UPDATED);
 
@@ -134,6 +141,8 @@ export default function RoomList({
           const updatedRoom = data.room;
           const pageNow = currentPageRef.current;
 
+          // 사용자가 첫페이지에 있을 경우
+          // 기존에 있던 방의 경우 갱신, 없던 방은 상단 추가 후 기존 아이템 한개 삭제
           if (pageNow === 0) {
             setRooms(currentRooms => {
               const roomIndex = currentRooms.findIndex(
@@ -153,6 +162,8 @@ export default function RoomList({
               }
             });
           } else {
+            // 사용자가 첫 페이지 이외 페이지에 있을 경우
+            // 기존에 있던 방의 경우 갱신, 없던 방의 경우 처리 안함함
             setRooms(currentRooms => {
               const roomIndex = currentRooms.findIndex(
                 room => room.id === updatedRoom.id,
@@ -169,6 +180,7 @@ export default function RoomList({
         }
       });
 
+      // 아직 서버 구현안된 type, finished로 들어올 예정
       eventSource.addEventListener(SSE_EVENTS.ROOM_DELETE, event => {
         const deletedRoom = handleEventData(event, SSE_EVENTS.ROOM_DELETE);
         if (deletedRoom) {
@@ -186,7 +198,7 @@ export default function RoomList({
         eventSource.close();
       }
     };
-  }, [handleEventData, pageSize]);
+  }, [handleEventData, pageSize, SSE_ENDPOINT, channelId]);
 
   useEffect(() => {
     if (!sseConnected) {
@@ -199,11 +211,12 @@ export default function RoomList({
   const isLastPage = currentPage === totalPages - 1 || totalPages === 0;
 
   return (
-    <div>
+    <div className='flex items-center justify-center'>
       {isLoading ? (
+        // 로딩 중
         <div className='flex items-center justify-center py-12'>
           <div
-            className='mr-2 inline-block h-6 w-6 animate-spin rounded-full border-[3px] border-current border-t-transparent text-indigo-500'
+            className='mr-2 h-6 w-6 animate-spin rounded-full border-[3px] border-current border-t-transparent text-indigo-500'
             aria-hidden='true'
           ></div>
           <p className='font-medium text-indigo-700'>
@@ -211,17 +224,17 @@ export default function RoomList({
           </p>
         </div>
       ) : rooms.length === 0 ? (
+        // SSE 연결 완료 & 현재 방 목록 없음
         <div className='flex flex-col items-center justify-center gap-2 py-20'>
           <div className='mb-2 flex h-16 w-16 items-center justify-center rounded-full bg-indigo-100'>
             <span className='text-2xl text-indigo-500'>🎵</span>
           </div>
           <p className='font-medium text-indigo-700'>생성된 방이 없습니다</p>
-          <p className='text-sm text-gray-500'>
-            새로운 노래방을 만들어 보세요!
-          </p>
+          <p className='text-sm text-white'>새로운 노래방을 만들어 보세요!</p>
         </div>
       ) : (
-        <>
+        // SSE 연결 완료 & 방 목록 내려받기 완료
+        <div className='flex flex-1'>
           {!sseConnected && (
             <Alert className='mb-4 border-amber-200 bg-amber-50'>
               <AlertDescription className='text-sm text-amber-700'>
@@ -229,45 +242,39 @@ export default function RoomList({
               </AlertDescription>
             </Alert>
           )}
-
-          <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'>
-            {rooms.map(room => (
-              <RoomItem key={room.id} room={room} />
-            ))}
-          </div>
-
-          {totalPages > 0 && (
-            <div className='mt-6 flex items-center justify-center gap-4'>
-              <Button
-                variant='outline'
-                size='sm'
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={isFirstPage || isLoading}
-                className={`${isFirstPage ? 'cursor-not-allowed opacity-50' : 'hover:bg-indigo-50'} border-indigo-200`}
-              >
-                <ChevronLeft className='mr-1 h-4 w-4' />
-                이전
-              </Button>
-
-              <div className='text-sm font-medium text-gray-700'>
+          {/* 방 목록 표시 */}
+          <div className='flex flex-1 items-center justify-between'>
+            {/* 이전 버튼 */}
+            <button
+              onClick={() => !isFirstPage && handlePageChange(currentPage - 1)}
+              disabled={isFirstPage}
+              className={`${isFirstPage ? 'opacity-10' : 'hover:cursor-pointer hover:text-[#82cdce]'} mr-3 text-7xl text-[#9FFCFE]`}
+            >
+              ◀
+            </button>
+            {/* 방 목록 */}
+            <div className='relative flex flex-1 flex-col justify-between'>
+              <div className='absolute top-[-50px] left-[50%] text-center text-sm font-medium text-white'>
                 {totalPages > 0
                   ? `${currentPage + 1} / ${totalPages}`
                   : '0 / 0'}
               </div>
-
-              <Button
-                variant='outline'
-                size='sm'
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={isLastPage || isLoading}
-                className={`${isLastPage ? 'cursor-not-allowed opacity-50' : 'hover:bg-indigo-50'} border-indigo-200`}
-              >
-                다음
-                <ChevronRight className='ml-1 h-4 w-4' />
-              </Button>
+              <div className='grid min-h-[400px] grid-cols-2 gap-4 lg:grid-cols-3'>
+                {rooms.map(room => (
+                  <RoomItem key={room.id} room={room} />
+                ))}
+              </div>
             </div>
-          )}
-        </>
+            {/* 다음 버튼 */}
+            <button
+              onClick={() => !isLastPage && handlePageChange(currentPage + 1)}
+              disabled={isLastPage}
+              className={`${isLastPage ? 'opacity-10' : 'hover:cursor-pointer hover:text-[#82cdce]'} ml-3 text-7xl text-[#9FFCFE]`}
+            >
+              ▶
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );
