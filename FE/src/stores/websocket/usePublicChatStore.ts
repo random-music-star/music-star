@@ -4,7 +4,7 @@ import { Chatting } from '@/types/websocket';
 
 export interface PublicChatStore {
   publicChattings: Chatting[];
-  setPublicChattings: (publicChatting?: Chatting) => void;
+  setPublicChattings: (publicChatting: Chatting) => void;
   resetPublicChatStore: () => void;
 }
 
@@ -14,10 +14,8 @@ const initialState = {
 
 export const usePublicChatStore = create<PublicChatStore>((set, get) => ({
   publicChattings: [],
-  setPublicChattings: (publicChatting?: Chatting) => {
-    if (publicChatting)
-      set({ publicChattings: [...get().publicChattings, publicChatting] });
-    else set({ publicChattings: [] });
+  setPublicChattings: (publicChatting: Chatting) => {
+    set({ publicChattings: [...get().publicChattings, publicChatting] });
   },
 
   resetPublicChatStore: () => set(initialState),

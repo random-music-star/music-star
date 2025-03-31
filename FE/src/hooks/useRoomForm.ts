@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
 import { createRoomFormSchema } from '@/types/rooms';
+import { Mode } from '@/types/websocket';
 
 // Zod 스키마로부터 타입 추론
 export type RoomFormValues = z.infer<typeof createRoomFormSchema>;
@@ -13,7 +14,7 @@ interface UseRoomFormProps {
   initialData?: {
     roomTitle?: string;
     format?: 'GENERAL' | 'BOARD';
-    mode?: ('FULL' | 'ONE_SEC')[];
+    mode?: Mode[];
     selectedYear?: number[];
     hasPassword?: boolean;
   };
@@ -37,7 +38,7 @@ export function useRoomForm({ initialData }: UseRoomFormProps = {}) {
       form.reset({
         title: initialData.roomTitle || '',
         format: initialData.format || 'BOARD',
-        modes: initialData.mode?.map(m => (m === 'ONE_SEC' ? '1SEC' : m)) || [],
+        modes: initialData.mode?.map(m => m) || [],
         years: initialData.selectedYear || [],
       });
     }

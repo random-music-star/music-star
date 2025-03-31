@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { useRoomApi } from '@/hooks/useRoomApi';
 import { type RoomFormValues, useRoomForm } from '@/hooks/useRoomForm';
 import { AVAILABLE_MODES, AVAILABLE_YEARS } from '@/types/rooms';
+import { Mode } from '@/types/websocket';
 
 import MapSelector from './MapSelector';
 
@@ -20,7 +21,7 @@ interface RoomFormProps {
   initialData?: {
     roomTitle?: string;
     format?: 'GENERAL' | 'BOARD';
-    mode?: ('FULL' | 'ONE_SEC')[];
+    mode?: Mode[];
     selectedYear?: number[];
     hasPassword?: boolean;
   };

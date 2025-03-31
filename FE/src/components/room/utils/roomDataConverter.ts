@@ -35,9 +35,7 @@ export function socketToFormData(
     title: gameRoomInfo.roomTitle || '',
     format: gameRoomInfo.format || 'BOARD',
     // 소켓에서는 'ONE_SEC', 폼에서는 '1SEC' 사용
-    modes: (gameRoomInfo.mode || []).map((m: Mode) =>
-      m === 'ONE_SEC' ? '1SEC' : m,
-    ),
+    modes: (gameRoomInfo.mode || []).map((m: Mode) => m),
     years: gameRoomInfo.selectedYear || [],
   };
 
@@ -66,12 +64,6 @@ export function formToApiData(
       selectedYears: formData.years || [],
       format: formData.format, // request에서 삭제되면 제거 필요
     };
-
-    console.log('폼 데이터를 API 요청 데이터로 변환:', {
-      원본_폼데이터: formData,
-      roomId: roomId,
-      변환된_요청데이터: data,
-    });
 
     return data;
   } else {
