@@ -1,7 +1,10 @@
+import { useEffect, useState } from 'react';
+
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/router';
 import { toast } from 'sonner';
 
+import { Channel, getChannelsApi } from '@/api/channels/channels';
 import { cn } from '@/lib/utils';
 import { useNicknameStore } from '@/stores/auth/useNicknameStore';
 
@@ -25,6 +28,11 @@ const pianoKeys = [
   { key: 'w', channelIndex: null },
 ];
 
+const SSE_EVENTS = {
+  CONNECT: 'CONNECT',
+  CHANNEL_UPDATE: 'CHANNEL_UPDATE',
+} as const;
+
 const channelCongestion = (playerCount: number, maxPlayers: number) => {
   const ratio = playerCount / maxPlayers;
 
@@ -46,46 +54,58 @@ const channelCongestion = (playerCount: number, maxPlayers: number) => {
 const ChannelList = () => {
   const router = useRouter();
   const { nickname } = useNicknameStore();
+  const [isSSEConnected, setIsSSEConnected] = useState(false);
+  const [channelData, setChannelData] = useState<Channel[]>([]);
 
-  // 더미데이터
-  const channels = [
-    {
-      channelId: 0,
-      name: '채널1',
-      playerCount: 120,
-      maxPlayers: 500,
-    },
-    {
-      channelId: 1,
-      name: '채널2',
-      playerCount: 300,
-      maxPlayers: 500,
-    },
-    {
-      channelId: 2,
-      name: '채널3',
-      playerCount: 450,
-      maxPlayers: 500,
-    },
-    {
-      channelId: 3,
-      name: '채널4',
-      playerCount: 50,
-      maxPlayers: 500,
-    },
-    {
-      channelId: 4,
-      name: '채널5',
-      playerCount: 200,
-      maxPlayers: 500,
-    },
-    {
-      channelId: 5,
-      name: '채널6',
-      playerCount: 370,
-      maxPlayers: 500,
-    },
-  ];
+  useEffect(() => {
+    (async () => {
+      const { channels } = await getChannelsApi();
+      setChannelData(channels);
+    })();
+  }, []);
+
+  // SSE 로직
+  useEffect(() => {
+    let retryCount = 0;
+
+    const eventSource = new EventSource(
+      `${process.env.NEXT_PUBLIC_SSE_URL}/channels`,
+    );
+
+    eventSource.addEventListener(SSE_EVENTS.CONNECT, async () => {
+      setIsSSEConnected(true);
+
+      const { channels } = await getChannelsApi();
+      setChannelData(channels);
+    });
+
+    eventSource.addEventListener(SSE_EVENTS.CHANNEL_UPDATE, event => {
+      const newChannel = JSON.parse(event.data);
+      setChannelData(prev =>
+        prev.map((channel, index) =>
+          index === newChannel.channelId - 1 ? newChannel : channel,
+        ),
+      );
+    });
+
+    eventSource.onmessage = event => {
+      console.log('기타 이벤트', event);
+    };
+
+    eventSource.onerror = () => {
+      retryCount++;
+
+      if (retryCount >= 3) {
+        eventSource.close();
+        setIsSSEConnected(false);
+      }
+    };
+
+    return () => {
+      eventSource.close();
+      setIsSSEConnected(false);
+    };
+  }, []);
 
   const handleEnterChannel = (index: number) => {
     if (!nickname) {
@@ -94,6 +114,8 @@ const ChannelList = () => {
     }
     router.push(`/game/lobby/${index + 1}`);
   };
+
+  if (!isSSEConnected || !channelData.length) return <>서버와 연결중...</>;
 
   return (
     <div className='relative flex w-full'>
@@ -121,7 +143,7 @@ const ChannelList = () => {
                 <div className='mb-4 flex flex-col items-center justify-center font-bold text-gray-700'>
                   <span className='text-lg'>채널</span>
                   <span className='min-w-4 rounded-3xl bg-purple-500 p-[5px] text-center text-lg text-white lg:min-w-16'>
-                    {channels[p.channelIndex].channelId + 1}
+                    {channelData[p.channelIndex].channelId}
                   </span>
                 </div>
 
@@ -130,22 +152,22 @@ const ChannelList = () => {
                     <div
                       className={cn(
                         channelCongestion(
-                          channels[p.channelIndex].playerCount,
-                          channels[p.channelIndex].maxPlayers,
+                          channelData[p.channelIndex].playerCount,
+                          channelData[p.channelIndex].maxPlayers,
                         ).color,
 
                         'h-full w-full rounded-l-2xl bg-gradient-to-r',
                       )}
                       style={{
-                        width: `${(channels[p.channelIndex].playerCount / channels[p.channelIndex].maxPlayers) * 100}%`,
+                        width: `${(channelData[p.channelIndex].playerCount / channelData[p.channelIndex].maxPlayers) * 100}%`,
                       }}
                     ></div>
                   </div>
                   <span>
                     {
                       channelCongestion(
-                        channels[p.channelIndex].playerCount,
-                        channels[p.channelIndex].maxPlayers,
+                        channelData[p.channelIndex].playerCount,
+                        channelData[p.channelIndex].maxPlayers,
                       ).congestion
                     }
                   </span>

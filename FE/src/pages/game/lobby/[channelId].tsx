@@ -24,17 +24,38 @@ export type Room = {
   selectedYears: number[];
 };
 
-export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
+export const getServerSideProps: GetServerSideProps = async ({
+  req,
+  res,
+  params,
+}) => {
   const userNickname = (await getCookie('userNickname', { req, res })) || '';
+  const { channelId } = params as { channelId: string };
+
+  if (!userNickname) {
+    return {
+      redirect: {
+        destination: '/',
+        permanent: false,
+      },
+    };
+  }
 
   return {
     props: {
       userNickname,
+      channelId,
     },
   };
 };
 
-const LobbyPage = ({ userNickname }: { userNickname: string }) => {
+interface LobbyServerProps {
+  userNickname: string;
+  channelId: string;
+}
+
+const LobbyPage = ({ userNickname, channelId }: LobbyServerProps) => {
+  console.log('channelId', channelId);
   const { setNickname } = useNicknameStore();
 
   useEffect(() => {
