@@ -237,6 +237,19 @@ export default function RoomList({
     }
   }, [sseConnected, initialCurrentPage, initialTotalPages]);
 
+  // 추가할 useEffect
+  useEffect(() => {
+    const handleUnload = () => {
+      navigator.sendBeacon(`${API_URL}/sse/disconnect`);
+    };
+
+    window.addEventListener('beforeunload', handleUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleUnload);
+    };
+  }, []);
+
   const isFirstPage = currentPage === 0;
   const isLastPage = currentPage === totalPages - 1 || totalPages === 0;
 
