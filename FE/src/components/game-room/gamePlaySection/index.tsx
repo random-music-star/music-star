@@ -11,10 +11,10 @@ import { useGameStateStore } from '@/stores/websocket/useGameStateStore';
 import { useGameWinnerStore } from '@/stores/websocket/useGameWinnerStore';
 import { Chatting } from '@/types/websocket';
 
-import GamePlayPanel from '../GameBoard/GamePlayPanel';
+import RoundInformation from './RoundInfomation';
 import SpeechBubble from './SpeechBubble';
 
-const GamePlay = () => {
+const GamePlaySection = () => {
   const { participantInfo } = useParticipantInfoStore();
   const { gameRoomInfo } = useGameInfoStore();
   const { gameChattings } = useGameChatStore();
@@ -119,7 +119,7 @@ const GamePlay = () => {
           transition={{ duration: 0.8, delay: 0.2 }}
         >
           <div className='flex items-center justify-center p-8'>
-            <GamePlayPanel />
+            <RoundInformation />
           </div>
         </motion.div>
       )}
@@ -206,4 +206,4 @@ const GamePlay = () => {
   );
 };
 
-export default GamePlay;
+export default GamePlaySection;

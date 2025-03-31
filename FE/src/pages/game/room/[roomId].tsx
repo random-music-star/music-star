@@ -6,9 +6,9 @@ import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
 
 import ChatBox from '@/components/game-room/ChatBox';
-import GameBoard from '@/components/game-room/GameBoard';
-import GameExitButton from '@/components/game-room/GameExit';
-import GamePlay from '@/components/game-room/gamePlay';
+import GameExitButton from '@/components/game-room/GameExitButton';
+import GameBoardMap from '@/components/game-room/boardMap';
+import GamePlaySection from '@/components/game-room/gamePlaySection';
 import RoomPannel from '@/components/game-room/gameRoomInfo/RoomPannel';
 import ReadyPanel from '@/components/game-room/gameWait/ReadyPanel';
 import { cn } from '@/lib/utils';
@@ -111,7 +111,7 @@ export default function GameRoom({
                   'duration-700 ease-in-out',
                 )}
               >
-                <GamePlay />
+                <GamePlaySection />
               </div>
               <div
                 className={cn(
@@ -121,7 +121,7 @@ export default function GameRoom({
                     : 'translate-y-full',
                 )}
               >
-                <GameBoard />
+                <GameBoardMap />
               </div>
             </div>
           )}

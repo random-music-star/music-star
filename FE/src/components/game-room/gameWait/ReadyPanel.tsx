@@ -11,7 +11,7 @@ import { useGameInfoStore } from '@/stores/websocket/useGameRoomInfoStore';
 import { useWebSocketStore } from '@/stores/websocket/useWebsocketStore';
 import { Chatting } from '@/types/websocket';
 
-import SpeechBubble from '../gamePlay/SpeechBubble';
+import SpeechBubble from '../gamePlaySection/SpeechBubble';
 
 interface ReadyPanelProps {
   currentUserId: string;

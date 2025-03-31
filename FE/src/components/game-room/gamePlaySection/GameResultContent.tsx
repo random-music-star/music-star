@@ -2,7 +2,7 @@ import React from 'react';
 
 import { useGameWinnerStore } from '@/stores/websocket/useGameWinnerStore';
 
-const GameEnd = () => {
+const GameResultContent = () => {
   const { winner } = useGameWinnerStore();
 
   return (
@@ -21,4 +21,4 @@ const GameEnd = () => {
   );
 };
 
-export default GameEnd;
+export default GameResultContent;

@@ -19,7 +19,7 @@ interface RoundInfo {
   mode: string;
 }
 
-const RoundRolling: React.FC = () => {
+const RoundRolling = () => {
   const { gameRoomInfo } = useGameInfoStore() as {
     gameRoomInfo: GameRoomInfo | null;
   };
@@ -99,7 +99,6 @@ const RoundRolling: React.FC = () => {
           </div>
         </div>
 
-        {/* 모드 목록 (미니 디스플레이) */}
         <div className='flex items-center justify-center gap-4'>
           {modeOptions.map((mode, index) => (
             <div
