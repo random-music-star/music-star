@@ -3,9 +3,9 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-import { Room } from '@/_types/game';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import { Room } from '@/pages/game/lobby/[channelId]';
 
 import RoomItem from './RoomItem';
 
