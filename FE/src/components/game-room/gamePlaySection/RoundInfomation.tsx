@@ -1,11 +1,11 @@
 import { useGameStateStore } from '@/stores/websocket/useGameStateStore';
 
-import RoundRolling from '../GameRound/RoundRolling';
-import GameEnd from '../gameEnd';
 import GameMusicPlayer from './GameMusicPlayer';
+import GameResultContent from './GameResultContent';
+import RoundRolling from './RoundRolling';
 import YoutubePlayer from './YoutubePlayer';
 
-const GamePlayPanel = () => {
+const RoundInformation = () => {
   const { gameState } = useGameStateStore();
 
   return (
@@ -15,7 +15,7 @@ const GamePlayPanel = () => {
       {(gameState === 'ROUND_INFO' || gameState === 'ROUND_OPEN') && (
         <RoundRolling />
       )}
-      {gameState === 'GAME_END' && <GameEnd />}
+      {gameState === 'GAME_END' && <GameResultContent />}
 
       {(gameState === 'ROUND_START' || gameState === 'GAME_RESULT') && (
         <GameMusicPlayer gameState={gameState} />
@@ -24,7 +24,7 @@ const GamePlayPanel = () => {
   );
 };
 
-export default GamePlayPanel;
+export default RoundInformation;
 
 /**
  *

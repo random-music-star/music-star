@@ -12,18 +12,17 @@ interface FootholderPosition {
 
 interface UserCharacter {
   name: string;
-  position: number; // 발판 인덱스
-  imageSrc: string; // 캐릭터 이미지 경로
+  position: number;
+  imageSrc: string;
   animationOffset: number;
-  // 캐릭터 이동 애니메이션을 위한 추가 속성
   isMoving: boolean;
   fromPosition: number;
   toPosition: number;
-  moveProgress: number; // 0(시작 위치)에서 1(목표 위치)까지의 진행도
-  moveStartTime: number; // 각 캐릭터별 이동 시작 시간 저장
+  moveProgress: number;
+  moveStartTime: number;
 }
 
-const GameBoard = () => {
+const GameBoardMap = () => {
   const { scores } = useScoreStore();
   const { targetUser, triggerUser, eventType } = useGameBubbleStore();
   const { participantInfo } = useParticipantInfoStore();
@@ -34,30 +33,23 @@ const GameBoard = () => {
     height: typeof window !== 'undefined' ? window.innerHeight : 1080,
   });
 
-  // 디버깅을 위한 로그 추가
   const currentTargetUserRef = useRef(targetUser);
   const currentTriggerUserRef = useRef(triggerUser);
 
-  // targetUser, triggerUser 변경 감지
   useEffect(() => {
-    console.log('말풍선 업데이트:', { targetUser, triggerUser, eventType });
     currentTargetUserRef.current = targetUser;
     currentTriggerUserRef.current = triggerUser;
   }, [targetUser, triggerUser, eventType]);
 
-  // 애니메이션 상태 관리
   const [animationTime, setAnimationTime] = useState(0);
-  const animationSpeed = 5; // 애니메이션 속도 조절 (높을수록 빠름)
-  const animationRange = 5; // 애니메이션 이동 범위 (픽셀)
-  const moveAnimationDuration = 200; // 이동 애니메이션 시간 (밀리초) - 더 빠르게 설정
+  const animationSpeed = 5;
+  const animationRange = 5;
+  const moveAnimationDuration = 200;
 
-  // REF를 사용하여 기존 애니메이션 완료 보장
   const animationInProgressRef = useRef(false);
   const prevBoardInfoRef = useRef<Record<string, number>>({});
 
-  // 발판 위치를 비율로 정의 (0~1 사이의 값)
   const footholderRatios: FootholderPosition[] = [
-    // 하단 행 (왼쪽에서 오른쪽으로) - 0~6
     { xRatio: 0.08, yRatio: 0.92, size: 2 }, // 0
     { xRatio: 0.22, yRatio: 0.9, size: 1.5 }, // 1
     { xRatio: 0.36, yRatio: 0.85, size: 1.5 }, // 2
@@ -368,7 +360,6 @@ const GameBoard = () => {
         const leftBubbleX = x - charWidth / 2 - bubbleWidth + 5;
         const leftBubbleY = y - charHeight - characterYOffset;
 
-        // 캐릭터별 렌더링 키 생성 - targetUser나 triggerUser에 맞춰 강제 리렌더링
         const characterRenderKey = `char-${charIndex}-${character.name === targetUser}-${character.name === triggerUser}`;
 
         return (
@@ -462,4 +453,4 @@ const GameBoard = () => {
   );
 };
 
-export default GameBoard;
+export default GameBoardMap;
