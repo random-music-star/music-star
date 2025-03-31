@@ -8,7 +8,7 @@ interface UserCredentials {
 }
 
 interface GuestLoginResponse {
-  token: string;
+  username: string;
 }
 
 export function useAuth() {
@@ -19,13 +19,13 @@ export function useAuth() {
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_BASE_URL}/member/guest/login`,
     );
-    const { token }: GuestLoginResponse = await response.json();
+    const { username }: GuestLoginResponse = await response.json();
 
-    setCookie('userNickname', token, {
+    setCookie('userNickname', username, {
       maxAge: 60 * 60 * 24 * 7,
       path: '/',
     });
-    setNickname(token);
+    setNickname(username);
   };
 
   // 회원 가입
