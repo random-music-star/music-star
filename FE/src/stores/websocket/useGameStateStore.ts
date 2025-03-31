@@ -18,6 +18,8 @@ interface GameStateStore {
 
 export const useGameStateStore = create<GameStateStore>(set => ({
   gameState: 'ROUND_INFO',
-  setGameState: (gameState: GameStateType) => set({ gameState }),
+  setGameState: (gameState: GameStateType) => {
+    set({ gameState });
+  },
   resetGameState: () => set({ gameState: null }),
 }));
