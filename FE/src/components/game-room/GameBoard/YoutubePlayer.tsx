@@ -1,14 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 
-import { useGameScreenStore } from '@/stores/websocket/useGameScreenStore';
+import { useGameRoundInfoStore } from '@/stores/websocket/useGameRoundInfoStore';
+import { useGameStateStore } from '@/stores/websocket/useGameStateStore';
 
-interface YoutubePlayerProps {
-  url: string;
-}
-
-const YoutubePlayer: React.FC<YoutubePlayerProps> = () => {
-  const remainTime = useGameScreenStore(state => state.remainTime);
-  const url = useGameScreenStore(state => state.songUrl);
+const YoutubePlayer = () => {
+  const url = useGameRoundInfoStore(state => state.roundInfo.songUrl);
+  const roundState = useGameStateStore(state => state.gameState);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const playerReadyRef = useRef<boolean>(false);
   const hasStartedRef = useRef<boolean>(false);
@@ -83,11 +80,11 @@ const YoutubePlayer: React.FC<YoutubePlayerProps> = () => {
     if (currentVideoId && !playerReadyRef.current) {
       playerReadyRef.current = true;
 
-      if (remainTime > 0) {
+      if (roundState !== 'ROUND_START') {
         pauseVideo();
       }
     }
-  }, [currentVideoId, remainTime]);
+  }, [currentVideoId, roundState]);
 
   const handleIframeLoad = () => {
     if (iframeRef.current && iframeRef.current.contentWindow) {
@@ -105,20 +102,20 @@ const YoutubePlayer: React.FC<YoutubePlayerProps> = () => {
   };
 
   useEffect(() => {
-    if (remainTime === 3) {
+    if (roundState === 'ROUND_INFO') {
       console.log(`[${getTimeString()}][YouTube] 새 라운드 시작, 상태 초기화`);
       hasStartedRef.current = false;
       wasPlayingRef.current = false;
     }
 
-    if (remainTime === 0) {
+    if (roundState === 'ROUND_START') {
       playerReadyRef.current = true;
       hasStartedRef.current = false; // 재생을 위해 강제로 false로 설정
       playVideo();
-    } else if (remainTime > 0) {
+    } else {
       pauseVideo();
     }
-  }, [remainTime]);
+  }, [roundState]);
 
   const checkAndPlayOrPause = () => {
     if (
@@ -130,7 +127,7 @@ const YoutubePlayer: React.FC<YoutubePlayerProps> = () => {
       return;
     }
 
-    if (remainTime <= 0) {
+    if (roundState === 'ROUND_START') {
       playVideo();
     } else {
       pauseVideo();
@@ -138,54 +135,41 @@ const YoutubePlayer: React.FC<YoutubePlayerProps> = () => {
   };
 
   const playVideo = () => {
-    if (remainTime > 0) {
-      console.log(
-        `[${getTimeString()}][YouTube] 재생 중단: remainTime이 ${remainTime}으로 0보다 큼`,
-      );
+    if (roundState !== 'ROUND_START') {
       return;
     }
 
     hasStartedRef.current = true;
     wasPlayingRef.current = true;
 
-    try {
-      if (iframeRef.current?.contentWindow) {
-        iframeRef.current.contentWindow.postMessage(
-          '{"event":"command","func":"pauseVideo","args":""}',
+    if (iframeRef.current?.contentWindow) {
+      iframeRef.current.contentWindow.postMessage(
+        '{"event":"command","func":"pauseVideo","args":""}',
+        '*',
+      );
+
+      setTimeout(() => {
+        if (roundState !== 'ROUND_START') {
+          wasPlayingRef.current = false;
+          return;
+        }
+
+        // 볼륨 설정 및 음소거 해제
+        iframeRef.current?.contentWindow?.postMessage(
+          '{"event":"command","func":"unMute","args":""}',
+          '*',
+        );
+        iframeRef.current?.contentWindow?.postMessage(
+          '{"event":"command","func":"setVolume","args":[100]}',
           '*',
         );
 
-        setTimeout(() => {
-          if (remainTime > 0) {
-            console.log(
-              `[${getTimeString()}][YouTube] 재생 취소, remainTime이 ${remainTime}으로 변경됨`,
-            );
-            wasPlayingRef.current = false;
-            return;
-          }
-
-          // 볼륨 설정 및 음소거 해제
-          iframeRef.current?.contentWindow?.postMessage(
-            '{"event":"command","func":"unMute","args":""}',
-            '*',
-          );
-          iframeRef.current?.contentWindow?.postMessage(
-            '{"event":"command","func":"setVolume","args":[100]}',
-            '*',
-          );
-
-          // 재생 명령
-          iframeRef.current?.contentWindow?.postMessage(
-            '{"event":"command","func":"playVideo","args":""}',
-            '*',
-          );
-          console.log(
-            `[${getTimeString()}][YouTube] 재생 명령 전송 완료, wasPlaying=true`,
-          );
-        }, 100);
-      }
-    } catch (error) {
-      console.error(`[${getTimeString()}] YouTube 재생 명령 실패:`, error);
+        // 재생 명령
+        iframeRef.current?.contentWindow?.postMessage(
+          '{"event":"command","func":"playVideo","args":""}',
+          '*',
+        );
+      }, 100);
     }
   };
 
@@ -209,7 +193,7 @@ const YoutubePlayer: React.FC<YoutubePlayerProps> = () => {
     wasPlayingRef.current = false;
   };
 
-  const getYoutubeId = (youtubeUrl: string): string => {
+  const getYoutubeId = (youtubeUrl: string) => {
     if (!youtubeUrl) return '';
 
     const regex =

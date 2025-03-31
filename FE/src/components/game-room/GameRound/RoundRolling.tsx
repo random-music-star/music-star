@@ -4,9 +4,6 @@ import { useGameInfoStore } from '@/stores/websocket/useGameRoomInfoStore';
 import { useGameRoundInfoStore } from '@/stores/websocket/useGameRoundInfoStore';
 import { useGameStateStore } from '@/stores/websocket/useGameStateStore';
 
-// 타입 정의
-type GameState = 'TIMER_WAIT' | 'ROUND_OPEN' | string;
-
 interface GameRoomInfo {
   roomTitle?: string;
   hasPassword?: boolean;
@@ -29,7 +26,7 @@ const RoundRolling: React.FC = () => {
   const { roundInfo } = useGameRoundInfoStore() as {
     roundInfo: RoundInfo | null;
   };
-  const { gameState } = useGameStateStore() as { gameState: GameState };
+  const { gameState } = useGameStateStore();
 
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [isSelected, setIsSelected] = useState<boolean>(false);
@@ -42,13 +39,11 @@ const RoundRolling: React.FC = () => {
   useEffect(() => {
     if (!gameRoomInfo) return;
 
-    // ROUND_OPEN 상태면 선택 모드로 변경
     if (gameState === 'ROUND_OPEN') {
       setIsSelected(true);
       const targetIndex = modeOptions.indexOf('한곡듣기');
       setCurrentIndex(targetIndex >= 0 ? targetIndex : 0);
 
-      // 애니메이션 정리
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
         animationRef.current = null;

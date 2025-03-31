@@ -1,8 +1,8 @@
 import { create } from 'zustand';
 
-type GameStateType =
-  | 'TIMER_WAIT'
-  | 'QUIZ_OPEN'
+export type GameStateType =
+  | 'ROUND_INFO'
+  | 'ROUND_START'
   | 'ROUND_OPEN'
   | 'GAME_RESULT'
   | 'SCORE_UPDATE'
@@ -17,7 +17,7 @@ interface GameStateStore {
 }
 
 export const useGameStateStore = create<GameStateStore>(set => ({
-  gameState: 'TIMER_WAIT',
+  gameState: 'ROUND_INFO',
   setGameState: (gameState: GameStateType) => set({ gameState }),
   resetGameState: () => set({ gameState: null }),
 }));

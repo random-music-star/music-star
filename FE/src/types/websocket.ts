@@ -6,7 +6,7 @@ export interface Chatting {
   message: string;
 }
 
-export type Mode = 'FULL' | 'ONE_SEC';
+export type Mode = 'FULL' | 'DOUBLE' | 'AI';
 
 export interface WebSocketState {
   client: Client | null;

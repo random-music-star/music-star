@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 
 import { useGameInfoStore } from '@/stores/websocket/useGameRoomInfoStore';
-import { useGameScreenStore } from '@/stores/websocket/useGameScreenStore';
+import { useGameStateStore } from '@/stores/websocket/useGameStateStore';
 import { Mode } from '@/types/websocket';
 
 const GameWait = () => {
-  const { remainTime } = useGameScreenStore();
   const { gameRoomInfo } = useGameInfoStore();
   const [selectedMode, setSelectedMode] = useState<string | null>(null);
   const [positions, setPositions] = useState<number[]>([]);
+  const { gameState } = useGameStateStore();
 
   useEffect(() => {
     if (gameRoomInfo) {
@@ -29,12 +29,11 @@ const GameWait = () => {
   }, [selectedMode]);
 
   useEffect(() => {
-    if (remainTime === 1 && !selectedMode) {
+    if (gameState === 'ROUND_OPEN' && !selectedMode) {
       setSelectedMode('한곡모드');
     }
-  }, [remainTime, selectedMode]);
+  }, [gameState, selectedMode]);
 
-  // gameRoomInfo가 없을 때 에러
   if (!gameRoomInfo) return;
 
   return (

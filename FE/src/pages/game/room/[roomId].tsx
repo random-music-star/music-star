@@ -7,7 +7,7 @@ import { useRouter } from 'next/router';
 
 import ChatBox from '@/components/game-room/ChatBox';
 import GameBoard from '@/components/game-room/GameBoard';
-import GameExit from '@/components/game-room/GameExit';
+import GameExitButton from '@/components/game-room/GameExit';
 import GamePlay from '@/components/game-room/gamePlay';
 import RoomPannel from '@/components/game-room/gameRoomInfo/RoomPannel';
 import ReadyPanel from '@/components/game-room/gameWait/ReadyPanel';
@@ -125,9 +125,7 @@ export default function GameRoom({
               </div>
             </div>
           )}
-          <div className='absolute right-0 bottom-0 p-6 text-end'>
-            <GameExit />
-          </div>
+          <GameExitButton />
         </div>
       </AnimatePresence>
       <div className='flex max-h-screen min-h-screen w-[480px] max-w-[480px] flex-col flex-wrap items-center gap-5 bg-black/50 text-white'>

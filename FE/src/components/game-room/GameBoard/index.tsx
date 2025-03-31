@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 
-import { useGameBoardInfoStore } from '@/stores/websocket/useGameBoardInfoStore';
 import { useGameBubbleStore } from '@/stores/websocket/useGameBubbleStore';
 import { useParticipantInfoStore } from '@/stores/websocket/useGameParticipantStore';
+import { useScoreStore } from '@/stores/websocket/useScoreStore';
 
 interface FootholderPosition {
   xRatio: number;
@@ -24,7 +24,7 @@ interface UserCharacter {
 }
 
 const GameBoard = () => {
-  const { boardInfo } = useGameBoardInfoStore();
+  const { scores } = useScoreStore();
   const { targetUser, triggerUser, eventType } = useGameBubbleStore();
   const { participantInfo } = useParticipantInfoStore();
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -104,16 +104,16 @@ const GameBoard = () => {
   // boardInfo가 변경될 때 캐릭터 이동 처리
   useEffect(() => {
     // boardInfo가 비어있으면 처리하지 않음
-    if (Object.keys(boardInfo).length === 0) return;
+    if (Object.keys(scores).length === 0) return;
 
     // 이전 boardInfo와 현재 boardInfo가 같으면 처리하지 않음
-    const isSameBoardInfo = Object.entries(boardInfo).every(
+    const isSameBoardInfo = Object.entries(scores).every(
       ([name, position]) => prevBoardInfoRef.current[name] === position,
     );
     if (isSameBoardInfo) return;
 
     // 현재 boardInfo 저장
-    prevBoardInfoRef.current = { ...boardInfo };
+    prevBoardInfoRef.current = { ...scores };
 
     const now = performance.now();
 
@@ -121,7 +121,7 @@ const GameBoard = () => {
     setCharacters(prevCharacters => {
       return prevCharacters.map(character => {
         // 각 캐릭터에 대해 무조건 처리 (name in boardInfo 대신)
-        const toPosition = boardInfo[character.name];
+        const toPosition = scores[character.name];
 
         // boardInfo에 해당 캐릭터 정보가 있고 위치가 다른 경우에만 이동
         if (toPosition !== undefined && character.position !== toPosition) {
@@ -150,7 +150,7 @@ const GameBoard = () => {
         return character;
       });
     });
-  }, [boardInfo]);
+  }, [scores]);
 
   // 참가자 정보가 로드되면 캐릭터 초기화
   useEffect(() => {

@@ -25,7 +25,7 @@ interface RoomFormDialogProps {
 interface InitialDataType {
   roomTitle?: string;
   format?: 'GENERAL' | 'BOARD';
-  mode?: ('FULL' | 'ONE_SEC')[];
+  mode?: ('FULL' | 'DOUBLE' | 'AI')[];
   selectedYear?: number[];
   hasPassword?: boolean;
 }
