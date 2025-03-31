@@ -8,6 +8,7 @@ import CreateRoomButton from '@/components/lobby/CreateRoomButton';
 import Header from '@/components/lobby/Footer';
 import RoomList from '@/components/lobby/RoomList';
 import { useNicknameStore } from '@/stores/auth/useNicknameStore';
+import { useChannelStore } from '@/stores/lobby/useChannelStore';
 
 export type Room = {
   id: number;
@@ -21,7 +22,7 @@ export type Room = {
   status: string;
   hasPassword: boolean;
   gameModes: string[] | null;
-  selectedYears: number[];
+  years: number[];
   roomNumber: number;
 };
 
@@ -58,10 +59,12 @@ interface LobbyServerProps {
 const LobbyPage = ({ userNickname, channelId }: LobbyServerProps) => {
   console.log('channelId', channelId);
   const { setNickname } = useNicknameStore();
+  const { setCurrentChannelId } = useChannelStore();
 
   useEffect(() => {
     setNickname(userNickname);
-  }, [userNickname, setNickname]);
+    setCurrentChannelId(Number(channelId));
+  }, [userNickname, channelId, setNickname, setCurrentChannelId]);
 
   return (
     <div className='flex h-screen flex-col bg-[url(/background.svg)] bg-cover bg-center'>

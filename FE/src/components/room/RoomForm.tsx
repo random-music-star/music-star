@@ -8,6 +8,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useRoomApi } from '@/hooks/useRoomApi';
 import { type RoomFormValues, useRoomForm } from '@/hooks/useRoomForm';
 import { AVAILABLE_MODES, AVAILABLE_YEARS } from '@/types/rooms';
@@ -37,13 +38,29 @@ export default function RoomForm({
   onCancel,
 }: RoomFormProps) {
   // 폼 로직
-  const { form, selectedModes, selectedYears } = useRoomForm({ initialData });
+  const { form, selectedModes, selectedYears, hasPassword } = useRoomForm({
+    initialData,
+  });
   // API 통신 로직
   const { loading, submitForm } = useRoomApi({ mode, roomId, onSuccess });
 
   // 폼 제출 핸들러
   const onSubmit = async (data: RoomFormValues) => {
     await submitForm(data);
+  };
+
+  // 모드 레이블 매핑
+  const getModeLabel = (mode: Mode) => {
+    switch (mode) {
+      case 'FULL':
+        return '전곡 재생';
+      case 'DOUBLE':
+        return '2배속';
+      case 'AI':
+        return 'AI';
+      default:
+        return mode;
+    }
   };
 
   return (
@@ -83,6 +100,85 @@ export default function RoomForm({
           {mode && (
             <MapSelector form={form} error={!!form.formState.errors.format} />
           )}
+
+          {/* 방 공개 설정 */}
+          <FormField
+            control={form.control}
+            name='hasPassword'
+            render={({ field }) => (
+              <FormItem className='mb-0'>
+                <FormLabel
+                  className={`mb-3 flex justify-between text-lg font-bold ${
+                    form.formState.errors.hasPassword
+                      ? 'text-red-400'
+                      : 'text-green-200'
+                  } drop-shadow-md`}
+                >
+                  <span>방 공개 설정</span>
+                  <FormMessage className='text-red-400' />
+                </FormLabel>
+                <FormControl>
+                  <RadioGroup
+                    className='mb-2 flex items-center space-y-3'
+                    value={field.value ? 'true' : 'false'}
+                    onValueChange={value => {
+                      field.onChange(value === 'true');
+                      // 열린 방으로 변경 시 비밀번호 필드 초기화
+                      if (value === 'false') {
+                        form.setValue('password', '');
+                      }
+                    }}
+                  >
+                    <FormItem className='mb-0 flex items-center space-x-3'>
+                      <FormControl>
+                        <RadioGroupItem
+                          value='false'
+                          className='h-5 w-5 bg-white'
+                        />
+                      </FormControl>
+                      <FormLabel className='cursor-pointer text-base font-semibold text-white'>
+                        열린 방
+                      </FormLabel>
+                    </FormItem>
+                    <FormItem className='flex items-center space-x-3'>
+                      <FormControl>
+                        <RadioGroupItem
+                          value='true'
+                          className='h-5 w-5 bg-white'
+                        />
+                      </FormControl>
+                      <FormLabel className='cursor-pointer text-base font-semibold text-white'>
+                        잠금 방
+                      </FormLabel>
+                    </FormItem>
+                  </RadioGroup>
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          {/* 비밀번호 입력 필드 */}
+          <FormField
+            control={form.control}
+            name='password'
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <Input
+                    {...field}
+                    type='text'
+                    disabled={!hasPassword}
+                    className={`bg-white ${form.formState.errors.password ? 'border-red-400' : ''}`}
+                    placeholder={
+                      hasPassword
+                        ? '비밀번호를 입력하세요'
+                        : '열린 방은 비밀번호가 필요하지 않습니다'
+                    }
+                  />
+                </FormControl>
+                <FormMessage className='mt-1 text-red-400' />
+              </FormItem>
+            )}
+          />
         </section>
 
         <section className='mt-4 w-full space-y-6 px-6 lg:w-1/2'>
@@ -103,12 +199,9 @@ export default function RoomForm({
                   <FormMessage className='text-red-400' />
                 </FormLabel>
                 <div>
-                  <div className='grid grid-cols-1 gap-3'>
+                  <div className='grid grid-cols-3 gap-3'>
                     {AVAILABLE_MODES.map(mode => (
-                      <FormItem
-                        key={mode}
-                        className='mb-3 flex items-center last:mb-0'
-                      >
+                      <FormItem key={mode} className='mb-3 flex items-center'>
                         <FormControl>
                           <Checkbox
                             checked={selectedModes.includes(mode)}
@@ -123,7 +216,7 @@ export default function RoomForm({
                           />
                         </FormControl>
                         <FormLabel className='ml-2 cursor-pointer text-base font-semibold text-white'>
-                          {mode === 'FULL' ? '전곡 재생' : '1초 재생'}
+                          {getModeLabel(mode)}
                         </FormLabel>
                       </FormItem>
                     ))}

@@ -11,7 +11,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { CreateRoomFormValues, GameFormat } from '@/types/rooms';
+import { GameFormat, RoomFormValues } from '@/types/rooms';
 
 // 맵 데이터 타입 정의
 interface MapData {
@@ -35,7 +35,7 @@ const MAPS: MapData[] = [
 ];
 
 interface MapSelectorProps {
-  form: UseFormReturn<CreateRoomFormValues>;
+  form: UseFormReturn<RoomFormValues>;
   error?: boolean;
 }
 
@@ -93,9 +93,7 @@ export default function MapSelector({ form, error }: MapSelectorProps) {
                 {/* 네비게이션 버튼 */}
                 <button
                   onClick={handlePrev}
-                  className='absolute top-1/2 left-2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-[#9F89EB] text-white hover:bg-[#5D42AA]
-                  
-                  sm:h-10 sm:w-10'
+                  className='absolute top-1/2 left-2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-[#9F89EB] text-white hover:bg-[#5D42AA] sm:h-10 sm:w-10'
                   aria-label='이전 맵'
                 >
                   <ChevronLeft size={20} className='sm:h-6 sm:w-6' />
