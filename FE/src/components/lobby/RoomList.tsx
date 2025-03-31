@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import axios from 'axios';
+import { useRouter } from 'next/router';
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Room } from '@/pages/game/lobby/[channelId]';
@@ -34,6 +35,7 @@ export default function RoomList({
   const [currentPage, setCurrentPage] = useState<number>(initialCurrentPage);
   const [totalPages, setTotalPages] = useState<number>(initialTotalPages);
   const currentPageRef = useRef<number>(initialCurrentPage);
+  const router = useRouter();
 
   const SSE_ENDPOINT = `${process.env.NEXT_PUBLIC_SSE_URL}/${channelId}`;
 
@@ -41,15 +43,30 @@ export default function RoomList({
     currentPageRef.current = currentPage;
   }, [currentPage]);
 
-  // 페이지 로딩 시 GET 요청으로 방 목록 가져옴옴
+  // URL 쿼리 파라미터에서 페이지 정보 가져오기
+  useEffect(() => {
+    const { page } = router.query;
+    if (page && !isNaN(Number(page))) {
+      const pageNum = Number(page);
+      if (pageNum !== currentPage) {
+        setCurrentPage(pageNum);
+      }
+    }
+  }, [router.query, currentPage]);
+
+  // 페이지 로딩 시 GET 요청으로 방 목록 가져옴
   useEffect(() => {
     setIsLoading(true);
     const fetchInitialRooms = async () => {
       try {
+        const pageToFetch = router.query.page
+          ? Number(router.query.page)
+          : initialCurrentPage;
+
         const response = await axios.get(`${API_URL}/room`, {
           params: {
             channelId: channelId,
-            page: initialCurrentPage,
+            page: pageToFetch,
             size: pageSize,
           },
         });
@@ -66,12 +83,25 @@ export default function RoomList({
     };
 
     fetchInitialRooms();
-  }, [channelId, initialCurrentPage, pageSize]);
+  }, [channelId, initialCurrentPage, pageSize, router.query.page]);
 
-  // 페이지 전환 시 GET 요청 받아서 값 처리리
+  // 페이지 전환 시 URL 업데이트 및 GET 요청 처리
   const handlePageChange = async (newPage: number) => {
     try {
       setIsLoading(true);
+
+      await router.push(
+        {
+          pathname: router.pathname,
+          query: {
+            ...router.query,
+            page: newPage,
+          },
+        },
+        undefined,
+        { shallow: true },
+      );
+
       const response = await axios.get(`${API_URL}/room`, {
         params: {
           channelId: channelId,
@@ -163,7 +193,7 @@ export default function RoomList({
             });
           } else {
             // 사용자가 첫 페이지 이외 페이지에 있을 경우
-            // 기존에 있던 방의 경우 갱신, 없던 방의 경우 처리 안함함
+            // 기존에 있던 방의 경우 갱신, 없던 방의 경우 처리 안함
             setRooms(currentRooms => {
               const roomIndex = currentRooms.findIndex(
                 room => room.id === updatedRoom.id,
