@@ -10,7 +10,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useGameInfoStore } from '@/stores/websocket/useGameRoomInfoStore';
-import { CreateRoomFormValues } from '@/types/rooms';
+import { RoomFormValues } from '@/types/rooms';
 
 import RoomForm from './RoomForm';
 
@@ -57,7 +57,7 @@ export default function RoomFormDialog({
   }, [isOpen, mode, gameRoomInfo]);
 
   // 방 생성 또는 수정 성공 핸들러
-  const handleSuccess = (_data: CreateRoomFormValues, newRoomId?: string) => {
+  const handleSuccess = (_data: RoomFormValues, newRoomId?: string) => {
     if (mode === 'create') {
       router.push(`/game/room/${newRoomId}`);
     } else if (mode === 'edit') {

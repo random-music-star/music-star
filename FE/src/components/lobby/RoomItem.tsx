@@ -28,14 +28,14 @@ const formatMapData = {
 // 게임 모드 매핑
 const gameModeLabels: Record<string, string> = {
   FULL: '전곡',
-  '1SEC': '1초',
+  DOUBLE: '2배속',
   AI: 'AI',
 };
 
 // 게임 모드 배지 스타일
 const modeBadgeVariants: Record<string, string> = {
   FULL: 'bg-purple-100 text-purple-800 border-purple-200',
-  '1SEC': 'bg-amber-100 text-amber-800 border-amber-200',
+  DOUBLE: 'bg-amber-100 text-amber-800 border-amber-200',
   AI: 'bg-emerald-100 text-emerald-800 border-emerald-200',
 };
 
@@ -100,7 +100,7 @@ export default function RoomItem({ room }: RoomItemProps) {
     }
     ranges.push(currentRange);
 
-    // 년도 값 내려올 경우 2020 이전은 년대로 표현현
+    // 년도 값 내려올 경우 2020 이전은 년대로 표현
     return ranges
       .map(range => {
         if (range.start === range.end) {
@@ -196,12 +196,9 @@ export default function RoomItem({ room }: RoomItemProps) {
             </div>
             {/* 선택 년도 - 라벨 */}
             <div className='text-xs'>
-              {room.selectedYears && room.selectedYears.length > 0 && (
-                <span className='text-xs'>
-                  {formatYearLabel(room.selectedYears)}
-                </span>
+              {room.years && room.years.length > 0 && (
+                <span className='text-xs'>{formatYearLabel(room.years)}</span>
               )}
-              <span>2024</span>
             </div>
           </div>
         </section>
@@ -211,7 +208,7 @@ export default function RoomItem({ room }: RoomItemProps) {
           <div className='flex items-center'>
             {/* 방 번호 */}
             <div className='mr-2 rounded-md bg-gradient-to-b from-[#8352D1] to-[#5B3A91] px-2 py-1 text-white'>
-              {String(room.roomNumber).padStart(3, '0')}
+              {String(room.roomNumber).padStart(5, '0')}
             </div>
             {/* 잠금방 아이콘 표시 */}
             {room.hasPassword ? (

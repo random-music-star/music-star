@@ -27,8 +27,10 @@ export function useRoomForm({ initialData }: UseRoomFormProps = {}) {
     defaultValues: {
       title: '',
       format: 'BOARD',
-      modes: [],
+      modes: ['FULL'],
       years: [],
+      hasPassword: false,
+      password: '',
     },
   });
 
@@ -40,6 +42,8 @@ export function useRoomForm({ initialData }: UseRoomFormProps = {}) {
         format: initialData.format || 'BOARD',
         modes: initialData.mode?.map(m => m) || [],
         years: initialData.selectedYear || [],
+        hasPassword: initialData.hasPassword || false,
+        password: '',
       });
     }
   }, [initialData, form]);
@@ -47,10 +51,19 @@ export function useRoomForm({ initialData }: UseRoomFormProps = {}) {
   // 폼 상태 가져오기
   const selectedModes = form.watch('modes');
   const selectedYears = form.watch('years');
+  const hasPassword = form.watch('hasPassword');
+
+  // 비밀번호 필드 값이 변경될 때마다 유효성 검사 실행
+  useEffect(() => {
+    if (hasPassword) {
+      form.trigger('password');
+    }
+  }, [hasPassword, form]);
 
   return {
     form,
     selectedModes,
     selectedYears,
+    hasPassword,
   };
 }

@@ -1,4 +1,5 @@
-import { CreateRoomFormValues } from '@/types/rooms';
+import { useChannelStore } from '@/stores/lobby/useChannelStore';
+import { RoomFormValues } from '@/types/rooms';
 import { Mode } from '@/types/websocket';
 
 /**
@@ -28,15 +29,16 @@ interface ApiRequestData {
 // 소켓 데이터를 폼 데이터로 변환 (GameInfoState -> FormValues)
 export function socketToFormData(
   gameRoomInfo: GameRoomInfo | null,
-): Partial<CreateRoomFormValues> | null {
+): Partial<RoomFormValues> | null {
   if (!gameRoomInfo) return null;
 
   const formData = {
     title: gameRoomInfo.roomTitle || '',
     format: gameRoomInfo.format || 'BOARD',
-    // 소켓에서는 'ONE_SEC', 폼에서는 '1SEC' 사용
     modes: (gameRoomInfo.mode || []).map((m: Mode) => m),
     years: gameRoomInfo.selectedYear || [],
+    hasPassword: gameRoomInfo.hasPassword || false,
+    password: '', // 서버에서는 비밀번호를 반환하지 않으므로 빈 문자열로 초기화
   };
 
   console.log('소켓 데이터를 폼 데이터로 변환:', {
@@ -49,18 +51,19 @@ export function socketToFormData(
 
 // 폼 데이터를 API 요청 데이터로 변환 (FormValues -> API Request)
 export function formToApiData(
-  formData: CreateRoomFormValues,
+  formData: RoomFormValues,
   roomId?: string,
 ): ApiRequestData {
+  const password = formData.hasPassword ? formData.password : '';
+  const currentChannelId = useChannelStore.getState().currentChannelId;
+
   if (roomId) {
     // 방 수정하기 요청 - API 명세에 맞게 구성
     const data = {
       roomId: Number(roomId),
       title: formData.title,
-      password: '',
-      gameModes: (formData.modes || []).map((m: string) =>
-        m === '1SEC' ? 'ONE_SEC' : m,
-      ),
+      password: password,
+      gameModes: formData.modes || [],
       selectedYears: formData.years || [],
       format: formData.format, // request에서 삭제되면 제거 필요
     };
@@ -69,13 +72,11 @@ export function formToApiData(
   } else {
     // 방 생성하기 요청
     const data = {
-      channelId: 1, // 현재 참여한 채널 아이디
+      channelId: currentChannelId ?? 1,
       title: formData.title,
-      password: '',
+      password: password,
       format: formData.format,
-      gameModes: (formData.modes || []).map((m: string) =>
-        m === '1SEC' ? 'ONE_SEC' : m,
-      ),
+      gameModes: formData.modes || [],
       selectedYears: formData.years || [],
     };
 
