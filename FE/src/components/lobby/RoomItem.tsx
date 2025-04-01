@@ -5,25 +5,13 @@ import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
 import { Room } from '@/pages/game/lobby/[channelId]';
 
+import BoardMapPreview from './BoardMapPreview';
+import GeneralMapPreview from './GeneralMapPreview';
 import RoomDialog from './RoomDialog';
 
 interface RoomItemProps {
   room: Room;
 }
-
-// 맵 이미지 및 데이터 정의
-const formatMapData = {
-  BOARD: {
-    className: 'bg-blue-100 text-blue-800 border-blue-200',
-    name: '보드판',
-    image: '/boardMap.svg',
-  },
-  GENERAL: {
-    className: 'bg-pink-100 text-pink-800 border-pink-200',
-    name: '점수판',
-    image: '/scoreMap.svg',
-  },
-};
 
 // 게임 모드 매핑
 const gameModeLabels: Record<string, string> = {
@@ -59,12 +47,6 @@ export default function RoomItem({ room }: RoomItemProps) {
   const isFull = room.currentPlayers >= room.maxPlayer;
   const currentStatus = room.status || 'WAITING';
   const statusDisplay = statusConfig[currentStatus] || statusConfig['WAITING'];
-  const formatType = room.format as keyof typeof formatMapData;
-  const formatData = formatMapData[formatType] || {
-    className: defaultBadgeStyle,
-    name: '점수판',
-    image: '/scoreMap.svg',
-  };
 
   // 방 클릭 처리
   const handleRoomClick = () => {
@@ -165,15 +147,13 @@ export default function RoomItem({ room }: RoomItemProps) {
                   </Badge>
                 ))}
             </div>
-            {/* 선택한 맵 */}
+            {/* 선택한 맵 - 맵 형식에 따라 다른 컴포넌트 렌더링 */}
             <div className='relative h-24 w-full overflow-hidden'>
-              <Image
-                src={formatData.image}
-                alt={formatData.name}
-                fill
-                sizes='100%'
-                className='h-full object-contain'
-              />
+              {room.format === 'GENERAL' ? (
+                <GeneralMapPreview />
+              ) : (
+                <BoardMapPreview />
+              )}
             </div>
             <div className='flex items-center justify-between'>
               {/* 방 상태 표시 */}
