@@ -11,6 +11,7 @@ import GameBoardMap from '@/components/game-room/boardMap';
 import GamePlaySection from '@/components/game-room/gamePlaySection';
 import RoomPannel from '@/components/game-room/gameRoomInfo/RoomPannel';
 import ReadyPanel from '@/components/game-room/gameWait/ReadyPanel';
+import ScoreboardMap from '@/components/game-room/scoreMap';
 import { cn } from '@/lib/utils';
 import { useNicknameStore } from '@/stores/auth/useNicknameStore';
 import { useGameInfoStore } from '@/stores/websocket/useGameRoomInfoStore';
@@ -103,26 +104,32 @@ export default function GameRoom({
             />
           ) : (
             <div className='relative h-screen w-full overflow-hidden'>
-              <div
-                className={cn(
-                  gameState === 'SCORE_UPDATE'
-                    ? '-translate-y-full'
-                    : 'translate-y-0',
-                  'duration-700 ease-in-out',
-                )}
-              >
-                <GamePlaySection />
-              </div>
-              <div
-                className={cn(
-                  'absolute top-0 left-0 h-full w-full transition-transform duration-700 ease-in-out',
-                  gameState === 'SCORE_UPDATE'
-                    ? 'translate-y-0'
-                    : 'translate-y-full',
-                )}
-              >
-                <GameBoardMap />
-              </div>
+              {gameRoomInfo.format === 'BOARD' ? (
+                <>
+                  <div
+                    className={cn(
+                      gameState === 'SCORE_UPDATE'
+                        ? '-translate-y-full'
+                        : 'translate-y-0',
+                      'duration-700 ease-in-out',
+                    )}
+                  >
+                    <GamePlaySection />
+                  </div>
+                  <div
+                    className={cn(
+                      'absolute top-0 left-0 h-full w-full transition-transform duration-700 ease-in-out',
+                      gameState === 'SCORE_UPDATE'
+                        ? 'translate-y-0'
+                        : 'translate-y-full',
+                    )}
+                  >
+                    <GameBoardMap />
+                  </div>
+                </>
+              ) : (
+                <ScoreboardMap />
+              )}
             </div>
           )}
           <GameExitButton />

@@ -12,7 +12,7 @@ interface ParticipantInfoStore {
   resetParticipantInfo: () => void;
 }
 
-interface ParticipantInfo {
+export interface ParticipantInfo {
   userName: string;
   isReady: boolean;
   isHost: boolean;

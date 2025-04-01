@@ -193,6 +193,164 @@ body {
   }
 }
 
+@layer utilities {
+  @keyframes jump {
+    0% {
+      transform: translateY(0);
+    }
+    100% {
+      transform: translateY(-20px);
+    }
+  }
+  .animate-jump {
+    animation: jump 1.5s ease-in-out infinite alternate;
+  }
+
+  /* 이벤트 오버레이 애니메이션 (fadeScale)
+     기존에 갑자기 나타나는 문제를 개선하기 위해
+     점점 커졌다가 다시 작아지는 플로우로 수정 */
+  @keyframes fadeScale {
+    0% {
+      transform: translate(-50%, -50%) scale(0.5);
+      opacity: 0;
+    }
+    60% {
+      transform: translate(-50%, -50%) scale(1.5);
+      opacity: 1;
+    }
+    80% {
+      transform: translate(-50%, -50%) scale(1.5);
+      opacity: 1;
+    }
+    81% {
+      transform: translate(-50%, -50%) scale(1.5);
+      opacity: 0;
+    }
+    100% {
+      transform: translate(-50%, -50%) scale(1.5);
+      opacity: 0;
+    }
+  }
+
+  .animate-fadeScale {
+    animation: fadeScale 1.5s ease-in-out forwards;
+  }
+
+  /* 캐릭터 점프 애니메이션 - 불규칙적인 점프를 위한 여러 버전 */
+  @keyframes jump-1 {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  @keyframes jump-2 {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-15px);
+    }
+  }
+
+  @keyframes jump-3 {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    60% {
+      transform: translateY(-8px);
+    }
+  }
+
+  .animate-jump-1 {
+    animation: jump-1 3s ease-in-out infinite;
+  }
+
+  .animate-jump-2 {
+    animation: jump-2 4s ease-in-out infinite;
+  }
+
+  .animate-jump-3 {
+    animation: jump-3 5s ease-in-out infinite;
+  }
+
+  /* 포디엄 애니메이션 */
+  @keyframes podium-1 {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-15px);
+    }
+  }
+
+  @keyframes podium-2 {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-12px);
+    }
+  }
+
+  @keyframes podium-3 {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  .animate-podium-1 {
+    animation: podium-1 3s ease-in-out infinite;
+  }
+
+  .animate-podium-2 {
+    animation: podium-2 3.5s ease-in-out infinite;
+  }
+
+  .animate-podium-3 {
+    animation: podium-3 4s ease-in-out infinite;
+  }
+}
+
+@layer components {
+  .game-board {
+    @apply absolute top-0 left-0 h-full w-full overflow-hidden;
+  }
+  .loading-screen {
+    @apply flex h-full w-full items-center justify-center text-2xl text-white;
+  }
+  .footholder {
+    @apply absolute bg-contain bg-center bg-no-repeat;
+  }
+  .character {
+    @apply absolute z-10 will-change-transform;
+  }
+  .character-name {
+    @apply absolute z-20 -translate-x-1/2 transform text-center text-sm font-bold whitespace-nowrap text-white;
+  }
+  .character-image {
+    @apply absolute z-10 bg-contain bg-center bg-no-repeat;
+  }
+  .event-overlay {
+    @apply absolute top-1/2 left-1/2 z-[100] -translate-x-1/2 -translate-y-1/2 transform;
+  }
+  .event-emoji {
+    @apply h-52 w-52;
+  }
+}
+
+/* Neon Scrollbar (Webkit & Firefox) */
 .neon-scrollbar::-webkit-scrollbar {
   width: 8px;
 }

@@ -12,11 +12,6 @@ const YoutubePlayer = () => {
   const wasPlayingRef = useRef<boolean>(false);
   const [currentVideoId, setCurrentVideoId] = useState<string>('');
 
-  const getTimeString = () => {
-    const now = new Date();
-    return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}.${now.getMilliseconds().toString().padStart(3, '0')}`;
-  };
-
   useEffect(() => {
     if (!url) return;
     const videoId = getYoutubeId(url);
@@ -69,7 +64,6 @@ const YoutubePlayer = () => {
     window.addEventListener('message', handleMessage);
 
     return () => {
-      console.log(`[${getTimeString()}][YouTube] 컴포넌트 언마운트`);
       aud.pause();
       aud.src = '';
       window.removeEventListener('message', handleMessage);
@@ -80,7 +74,7 @@ const YoutubePlayer = () => {
     if (currentVideoId && !playerReadyRef.current) {
       playerReadyRef.current = true;
 
-      if (roundState !== 'ROUND_START') {
+      if (roundState === 'ROUND_INFO' || roundState === 'ROUND_OPEN') {
         pauseVideo();
       }
     }
@@ -102,18 +96,14 @@ const YoutubePlayer = () => {
   };
 
   useEffect(() => {
-    if (roundState === 'ROUND_INFO') {
-      console.log(`[${getTimeString()}][YouTube] 새 라운드 시작, 상태 초기화`);
+    if (roundState === 'ROUND_INFO' || roundState === 'ROUND_OPEN') {
+      pauseVideo();
       hasStartedRef.current = false;
       wasPlayingRef.current = false;
-    }
-
-    if (roundState === 'ROUND_START') {
-      playerReadyRef.current = true;
-      hasStartedRef.current = false; // 재생을 위해 강제로 false로 설정
-      playVideo();
     } else {
-      pauseVideo();
+      if (!wasPlayingRef.current) {
+        playVideo();
+      }
     }
   }, [roundState]);
 
@@ -123,19 +113,22 @@ const YoutubePlayer = () => {
       typeof window === 'undefined' ||
       !currentVideoId
     ) {
-      console.log(`[${getTimeString()}][YouTube] iframe 또는 비디오 ID 없음`);
       return;
     }
 
-    if (roundState === 'ROUND_START') {
-      playVideo();
-    } else {
+    if (roundState === 'ROUND_INFO' || roundState === 'ROUND_OPEN') {
       pauseVideo();
+    } else {
+      if (!wasPlayingRef.current) {
+        playVideo();
+      }
     }
   };
 
   const playVideo = () => {
-    if (roundState !== 'ROUND_START') {
+    if (wasPlayingRef.current) return; // 이미 재생 중이면 무시
+
+    if (roundState === 'ROUND_INFO' || roundState === 'ROUND_OPEN') {
       return;
     }
 
@@ -144,32 +137,17 @@ const YoutubePlayer = () => {
 
     if (iframeRef.current?.contentWindow) {
       iframeRef.current.contentWindow.postMessage(
-        '{"event":"command","func":"pauseVideo","args":""}',
+        '{"event":"command","func":"unMute","args":""}',
         '*',
       );
-
-      setTimeout(() => {
-        if (roundState !== 'ROUND_START') {
-          wasPlayingRef.current = false;
-          return;
-        }
-
-        // 볼륨 설정 및 음소거 해제
-        iframeRef.current?.contentWindow?.postMessage(
-          '{"event":"command","func":"unMute","args":""}',
-          '*',
-        );
-        iframeRef.current?.contentWindow?.postMessage(
-          '{"event":"command","func":"setVolume","args":[100]}',
-          '*',
-        );
-
-        // 재생 명령
-        iframeRef.current?.contentWindow?.postMessage(
-          '{"event":"command","func":"playVideo","args":""}',
-          '*',
-        );
-      }, 100);
+      iframeRef.current.contentWindow.postMessage(
+        '{"event":"command","func":"setVolume","args":[100]}',
+        '*',
+      );
+      iframeRef.current.contentWindow.postMessage(
+        '{"event":"command","func":"playVideo","args":""}',
+        '*',
+      );
     }
   };
 
