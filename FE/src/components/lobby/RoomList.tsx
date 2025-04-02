@@ -13,7 +13,13 @@ const API_URL = process.env.NEXT_PUBLIC_BASE_URL;
 const SSE_EVENTS = {
   CONNECT: 'CONNECT',
   ROOM_UPDATED: 'ROOM_UPDATED',
-  ROOM_DELETE: 'ROOM_DELETE',
+} as const;
+
+// 액션 타입 상수 추가
+const ACTION_TYPES = {
+  CREATED: 'CREATED',
+  UPDATED: 'UPDATED',
+  FINISHED: 'FINISHED',
 } as const;
 
 interface RoomListProps {
@@ -35,9 +41,15 @@ export default function RoomList({
   const [currentPage, setCurrentPage] = useState<number>(initialCurrentPage);
   const [totalPages, setTotalPages] = useState<number>(initialTotalPages);
   const currentPageRef = useRef<number>(initialCurrentPage);
+  const roomsRef = useRef<Room[]>([]);
   const router = useRouter();
 
   const SSE_ENDPOINT = `${process.env.NEXT_PUBLIC_SSE_URL}/${channelId}`;
+
+  // rooms 상태가 변경될 때마다 ref도 업데이트
+  useEffect(() => {
+    roomsRef.current = rooms;
+  }, [rooms]);
 
   useEffect(() => {
     currentPageRef.current = currentPage;
@@ -76,7 +88,8 @@ export default function RoomList({
         setCurrentPage(data.number || 0);
         setTotalPages(data.totalPages || 1);
         setIsLoading(false);
-      } catch {
+      } catch (error) {
+        console.error('초기 방 목록 가져오기 오류:', error);
         setIsLoading(false);
       }
     };
@@ -84,6 +97,7 @@ export default function RoomList({
     fetchInitialRooms();
   }, [channelId, initialCurrentPage, pageSize, router.query.page]);
 
+  // 페이지 전환 시 URL 업데이트 및 GET 요청 처리
   const handlePageChange = async (newPage: number) => {
     try {
       setIsLoading(true);
@@ -113,7 +127,8 @@ export default function RoomList({
       setCurrentPage(data.pageable?.pageNumber || newPage);
       setTotalPages(data.totalPages || 1);
       setIsLoading(false);
-    } catch {
+    } catch (error) {
+      console.error('방 목록 가져오기 오류:', error);
       setIsLoading(false);
     }
   };
@@ -130,7 +145,8 @@ export default function RoomList({
 
         data = JSON.parse(event.data);
         return data;
-      } catch {
+      } catch (error) {
+        console.error(`${eventName} 이벤트 처리 오류:`, error);
         return null;
       }
     },
@@ -163,36 +179,174 @@ export default function RoomList({
       eventSource.addEventListener(SSE_EVENTS.ROOM_UPDATED, event => {
         const data = handleEventData(event, SSE_EVENTS.ROOM_UPDATED);
 
-        if (data && data.room) {
-          const updatedRoom = data.room;
-          const pageNow = currentPageRef.current;
+        if (!data) return;
 
-          // 사용자가 첫페이지에 있을 경우
-          // 기존에 있던 방의 경우 갱신, 없던 방은 상단 추가 후 기존 아이템 한개 삭제
-          if (pageNow === 0) {
-            setRooms(currentRooms => {
-              const roomIndex = currentRooms.findIndex(
-                room => room.id === updatedRoom.id,
-              );
+        const pageNow = currentPageRef.current;
 
-              if (roomIndex !== -1) {
-                const newRooms = [...currentRooms];
-                newRooms[roomIndex] = updatedRoom;
-                return newRooms;
-              } else {
-                const newRooms = [updatedRoom, ...currentRooms];
-                if (newRooms.length > pageSize) {
-                  return newRooms.slice(0, pageSize);
+        // FINISHED 상태인 방 처리
+        if (data.actionType === ACTION_TYPES.FINISHED) {
+          const roomId = data.roomId;
+
+          // roomsRef를 사용하여 최신 rooms 상태 참조
+          const isRoomInCurrentPage = roomsRef.current.some(
+            (room: Room) => room.id === roomId,
+          );
+
+          // 현재 페이지에 없을 경우 관련 정보를 무시
+          if (!isRoomInCurrentPage) {
+            return;
+          }
+
+          // 현재 페이지에 있을 경우 FINISHED된 방의 입장을 제한
+          setRooms(currentRooms => {
+            const roomIndex = currentRooms.findIndex(
+              (room: Room) => room.id === roomId,
+            );
+
+            if (roomIndex !== -1) {
+              const newRooms = [...currentRooms];
+              newRooms[roomIndex] = {
+                ...newRooms[roomIndex],
+                disabled: true,
+              } as Room;
+              return newRooms;
+            }
+            return currentRooms;
+          });
+
+          // 페이지에 대한 GET 요청을 보내 새로운 목록을 받아옴
+          const fetchUpdatedRooms = async () => {
+            try {
+              const response = await axios.get(`${API_URL}/room`, {
+                params: {
+                  channelId: channelId,
+                  page: pageNow,
+                  size: pageSize,
+                },
+              });
+
+              const newRoomsData = response.data.content || [];
+
+              setRooms(currentRooms => {
+                // 방 목록 업데이트 로직
+                const finishedRoomIndex = currentRooms.findIndex(
+                  (room: Room) => room.id === roomId,
+                );
+
+                if (finishedRoomIndex === -1) {
+                  return currentRooms; // FINISHED 방이 이미 처리되었거나 없는 경우
                 }
-                return newRooms;
-              }
-            });
-          } else {
-            // 사용자가 첫 페이지 이외 페이지에 있을 경우
-            // 기존에 있던 방의 경우 갱신, 없던 방의 경우 처리 안함
+
+                // 기존 방 목록에서 FINISHED 방을 제외한 나머지 방들
+                const remainingRooms = currentRooms.filter(
+                  (room: Room) => room.id !== roomId,
+                );
+
+                // 결과 목록의 개수가 기존과 동일한 경우
+                if (newRoomsData.length === currentRooms.length) {
+                  // 기존 목록에 없는 새로운 방 찾기
+                  const newRoom = newRoomsData.find(
+                    (room: Room) =>
+                      !currentRooms.some(
+                        (existingRoom: Room) => existingRoom.id === room.id,
+                      ),
+                  );
+
+                  if (newRoom) {
+                    // FINISHED된 방 위치에 새로운 방으로 대체
+                    const result = [...remainingRooms];
+                    result.splice(finishedRoomIndex, 0, newRoom);
+                    return result;
+                  }
+
+                  // 새로운 방을 찾지 못한 경우 기존 목록 유지 (FINISHED 방은 disabled 상태로)
+                  return currentRooms;
+                }
+                // 결과 목록의 개수가 기존보다 적은 경우
+                else if (newRoomsData.length < currentRooms.length) {
+                  // FINISHED된 방을 제외
+                  return remainingRooms;
+                }
+                // 결과 목록의 개수가 기존보다 많은 경우
+                else {
+                  // 1. FINISHED 방을 제외한 기존 방 목록 구성
+                  const remainingRooms = currentRooms.filter(
+                    (room: Room) => room.id !== roomId,
+                  );
+
+                  // 2. 기존에 없던 새로운 방들 찾기
+                  const newRooms = newRoomsData.filter(
+                    (room: Room) =>
+                      !currentRooms.some(
+                        (existingRoom: Room) => existingRoom.id === room.id,
+                      ),
+                  );
+
+                  // 3. FINISHED 방 위치에 새로운 방 중 하나를 배치
+                  const result = [...remainingRooms];
+                  if (newRooms.length > 0) {
+                    result.splice(finishedRoomIndex, 0, newRooms[0]);
+
+                    // 4. 나머지 새로운 방들은 배열 뒤에 추가
+                    if (newRooms.length > 1) {
+                      result.push(...newRooms.slice(1));
+                    }
+                  }
+
+                  // 5. 페이지 크기에 맞게 목록 조정
+                  return result.slice(0, pageSize);
+                }
+              });
+            } catch (error) {
+              console.error(
+                'FINISHED 상태 방 처리 중 방 목록 가져오기 오류:',
+                error,
+              );
+            }
+          };
+
+          fetchUpdatedRooms();
+          return;
+        }
+
+        // CREATED 또는 UPDATED 상태인 방 처리 (room 객체가 있는 경우)
+        if (
+          (data.actionType === ACTION_TYPES.CREATED ||
+            data.actionType === ACTION_TYPES.UPDATED) &&
+          data.room
+        ) {
+          const updatedRoom = data.room;
+
+          // CREATED 액션 처리 - 주로 첫 페이지에 새 방을 추가
+          if (data.actionType === ACTION_TYPES.CREATED) {
+            // 사용자가 첫페이지에 있을 경우에만 새 방 추가
+            if (pageNow === 0) {
+              setRooms(currentRooms => {
+                const roomIndex = currentRooms.findIndex(
+                  (room: Room) => room.id === updatedRoom.id,
+                );
+
+                if (roomIndex !== -1) {
+                  // 이미 존재하는 방이면 업데이트
+                  const newRooms = [...currentRooms];
+                  newRooms[roomIndex] = updatedRoom;
+                  return newRooms;
+                } else {
+                  // 새 방이면 맨 앞에 추가
+                  const newRooms = [updatedRoom, ...currentRooms];
+                  if (newRooms.length > pageSize) {
+                    return newRooms.slice(0, pageSize);
+                  }
+                  return newRooms;
+                }
+              });
+            }
+          }
+          // UPDATED 액션 처리 - 현재 페이지에 해당 방이 있으면 정보 업데이트
+          else if (data.actionType === ACTION_TYPES.UPDATED) {
             setRooms(currentRooms => {
               const roomIndex = currentRooms.findIndex(
-                room => room.id === updatedRoom.id,
+                (room: Room) => room.id === updatedRoom.id,
               );
 
               if (roomIndex !== -1) {
@@ -203,16 +357,6 @@ export default function RoomList({
               return currentRooms;
             });
           }
-        }
-      });
-
-      // 아직 서버 구현안된 type, finished로 들어올 예정
-      eventSource.addEventListener(SSE_EVENTS.ROOM_DELETE, event => {
-        const deletedRoom = handleEventData(event, SSE_EVENTS.ROOM_DELETE);
-        if (deletedRoom) {
-          setRooms(currentRooms =>
-            currentRooms.filter(room => room.id !== deletedRoom.id),
-          );
         }
       });
     };

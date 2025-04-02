@@ -66,6 +66,12 @@ const ChannelList = () => {
 
   // SSE 로직
   useEffect(() => {
+    const handleUnload = () => {
+      navigator.sendBeacon(`${process.env.NEXT_PUBLIC_SSE_URL}/disconnect`);
+    };
+
+    window.addEventListener('beforeunload', handleUnload);
+
     let retryCount = 0;
 
     const eventSource = new EventSource(
@@ -98,6 +104,7 @@ const ChannelList = () => {
     };
 
     return () => {
+      window.removeEventListener('beforeunload', handleUnload);
       eventSource.close();
       setIsSSEConnected(false);
     };

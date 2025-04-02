@@ -342,9 +342,9 @@ body {
   .character-image {
     @apply absolute z-10 bg-contain bg-center bg-no-repeat;
   }
-  .event-overlay {
+  /* .event-overlay {
     @apply absolute top-1/2 left-1/2 z-[100] -translate-x-1/2 -translate-y-1/2 transform;
-  }
+  } */
   .event-emoji {
     @apply h-52 w-52;
   }
@@ -375,8 +375,49 @@ body {
     0 0 25px #30ffff;
 }
 
-/* Firefox용 */
 .neon-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: #30ffff #2a2a2a;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+.flip-card-front,
+.flip-card-back {
+  @apply absolute inset-0 flex items-center justify-center;
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+}
+
+.flip-card-front {
+  transform: rotateY(0deg);
+}
+
+.flip-card-back {
+  transform: rotateY(180deg);
+}
+
+.event-overlay {
+  @apply fixed top-1/2 left-1/2 z-[100] flex h-screen w-screen -translate-x-1/2 -translate-y-1/2 transform items-center justify-center;
+  perspective: 1000px;
+  transition: transform 0.7s ease-out;
+  transform-style: preserve-3d;
+  transform-origin: center;
+}
+
+.event-card {
+  @apply flex items-center justify-center rounded-2xl bg-white p-6 pr-12 shadow-2xl shadow-white/70;
+  border-radius: 2rem;
+  border: 14px solid transparent;
+  background-image:
+    linear-gradient(white, white),
+    linear-gradient(45deg, #6b9cff, #65ebf0, #845ef7, #339af0);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
 }
