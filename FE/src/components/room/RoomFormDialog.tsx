@@ -63,7 +63,7 @@ export default function RoomFormDialog({
   // 방 생성 또는 수정 성공 핸들러
   const handleSuccess = (_data: RoomFormValues, newRoomId?: string) => {
     if (mode === 'create') {
-      router.push(`/game/room/${newRoomId}`);
+      router.push(`/game/room/1/${newRoomId}`);
     } else if (mode === 'edit') {
       // 방 정보는 소켓 연결을 통해 자동으로 업데이트될 거라 없음
     }
