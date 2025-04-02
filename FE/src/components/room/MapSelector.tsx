@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import Image from 'next/image';
 import { UseFormReturn } from 'react-hook-form';
 
+import BoardMapPreview from '@/components/lobby/BoardMapPreview';
+import GeneralMapPreview from '@/components/lobby/GeneralMapPreview';
 import {
   FormControl,
   FormField,
@@ -17,20 +18,17 @@ import { GameFormat, RoomFormValues } from '@/types/rooms';
 interface MapData {
   id: GameFormat;
   name: string;
-  image: string;
 }
 
-// Map images and data
+// Map data without images
 const MAPS: MapData[] = [
   {
     id: 'BOARD',
     name: '보드판',
-    image: '/boardMap.svg',
   },
   {
     id: 'GENERAL',
     name: '점수판',
-    image: '/scoreMap.svg',
   },
 ];
 
@@ -81,14 +79,12 @@ export default function MapSelector({ form, error }: MapSelectorProps) {
             <div className='relative flex flex-col items-center overflow-hidden rounded-lg'>
               {/* 맵 이미지 컨테이너 - 반응형으로 수정 */}
               <div className='relative w-full overflow-hidden rounded-lg bg-slate-800 sm:h-24 md:h-40 lg:h-48'>
-                {/* 화면 크기에 따라 높이 조절 - 더 작은 크기로 조정 */}
-                <Image
-                  src={currentMap.image}
-                  alt={currentMap.name}
-                  fill
-                  className='h-full object-contain'
-                  priority
-                />
+                {/* 맵 컴포넌트 렌더링 */}
+                {currentMap.id === 'BOARD' ? (
+                  <BoardMapPreview />
+                ) : (
+                  <GeneralMapPreview />
+                )}
 
                 {/* 네비게이션 버튼 */}
                 <button
