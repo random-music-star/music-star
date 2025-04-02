@@ -101,10 +101,12 @@ const ScoreWaitingPanel = ({
   return (
     <div className='relative h-screen w-full overflow-hidden'>
       <div className='flex h-full flex-col px-4 py-3'>
-        {/* 상단 타이틀 */}
         <div className='mb-3 text-center'>
-          <h1 className='drop-shadow-glow text-2xl font-bold text-purple-100'>
+          <h1 className='drop-shadow-glow flex items-center justify-center text-4xl font-bold text-purple-100'>
             {roomTitle || '게임 대기실'}
+            <span className='ml-2 text-base text-purple-200'>
+              {hasPassword ? '🔒' : '🔓'}
+            </span>
           </h1>
           <div className='mt-1 flex items-center justify-center gap-3'>
             <span
@@ -113,7 +115,7 @@ const ScoreWaitingPanel = ({
               {statusConfig[status].text}
             </span>
             <span className='rounded-md bg-purple-800 px-3 py-1 text-sm font-medium text-purple-100'>
-              참가자 {participantInfo.length}/{maxPlayer}명
+              {formatText[format]} 모드
             </span>
           </div>
         </div>
@@ -199,70 +201,53 @@ const ScoreWaitingPanel = ({
 
         {/* 하단 섹션 - 채팅과 방 정보를 나란히 표시 */}
         <div className='flex flex-1 flex-col gap-4 overflow-hidden md:flex-row'>
-          <div className='rounded-lg bg-purple-700/40 p-3 shadow-md backdrop-blur-sm md:w-[40%]'>
-            <h3 className='mb-2 border-b border-purple-400/40 pb-1.5 text-xl font-bold text-purple-100'>
+          <div className='rounded-lg bg-purple-700/40 p-2.5 shadow-md backdrop-blur-sm md:w-[40%]'>
+            <h2 className='mb-1.5 border-b border-purple-400/40 pb-1 text-3xl font-bold text-purple-100'>
               <span className='mr-1'>🎮</span> 방 정보
-            </h3>
+            </h2>
 
-            <div className='mb-3 grid grid-cols-2 gap-2'>
-              <div className='rounded-md bg-purple-600/30 p-2.5 shadow-sm backdrop-blur-sm'>
-                <span className='block text-sm font-medium text-purple-200'>
+            {/* 3열 레이아웃으로 변경 */}
+            <div className='mb-2 grid grid-cols-2 gap-2'>
+              {/* 참가 인원 */}
+              <div className='rounded-md bg-purple-600/30 p-1.5 shadow-sm backdrop-blur-sm'>
+                <span className='block font-medium text-purple-200'>
                   참가 인원
                 </span>
                 <div className='flex items-end justify-between'>
-                  <span className='text-xl font-bold text-purple-100'>
+                  <span className='text-base font-bold text-purple-100'>
                     {participantInfo.length}
                   </span>
-                  <span className='text-base text-purple-200'>
+                  <span className='text-xs text-purple-200'>
                     / {maxPlayer}명
                   </span>
                 </div>
               </div>
 
-              <div className='rounded-md bg-purple-600/30 p-2.5 shadow-sm backdrop-blur-sm'>
-                <span className='block text-sm font-medium text-purple-200'>
+              {/* 게임 라운드 */}
+              <div className='rounded-md bg-purple-600/30 p-1.5 shadow-sm backdrop-blur-sm'>
+                <span className='block font-medium text-purple-200'>
                   게임 라운드
                 </span>
                 <div className='flex items-end justify-between'>
-                  <span className='text-xl font-bold text-purple-100'>
+                  <span className='text-base font-bold text-purple-100'>
                     {maxGameRound}
                   </span>
-                  <span className='text-base text-purple-200'>회</span>
+                  <span className='text-xs text-purple-200'>회</span>
                 </div>
               </div>
             </div>
 
-            <div className='mb-3 rounded-md bg-purple-600/30 p-2.5 shadow-sm backdrop-blur-sm'>
-              <div className='flex items-center justify-between'>
-                <span className='text-sm font-medium text-purple-200'>
-                  게임 포맷
-                </span>
-                <div className='flex items-center'>
-                  <span className='mr-2 inline-flex items-center justify-center rounded-full bg-purple-500/40 px-3 py-1 text-sm font-bold text-purple-100 shadow-sm'>
-                    {formatText[format]}
-                  </span>
-                  <span className='text-base text-purple-200'>
-                    {hasPassword ? '🔒' : '🔓'}
-                  </span>
+            <div className='space-y-1.5'>
+              {/* 게임 모드 목록 */}
+              <div className='rounded-md bg-purple-600/30 p-2 shadow-sm backdrop-blur-sm'>
+                <div className='mb-1 flex items-center justify-between'>
+                  <span className='font-medium text-purple-200'>게임 모드</span>
                 </div>
-              </div>
-            </div>
-
-            <div className='space-y-2'>
-              <div className='rounded-md bg-purple-600/30 p-2.5 shadow-sm backdrop-blur-sm'>
-                <div className='mb-1.5 flex items-center justify-between'>
-                  <span className='text-sm font-medium text-purple-200'>
-                    게임 모드
-                  </span>
-                  <span className='text-xs text-purple-300'>
-                    {modeArray.length}개 선택
-                  </span>
-                </div>
-                <div className='flex flex-wrap gap-1.5'>
+                <div className='mt-2 flex max-h-16 flex-wrap gap-1 overflow-y-auto'>
                   {modeArray.map((m, index) => (
                     <span
                       key={`mode-${index}`}
-                      className='inline-block rounded-full bg-pink-400/40 px-3 py-1 text-xs font-medium text-white shadow-sm'
+                      className='inline-block rounded-full bg-pink-400/40 px-2 py-0.5 text-sm font-medium text-white shadow-sm'
                     >
                       {m}
                     </span>
@@ -270,20 +255,19 @@ const ScoreWaitingPanel = ({
                 </div>
               </div>
 
-              <div className='rounded-md bg-purple-600/30 p-2.5 shadow-sm backdrop-blur-sm'>
-                <div className='mb-1.5 flex items-center justify-between'>
-                  <span className='text-sm font-medium text-purple-200'>
-                    선택 연도
-                  </span>
-                  <span className='text-xs text-purple-300'>
+              {/* 선택 연도 목록 */}
+              <div className='rounded-md bg-purple-600/30 p-2 shadow-sm backdrop-blur-sm'>
+                <div className='mb-1 flex items-center justify-between'>
+                  <span className='font-medium text-purple-200'>선택 연도</span>
+                  <span className='text-purple-300'>
                     {yearArray.length}개 선택
                   </span>
                 </div>
-                <div className='flex flex-wrap gap-1.5'>
+                <div className='mt-2 flex max-h-16 flex-wrap gap-1 overflow-y-auto'>
                   {yearArray.map((year, index) => (
                     <span
                       key={`year-${index}`}
-                      className='inline-block rounded-full bg-cyan-400/40 px-3 py-1 text-xs font-medium text-white shadow-sm'
+                      className='inline-block rounded-full bg-cyan-400/40 px-2 py-0.5 text-sm font-medium text-white shadow-sm'
                     >
                       {year}
                     </span>
@@ -293,16 +277,17 @@ const ScoreWaitingPanel = ({
             </div>
 
             {isHost && (
-              <div className='mt-3'>
+              <div className='mt-2'>
                 <Button
                   onClick={handleStartGame}
-                  className='w-full rounded-md bg-purple-500/60 px-3 py-2 text-base font-bold text-white shadow-md transition-all hover:bg-purple-400/70 hover:shadow-lg'
+                  className='w-full rounded-md bg-purple-500/60 px-3 py-1.5 text-sm font-bold text-white shadow-md transition-all hover:bg-purple-400/70 hover:shadow-lg'
                 >
                   게임 시작
                 </Button>
               </div>
             )}
           </div>
+
           {/* 채팅 박스 */}
           <div className='flex-1 md:w-[60%]'>
             <div className='h-full rounded-lg border border-purple-700 bg-purple-900/50 shadow-md'>
