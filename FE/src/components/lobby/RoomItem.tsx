@@ -51,51 +51,34 @@ export default function RoomItem({ room }: RoomItemProps) {
   // 방 클릭 처리
   const handleRoomClick = () => {
     if (isFull) return;
-
     setIsDialogOpen(true);
   };
 
-  // 년도 정보에 대한 전처리
-  const formatYearLabel = (years: number[]) => {
-    if (!years || years.length === 0) return '모든 연도';
+  // 년도 표시 함수
+  const renderYearOptions = () => {
+    const allYears = [
+      1970, 1980, 1990, 2000, 2010, 2020, 2021, 2022, 2023, 2024,
+    ];
+    const selectedYears = room.years || [];
 
-    // 년도 오름차순 정렬
-    const sortedYears = [...years].sort((a, b) => a - b);
+    return (
+      <div className='mr-2 flex flex-col gap-1 text-[8px]'>
+        {allYears.map(year => {
+          const isSelected = selectedYears.includes(year);
+          const needSuffix = year < 2020;
 
-    if (sortedYears.length === 1) return `${sortedYears[0]}년대`;
-
-    // 연속된 년도 그룹화
-    const ranges: { start: number; end: number }[] = [];
-    let currentRange = { start: sortedYears[0], end: sortedYears[0] };
-
-    for (let i = 1; i < sortedYears.length; i++) {
-      if (
-        sortedYears[i] === sortedYears[i - 1] + 10 ||
-        (sortedYears[i - 1] >= 2020 &&
-          sortedYears[i] === sortedYears[i - 1] + 1)
-      ) {
-        currentRange.end = sortedYears[i];
-      } else {
-        ranges.push(currentRange);
-        currentRange = { start: sortedYears[i], end: sortedYears[i] };
-      }
-    }
-    ranges.push(currentRange);
-
-    // 년도 값 내려올 경우 2020 이전은 년대로 표현
-    return ranges
-      .map(range => {
-        if (range.start === range.end) {
-          return range.start >= 2020
-            ? `${range.start}년`
-            : `${range.start}년대`;
-        } else if (range.start >= 2020) {
-          return `${range.start}-${range.end}년`;
-        } else {
-          return `${range.start}-${range.end}년대`;
-        }
-      })
-      .join(', ');
+          return (
+            <span
+              key={year}
+              className={`rounded px-1 ${isSelected ? 'font-medium text-purple-600' : 'text-gray-700'}`}
+            >
+              {year}
+              {needSuffix ? 's' : ''}
+            </span>
+          );
+        })}
+      </div>
+    );
   };
 
   return (
@@ -132,53 +115,57 @@ export default function RoomItem({ room }: RoomItemProps) {
           </div>
 
           {/* CD 케이스 (왼쪽 60%, CD 일부를 가림) */}
-          <div className='relative z-10 flex aspect-square w-3/5 flex-col justify-between bg-white p-2'>
-            {/* 게임 모드 뱃지 */}
-            <div className='flex justify-center'>
-              {room.gameModes &&
-                Array.isArray(room.gameModes) &&
-                room.gameModes.map(mode => (
-                  <Badge
-                    key={mode}
-                    variant='outline'
-                    className={`rounded-full border px-2 text-xs ${modeBadgeVariants[mode] || defaultBadgeStyle}`}
-                  >
-                    {gameModeLabels[mode] || mode}
-                  </Badge>
-                ))}
-            </div>
-            {/* 선택한 맵 - 맵 형식에 따라 다른 컴포넌트 렌더링 */}
-            <div className='relative h-24 w-full overflow-hidden'>
-              {room.format === 'GENERAL' ? (
-                <GeneralMapPreview />
-              ) : (
-                <BoardMapPreview />
-              )}
-            </div>
-            <div className='flex items-center justify-between'>
+          <div className='relative z-10 flex aspect-square w-4/5 flex-col justify-between bg-white p-2'>
+            {/* CD 케이스 상단 : 상태, 모드 */}
+            <div className='flex w-full items-center justify-between'>
               {/* 방 상태 표시 */}
-              <div>
-                <span
-                  className={`rounded-full px-2 py-1 text-xs ${statusDisplay.className}`}
-                >
-                  {statusDisplay.text}
-                </span>
-              </div>
-              {/* 방 인원 */}
-              <div className='flex justify-end'>
-                <span className='mr-1 text-xs'>👨‍👩‍👦</span>
-                <span
-                  className={`${isFull ? 'text-red-600' : 'text-black'} text-xs`}
-                >
-                  {room.currentPlayers} / {room.maxPlayer}
-                </span>
+              <span
+                className={`rounded-full px-2 py-1 text-xs ${statusDisplay.className}`}
+              >
+                {statusDisplay.text}
+              </span>
+              {/* 게임 모드 뱃지 */}
+              <div className='ml-2 flex flex-wrap justify-center gap-1'>
+                {room.gameModes &&
+                  Array.isArray(room.gameModes) &&
+                  room.gameModes.map(mode => (
+                    <Badge
+                      key={mode}
+                      variant='outline'
+                      className={`rounded-full border px-2 text-xs ${modeBadgeVariants[mode] || defaultBadgeStyle}`}
+                    >
+                      {gameModeLabels[mode] || mode}
+                    </Badge>
+                  ))}
               </div>
             </div>
-            {/* 선택 년도 - 라벨 */}
-            <div className='text-xs'>
-              {room.years && room.years.length > 0 && (
-                <span className='text-xs'>{formatYearLabel(room.years)}</span>
-              )}
+            {/* CD 케이스 하단 : 년도, 맵, 인원 수, 라운드 수 */}
+            <div className='flex w-full flex-1'>
+              {/* CD 케이스 좌측 사이드 : 년도 */}
+              <div className='flex flex-col justify-end'>
+                {/* 모든 년도 표시 - 선택된 년도는 보라색으로 */}
+                <div>{renderYearOptions()}</div>
+              </div>
+              {/* CD 케이스 우측 : 맵, 인원 현황, 라운드 설정 값*/}
+              <div className='relative flex w-full flex-col justify-center'>
+                {/* 선택한 맵 - 맵 형식에 따라 다른 컴포넌트 렌더링 */}
+                <div className='relative h-24 w-full overflow-hidden'>
+                  {room.format === 'GENERAL' ? (
+                    <GeneralMapPreview />
+                  ) : (
+                    <BoardMapPreview />
+                  )}
+                </div>
+                {/* 방 인원 */}
+                <div className='absolute right-0 bottom-0 flex justify-end'>
+                  <span className='mr-1 text-xs'>👨‍👩‍👦</span>
+                  <span
+                    className={`${isFull ? 'text-red-600' : 'text-black'} text-xs`}
+                  >
+                    {room.currentPlayers} / {room.maxPlayer}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </section>

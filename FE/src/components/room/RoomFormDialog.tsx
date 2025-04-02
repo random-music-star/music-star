@@ -28,6 +28,8 @@ interface InitialDataType {
   mode?: ('FULL' | 'DOUBLE' | 'AI')[];
   selectedYear?: number[];
   hasPassword?: boolean;
+  maxGameRound?: number;
+  maxPlayer?: number;
 }
 
 export default function RoomFormDialog({
@@ -52,6 +54,8 @@ export default function RoomFormDialog({
         mode: gameRoomInfo.mode,
         selectedYear: gameRoomInfo.selectedYear,
         hasPassword: gameRoomInfo.hasPassword,
+        maxGameRound: gameRoomInfo.maxGameRound, // 추가됨
+        maxPlayer: gameRoomInfo.maxPlayer, // 추가됨
       };
     }
   }, [isOpen, mode, gameRoomInfo]);
