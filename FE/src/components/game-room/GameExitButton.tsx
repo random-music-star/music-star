@@ -6,7 +6,7 @@ const GameExitButton = () => {
   const router = useRouter();
 
   const handleExit = () => {
-    router.push('/game/lobby');
+    router.push('/game/lobby/1');
   };
   return (
     <div className='absolute right-0 bottom-0 p-6 text-end'>

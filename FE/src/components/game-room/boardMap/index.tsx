@@ -8,6 +8,8 @@ import {
 import { useParticipantInfoStore } from '@/stores/websocket/useGameParticipantStore';
 import { useScoreStore } from '@/stores/websocket/useScoreStore';
 
+import EventCard from './EventCard';
+
 interface FootholderPosition {
   xRatio: number;
   yRatio: number;
@@ -51,18 +53,32 @@ const footholderRatios: FootholderPosition[] = [
 
 const EventOverlay = ({ eventType }: { eventType: EventType }) => {
   const [show, setShow] = useState(true);
+  const [rotation, setRotation] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => setShow(false), 1500);
+    if (eventType !== 'MARK') {
+      setRotation(true);
+    }
+    setShow(true);
+    const timer = setTimeout(() => {
+      setShow(false);
+      setRotation(false);
+    }, 1500);
     return () => clearTimeout(timer);
   }, [eventType]);
 
   if (!show || !eventType) return null;
 
-  const emojiUrl = `/eventemoji/${(eventType || 'NOTHING').toLowerCase()}.svg`;
   return (
-    <div className='event-overlay'>
-      <img src={emojiUrl} alt='event' className='event-emoji' />
+    <div className={`event-overlay ${rotation ? 'rotate-y-180' : ''}`}>
+      {/* 앞면 */}
+      <div className='flip-card-front'>
+        <EventCard eventType={'MARK'} />
+      </div>
+      {/* 뒷면 */}
+      <div className='flip-card-back'>
+        <EventCard eventType={eventType} />
+      </div>
     </div>
   );
 };
