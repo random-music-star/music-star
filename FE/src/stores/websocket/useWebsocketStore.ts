@@ -95,6 +95,14 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
       const gameBubbleStore = useGameBubbleStore.getState();
       const roundHint = useRoundHintStore.getState();
 
+      newSubscriptions['messageQueue'] = client.subscribe(
+        `/user/queue/system`,
+        () => {},
+        {
+          Authorization: useNicknameStore.getState().nickname,
+        },
+      );
+
       newSubscriptions['game-room'] = client.subscribe(
         `/topic/channel/1/room/${roomId}`,
         message => {
@@ -143,6 +151,14 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
           if (type === 'gameResult') {
             gameRoundResult.setGameRoundResult(response);
             gameStateStore.setGameState('GAME_RESULT');
+
+            if (response.winner) {
+              gameChatStore.setGameChattings({
+                sender: 'system',
+                messageType: 'winner',
+                message: `${response.winner}님이 정답을 맞췄습니다! `,
+              });
+            }
           }
 
           if (type === 'hint') {

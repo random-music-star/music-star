@@ -29,7 +29,7 @@ const ScoreRoundInformation = () => {
         <YoutubePlayer />
       </div>
 
-      <div className='h-full w-full rounded-lg bg-purple-800/50 p-3 shadow-inner backdrop-blur-sm'>
+      <div className='h-full w-full rounded-lg p-3 shadow-inner backdrop-blur-sm'>
         <AnimatePresence mode='wait'>
           {(gameState === 'ROUND_INFO' || gameState === 'ROUND_OPEN') && (
             <motion.div
@@ -57,7 +57,9 @@ const ScoreRoundInformation = () => {
             </motion.div>
           )}
 
-          {(gameState === 'ROUND_START' || gameState === 'GAME_RESULT') && (
+          {(gameState === 'ROUND_START' ||
+            gameState === 'GAME_RESULT' ||
+            gameState === 'SCORE_UPDATE') && (
             <motion.div
               key='music-player'
               variants={containerVariants}

@@ -57,7 +57,6 @@ interface LobbyServerProps {
 }
 
 const LobbyPage = ({ userNickname, channelId }: LobbyServerProps) => {
-  console.log('channelId', channelId);
   const { setNickname } = useNicknameStore();
   const { setCurrentChannelId } = useChannelStore();
 
@@ -68,9 +67,7 @@ const LobbyPage = ({ userNickname, channelId }: LobbyServerProps) => {
 
   return (
     <div className='flex h-screen flex-col bg-[url(/background.svg)] bg-cover bg-center'>
-      {/* main */}
       <main className='flex flex-1 overflow-hidden'>
-        {/* section - 게임 방 목록 */}
         <section className='m-10 flex flex-1 flex-col bg-gradient-to-r from-[#4F719C]/80 to-[#5F4EA0]/80 p-6'>
           <div className='mb-6 flex items-center justify-between'>
             <h1 className='text-2xl font-bold text-white'>게임 방 목록</h1>
@@ -78,14 +75,10 @@ const LobbyPage = ({ userNickname, channelId }: LobbyServerProps) => {
           </div>
           <RoomList channelId={channelId} />
         </section>
-
-        {/* section - 채팅 */}
         <section className='w-2/10 bg-black/50 text-white'>
           <ChatBox />
         </section>
       </main>
-
-      {/* footer */}
       <Header channelId={channelId} />
     </div>
   );
