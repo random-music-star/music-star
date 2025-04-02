@@ -17,12 +17,14 @@ interface ReadyPanelProps {
   currentUserId: string;
   handleStartGame: () => void;
   roomId: string;
+  channelId: string;
 }
 
 const ReadyPanel = ({
   currentUserId,
   handleStartGame,
   roomId,
+  channelId,
 }: ReadyPanelProps) => {
   const { participantInfo, isAllReady, hostNickname } =
     useParticipantInfoStore();
@@ -40,7 +42,7 @@ const ReadyPanel = ({
       user => user.userName === currentUserId,
     );
     if (!currentPlayer) return;
-    sendMessage(`/app/channel/1/room/${roomId}/ready`, {
+    sendMessage(`/app/channel/${channelId}/room/${roomId}/ready`, {
       type: 'ready',
       username: currentUserId,
     });

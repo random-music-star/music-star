@@ -24,7 +24,7 @@ export const getServerSideProps: GetServerSideProps = async ({
   params,
 }) => {
   const userNickname = (await getCookie('userNickname', { req, res })) || '';
-  const { roomId } = params as { roomId: string };
+  const { roomId, channelId } = params as { roomId: string; channelId: string };
 
   if (!userNickname) {
     return {
@@ -39,6 +39,7 @@ export const getServerSideProps: GetServerSideProps = async ({
     props: {
       userNickname,
       roomId,
+      channelId,
     },
   };
 };
@@ -46,11 +47,13 @@ export const getServerSideProps: GetServerSideProps = async ({
 interface GameRoomServerProps {
   userNickname: string;
   roomId: string;
+  channelId: string;
 }
 
 export default function GameRoom({
   userNickname,
   roomId,
+  channelId,
 }: GameRoomServerProps) {
   const router = useRouter();
 
@@ -65,7 +68,7 @@ export default function GameRoom({
 
   useEffect(() => {
     if (isConnected) {
-      updateSubscription('game-room', roomId);
+      updateSubscription('game-room', channelId, roomId);
     }
   }, [isConnected]);
 
@@ -82,7 +85,7 @@ export default function GameRoom({
   }, []);
 
   const handleStartGame = () => {
-    sendMessage(`/app/channel/1/room/${roomId}/start`, {
+    sendMessage(`/app/channel/${channelId}/room/${roomId}/start`, {
       type: 'gameStart',
       request: null,
     });
@@ -108,6 +111,7 @@ export default function GameRoom({
               currentUserId={nickname}
               handleStartGame={handleStartGame}
               roomId={roomId}
+              channelId={channelId}
             />
             <GameExitButton />
           </div>
@@ -139,7 +143,7 @@ export default function GameRoom({
             <GameExitButton />
           </div>
         ) : (
-          <ScoreMap roomId={roomId} nickname={nickname} />
+          <ScoreMap roomId={roomId} nickname={nickname} channelId={channelId} />
         )}
       </AnimatePresence>
 
@@ -148,7 +152,11 @@ export default function GameRoom({
         <div className='flex max-h-screen min-h-screen w-[480px] max-w-[480px] flex-col flex-wrap items-center gap-5 bg-black/50 text-white'>
           {gameRoomInfo?.status === 'WAITING' && <RoomPannel />}
           <div className='w-full flex-1 overflow-hidden'>
-            <ChatBox currentUserId={nickname} roomId={roomId} />
+            <ChatBox
+              currentUserId={nickname}
+              roomId={roomId}
+              channelId={channelId}
+            />
           </div>
         </div>
       )}

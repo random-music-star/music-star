@@ -88,10 +88,6 @@ const ChannelList = () => {
       );
     });
 
-    eventSource.onmessage = event => {
-      console.log('기타 이벤트', event);
-    };
-
     eventSource.onerror = () => {
       retryCount++;
 

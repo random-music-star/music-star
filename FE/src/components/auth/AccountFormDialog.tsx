@@ -18,26 +18,21 @@ export default function AccountFormDialog() {
   const [activeTab, setActiveTab] = useState('login');
   const [signupUsername, setSignupUsername] = useState<string>('');
 
-  // 다이얼로그 상태가 변경될 때 호출
   useEffect(() => {
-    // 다이얼로그가 닫힐 때 상태 초기화
     if (!open) {
       setSignupUsername('');
       setActiveTab('login');
     }
   }, [open]);
 
-  // 탭 변경 처리
   const handleTabChange = (value: string) => {
     setActiveTab(value);
   };
 
-  // 성공 시 다이얼로그 닫기
   const handleSuccess = () => {
     setOpen(false);
   };
 
-  // 회원가입 성공 시 로그인 탭으로 전환 및 사용자명 저장
   const handleSignupSuccess = (username: string) => {
     setSignupUsername(username);
     setActiveTab('login');
@@ -62,7 +57,6 @@ export default function AccountFormDialog() {
             ACCOUNT
           </DialogTitle>
         </DialogHeader>
-
         <Tabs
           value={activeTab}
           onValueChange={handleTabChange}
@@ -82,16 +76,12 @@ export default function AccountFormDialog() {
               로그인
             </TabsTrigger>
           </TabsList>
-
-          {/* 로그인 탭 */}
           <TabsContent value='login' className='space-y-4 py-4 text-white'>
             <LoginForm
               onSuccess={handleSuccess}
               initialUsername={signupUsername}
             />
           </TabsContent>
-
-          {/* 회원가입 탭 */}
           <TabsContent value='signup' className='space-y-4 py-4 text-white'>
             <SignupForm onSuccess={handleSignupSuccess} />
           </TabsContent>

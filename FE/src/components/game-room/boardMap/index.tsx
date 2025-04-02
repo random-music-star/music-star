@@ -49,12 +49,10 @@ const footholderRatios: FootholderPosition[] = [
   { xRatio: 0.92, yRatio: 0.14, size: 2 },
 ];
 
-// 이벤트 오버레이 컴포넌트
 const EventOverlay = ({ eventType }: { eventType: EventType }) => {
   const [show, setShow] = useState(true);
 
   useEffect(() => {
-    // 이벤트 발생 시 1.5초 후 사라짐
     const timer = setTimeout(() => setShow(false), 1500);
     return () => clearTimeout(timer);
   }, [eventType]);
@@ -96,7 +94,6 @@ const GameBoardMap = () => {
   const animationInProgressRef = useRef(false);
   const prevBoardInfoRef = useRef<Record<string, number>>({});
 
-  // 윈도우 크기 감지
   useEffect(() => {
     const handleResize = () => {
       setWindowSize({
@@ -109,7 +106,6 @@ const GameBoardMap = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // scores가 변경되면 캐릭터 이동 처리
   useEffect(() => {
     if (Object.keys(scores).length === 0) return;
     const isSameBoardInfo = Object.entries(scores).every(
@@ -147,7 +143,6 @@ const GameBoardMap = () => {
     );
   }, [scores]);
 
-  // 참가자 정보가 로드되면 캐릭터 초기화
   useEffect(() => {
     if (participantInfo.length > 0) {
       const now = performance.now();
@@ -167,7 +162,6 @@ const GameBoardMap = () => {
     }
   }, [participantInfo]);
 
-  // 애니메이션 루프
   useEffect(() => {
     let animationId: number;
     let lastTimestamp = 0;
@@ -209,7 +203,6 @@ const GameBoardMap = () => {
     return () => cancelAnimationFrame(animationId);
   }, [animationTime]);
 
-  // 보간 함수: 캐릭터 이동 경로 계산
   const interpolatePosition = (
     fromPos: FootholderPosition,
     toPos: FootholderPosition,
@@ -241,8 +234,6 @@ const GameBoardMap = () => {
   return (
     <div key={renderKey} className='game-board'>
       {eventType && <EventOverlay eventType={eventType} />}
-
-      {/* 발판 렌더링 */}
       {footholderRatios.map((position, index) => {
         const leftSectionWidth = windowSize.width * 0.75;
         const baseSize = Math.min(48, leftSectionWidth * 0.08);

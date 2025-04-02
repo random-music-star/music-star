@@ -19,7 +19,6 @@ export function useRoomApi({ mode, roomId, onSuccess }: UseRoomApiProps) {
 
   const submitForm = async (data: RoomFormValues) => {
     setLoading(true);
-    console.log('폼 제출 데이터:', data);
 
     const requestData = formToApiData(
       data,
@@ -28,11 +27,6 @@ export function useRoomApi({ mode, roomId, onSuccess }: UseRoomApiProps) {
 
     try {
       if (mode === 'create') {
-        console.log('방 생성 요청 전송:', {
-          url: `${process.env.NEXT_PUBLIC_BASE_URL}/room`,
-          데이터: requestData,
-        });
-
         const response = await axios.post(
           `${process.env.NEXT_PUBLIC_BASE_URL}/room`,
           requestData,
@@ -44,16 +38,9 @@ export function useRoomApi({ mode, roomId, onSuccess }: UseRoomApiProps) {
           },
         );
 
-        console.log('방 생성 응답 결과:', response.data);
         onSuccess(data, response.data.roomId);
       } else if (mode === 'edit' && roomId) {
-        console.log('방 수정 요청 전송:', {
-          url: `${process.env.NEXT_PUBLIC_BASE_URL}/room`,
-          방식: 'PATCH',
-          데이터: requestData,
-        });
-
-        const response = await axios.patch(
+        await axios.patch(
           `${process.env.NEXT_PUBLIC_BASE_URL}/room`,
           requestData,
           {
@@ -63,23 +50,10 @@ export function useRoomApi({ mode, roomId, onSuccess }: UseRoomApiProps) {
             },
           },
         );
-
-        console.log('방 수정 응답 코드:', response.status);
-        console.log('방 수정 응답 결과:', response.data);
-
-        // 웹소켓을 통해 서버에서 업데이트된 방 정보 전달 받아 방 정보 수정될 예정
-
         onSuccess(data, roomId);
       }
-    } catch (error) {
-      console.error('API 오류:', error);
-      if (axios.isAxiosError(error)) {
-        console.log('API 오류 상세 정보:', {
-          상태: error.response?.status,
-          응답데이터: error.response?.data,
-          요청설정: error.config,
-        });
-      }
+    } catch {
+      //
     } finally {
       setLoading(false);
     }

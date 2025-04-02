@@ -76,7 +76,7 @@ const LobbyPage = ({ userNickname, channelId }: LobbyServerProps) => {
           <RoomList channelId={channelId} />
         </section>
         <section className='w-2/10 bg-black/50 text-white'>
-          <ChatBox />
+          <ChatBox channelId={channelId} />
         </section>
       </main>
       <Header channelId={channelId} />

@@ -76,8 +76,7 @@ export default function RoomList({
         setCurrentPage(data.number || 0);
         setTotalPages(data.totalPages || 1);
         setIsLoading(false);
-      } catch (error) {
-        console.error('초기 방 목록 가져오기 오류:', error);
+      } catch {
         setIsLoading(false);
       }
     };
@@ -85,7 +84,6 @@ export default function RoomList({
     fetchInitialRooms();
   }, [channelId, initialCurrentPage, pageSize, router.query.page]);
 
-  // 페이지 전환 시 URL 업데이트 및 GET 요청 처리
   const handlePageChange = async (newPage: number) => {
     try {
       setIsLoading(true);
@@ -115,8 +113,7 @@ export default function RoomList({
       setCurrentPage(data.pageable?.pageNumber || newPage);
       setTotalPages(data.totalPages || 1);
       setIsLoading(false);
-    } catch (error) {
-      console.error('방 목록 가져오기 오류:', error);
+    } catch {
       setIsLoading(false);
     }
   };
@@ -133,8 +130,7 @@ export default function RoomList({
 
         data = JSON.parse(event.data);
         return data;
-      } catch (error) {
-        console.error(`${eventName} 이벤트 처리 오류:`, error);
+      } catch {
         return null;
       }
     },

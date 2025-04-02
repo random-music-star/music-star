@@ -42,7 +42,6 @@ export default function LoginForm({
   const { userLogin } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
 
-  // 로그인 폼
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginFormSchema),
     defaultValues: {
@@ -51,33 +50,24 @@ export default function LoginForm({
     },
   });
 
-  // initialUsername이 변경되면 폼 업데이트
   useEffect(() => {
     if (initialUsername) {
       form.setValue('username', initialUsername);
     }
   }, [initialUsername, form]);
 
-  // 로그인 제출 핸들러
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
 
     try {
       await userLogin(data);
       form.reset();
-
-      // 성공은 toast로만 표시
       toast.success('로그인 성공', {
         description: '환영합니다!',
       });
 
-      // 성공 콜백 호출
       onSuccess?.();
-    } catch (error) {
-      console.error('로그인 실패:', error);
-      // 에러는 콘솔에만 로깅하고 사용자에게는 표시하지 않음
-
-      // 에러 상황에서도 폼 필드 리셋하지만 username은 유지
+    } catch {
       const username = form.getValues('username');
       form.reset({ username, password: '' });
     } finally {

@@ -7,7 +7,7 @@ import { usePublicChatStore } from '@/stores/websocket/usePublicChatStore';
 import { useWebSocketStore } from '@/stores/websocket/useWebsocketStore';
 import { Chatting } from '@/types/websocket';
 
-export default function ChatBox() {
+export default function ChatBox({ channelId }: { channelId: string }) {
   const { nickname } = useNicknameStore();
   const [newMessage, setNewMessage] = useState<string>('');
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -18,7 +18,7 @@ export default function ChatBox() {
 
   useEffect(() => {
     if (isConnected && !checkSubscription('channel')) {
-      updateSubscription('channel');
+      updateSubscription('channel', channelId);
     }
   }, [isConnected]);
 
@@ -38,7 +38,7 @@ export default function ChatBox() {
       message: newMessage,
     };
 
-    sendMessage('/app/channel/1', {
+    sendMessage(`/app/channel/${channelId}`, {
       type: 'chatting',
       request: newChatting,
     });
