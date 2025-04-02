@@ -35,7 +35,7 @@ export default function Home({ userNickname }: HomeServerProps) {
 
   return (
     <div
-      className={`flex min-h-screen flex-col items-center bg-[url('/background.svg')] bg-cover bg-center p-12`}
+      className={`flex max-h-screen min-h-screen flex-col items-center bg-[url('/background.svg')] bg-cover bg-center p-12`}
     >
       <motion.main
         className='flex text-center'
@@ -87,7 +87,7 @@ export default function Home({ userNickname }: HomeServerProps) {
           </div>
         )}
 
-        <div className='w-full px-12'>
+        <div className='w-full'>
           <ChannelList />
         </div>
       </motion.div>

@@ -121,8 +121,7 @@ const ChannelList = () => {
   if (!isSSEConnected || !channelData.length) return <>서버와 연결중...</>;
 
   return (
-    <div className='relative flex w-full'>
-      {/* 흰 건반 */}
+    <div className='relative mx-auto flex w-full max-w-5xl'>
       {pianoKeys.map((p, index) => {
         if (p.key !== 'w') return null;
 
@@ -132,8 +131,10 @@ const ChannelList = () => {
           <motion.div
             key={`white-${index}`}
             className={cn(
-              'relative flex h-70 w-[10%] cursor-pointer flex-col items-center justify-end rounded-lg border border-gray-300 bg-white transition-transform',
-              isActive ? 'hover:bg-gray-100' : 'opacity-50',
+              'relative flex h-64 w-[10%] flex-col items-center justify-end rounded-lg border border-gray-300 bg-white transition-transform',
+              isActive
+                ? 'cursor-pointer hover:bg-gray-100'
+                : 'cursor-not-allowed opacity-50',
             )}
             whileHover={isActive ? { scale: 1.05 } : {}}
             whileTap={isActive ? { scale: 0.95 } : {}}
@@ -143,15 +144,15 @@ const ChannelList = () => {
           >
             {isActive && (
               <>
-                <div className='mb-4 flex flex-col items-center justify-center font-bold text-gray-700'>
-                  <span className='text-lg'>채널</span>
-                  <span className='min-w-4 rounded-3xl bg-purple-500 p-[5px] text-center text-lg text-white lg:min-w-16'>
+                <div className='mb-3 flex flex-col items-center justify-center font-bold text-gray-700'>
+                  <span className='text-base'>채널</span>
+                  <span className='min-w-4 rounded-3xl bg-purple-500 p-1 text-center text-sm text-white lg:min-w-12'>
                     {channelData[p.channelIndex].channelId}
                   </span>
                 </div>
 
-                <div className='absolute flex w-full translate-y-14 flex-col items-center justify-center'>
-                  <div className='h-[15px] w-[90%] overflow-hidden rounded-2xl bg-purple-800/20'>
+                <div className='absolute flex w-full translate-y-12 flex-col items-center justify-center'>
+                  <div className='h-[12px] w-[85%] overflow-hidden rounded-2xl bg-purple-800/20'>
                     <div
                       className={cn(
                         channelCongestion(
@@ -166,7 +167,7 @@ const ChannelList = () => {
                       }}
                     ></div>
                   </div>
-                  <span>
+                  <span className='text-xs'>
                     {
                       channelCongestion(
                         channelData[p.channelIndex].playerCount,
@@ -194,7 +195,7 @@ const ChannelList = () => {
           <div
             key={`black-${index}`}
             className={cn(
-              'absolute z-10 h-1/2 w-[6%] rounded-b-lg bg-gray-900 transition-transform',
+              'absolute z-10 h-[45%] w-[6%] rounded-b-lg bg-gray-900 transition-transform',
             )}
             style={{
               left: `${leftOffsetPercent}%`,

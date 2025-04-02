@@ -218,7 +218,7 @@ const JumpingAnimation: React.FC = () => {
     const t = easeInOut(character.moveProgress);
     const x = fromPos.x + (toPos.x - fromPos.x) * t;
     const baseY = fromPos.y - 10;
-    const jumpHeight = 100;
+    const jumpHeight = 80;
     const y = baseY - jumpHeight * Math.sin(Math.PI * t);
 
     return {
