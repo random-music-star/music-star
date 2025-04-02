@@ -5,9 +5,11 @@ import ScoreRoundInformation from './ScoreRoundInformation';
 const ScoreMap = ({
   nickname,
   roomId,
+  channelId,
 }: {
   nickname: string;
   roomId: string;
+  channelId: string;
 }) => {
   return (
     <div className='flex h-full w-full'>
@@ -20,7 +22,11 @@ const ScoreMap = ({
 
         {/* 하단: 채팅 - 고정 높이 */}
         <div className='h-[calc(100vh-380px)] w-full p-2'>
-          <ScoreChatBox currentUserId={nickname} roomId={roomId} />
+          <ScoreChatBox
+            currentUserId={nickname}
+            roomId={roomId}
+            channelId={channelId}
+          />
         </div>
       </div>
 

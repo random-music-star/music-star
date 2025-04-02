@@ -14,7 +14,11 @@ export interface WebSocketState {
   connectWebSocket: () => void;
   disconnectWebSocket: () => void;
   checkSubscription: (subscriptiontype: string) => boolean;
-  updateSubscription: (subscriptionType: string, roomId?: string) => void;
+  updateSubscription: (
+    subscriptionType: string,
+    channelId: string,
+    roomId?: string,
+  ) => void;
   sendMessage: (destination: string, payload?: unknown) => void;
   isConnected: boolean;
 }

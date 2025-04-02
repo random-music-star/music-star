@@ -47,11 +47,6 @@ export function socketToFormData(
     maxPlayer: gameRoomInfo.maxPlayer || 4, // 추가됨
   };
 
-  console.log('소켓 데이터를 폼 데이터로 변환:', {
-    원본_게임방정보: gameRoomInfo,
-    변환된_폼데이터: formData,
-  });
-
   return formData;
 }
 
@@ -89,11 +84,6 @@ export function formToApiData(
       maxGameRound: formData.maxGameRound, // 추가됨
       maxPlayer: formData.maxPlayer, // 추가됨
     };
-
-    console.log('폼 데이터를 API 요청 데이터로 변환:', {
-      원본_폼데이터: formData,
-      변환된_요청데이터: data,
-    });
 
     return data;
   }

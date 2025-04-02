@@ -55,7 +55,11 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
     return !!subscriptions[subscriptionType];
   },
 
-  updateSubscription: (subscriptionType: string, roomId?: string) => {
+  updateSubscription: (
+    subscriptionType: string,
+    channelId: string,
+    roomId?: string,
+  ) => {
     const { client, subscriptions } = get();
 
     if (!client || !client.connected) return;
@@ -72,7 +76,7 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
 
     if (subscriptionType === 'channel') {
       newSubscriptions['channel'] = client.subscribe(
-        `/topic/channel/1`,
+        `/topic/channel/${channelId}`,
         message => {
           const { response } = JSON.parse(message.body);
           usePublicChatStore.getState().setPublicChattings(response);
@@ -104,7 +108,7 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
       );
 
       newSubscriptions['game-room'] = client.subscribe(
-        `/topic/channel/1/room/${roomId}`,
+        `/topic/channel/${channelId}/room/${roomId}`,
         message => {
           const { type, response } = JSON.parse(message.body);
 

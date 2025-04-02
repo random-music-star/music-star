@@ -17,7 +17,6 @@ import {
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/hooks/useAuth';
 
-// 스키마 정의
 const signupFormSchema = z.object({
   username: z
     .string()
@@ -39,7 +38,6 @@ export default function SignupForm({ onSuccess }: SignupFormProps) {
   const { signUp } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
 
-  // 회원가입 폼
   const form = useForm<SignupFormValues>({
     resolver: zodResolver(signupFormSchema),
     defaultValues: {
@@ -48,28 +46,17 @@ export default function SignupForm({ onSuccess }: SignupFormProps) {
     },
   });
 
-  // 회원가입 제출 핸들러
   const onSubmit = async (data: SignupFormValues) => {
     setIsLoading(true);
 
     try {
       await signUp(data);
-
-      // 성공은 toast로만 표시
       toast.success('회원가입 성공', {
         description: '로그인하여 시작하세요!',
       });
-
-      // 성공 콜백 호출 (username 전달)
       onSuccess?.(data.username);
-
-      // 폼 리셋은 성공 콜백 후에 수행
       form.reset();
-    } catch (error) {
-      console.error('회원가입 실패:', error);
-      // 에러는 콘솔에만 로깅하고 사용자에게는 표시하지 않음
-
-      // 에러 상황에서도 폼 필드 리셋
+    } catch {
       form.reset();
     } finally {
       setIsLoading(false);

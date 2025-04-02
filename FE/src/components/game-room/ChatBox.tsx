@@ -8,9 +8,10 @@ import { useWebSocketStore } from '@/stores/websocket/useWebsocketStore';
 interface ChatBoxProps {
   currentUserId: string;
   roomId: string;
+  channelId: string;
 }
 
-const ChatBox = ({ currentUserId, roomId }: ChatBoxProps) => {
+const ChatBox = ({ currentUserId, roomId, channelId }: ChatBoxProps) => {
   const [inputValue, setInputValue] = useState('');
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
@@ -29,7 +30,7 @@ const ChatBox = ({ currentUserId, roomId }: ChatBoxProps) => {
 
     if (!inputValue.trim()) return;
 
-    sendMessage(`/app/channel/1/room/${roomId}`, {
+    sendMessage(`/app/channel/${channelId}/room/${roomId}`, {
       type: 'gameChat',
       request: {
         sender: currentUserId,
