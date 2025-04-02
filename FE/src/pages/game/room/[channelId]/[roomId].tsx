@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 
 import { getCookie } from 'cookies-next';
-import { AnimatePresence } from 'framer-motion';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
 
@@ -12,6 +11,7 @@ import GamePlaySection from '@/components/game-room/gamePlaySection';
 import RoomPannel from '@/components/game-room/gameRoomInfo/RoomPannel';
 import ReadyPanel from '@/components/game-room/gameWait/ReadyPanel';
 import ScoreMap from '@/components/game-room/scoreMap';
+import WaitingRoom from '@/components/game-room/scoreMap/ScoreWaiting';
 import { cn } from '@/lib/utils';
 import { useNicknameStore } from '@/stores/auth/useNicknameStore';
 import { useGameInfoStore } from '@/stores/websocket/useGameRoomInfoStore';
@@ -98,59 +98,42 @@ export default function GameRoom({
   // roomInfo가 Board 형식인지 확인
   const isBoardFormat = gameRoomInfo?.format === 'BOARD';
 
+  // 스코어 형식인지 확인
+
   // 게임 대기 중인지 확인
   const isWaiting = gameRoomInfo === null || gameRoomInfo.status === 'WAITING';
 
-  return (
-    <div className='flex flex-1 justify-between bg-[url(/background.svg)] bg-cover bg-center'>
-      <AnimatePresence mode='wait'>
-        {isWaiting ? (
-          // 대기 화면
+  // 대기 화면 렌더링
+  if (isWaiting) {
+    if (gameRoomInfo?.format === 'GENERAL') {
+      return (
+        <div className='flex flex-1 justify-between bg-[url(/background.svg)] bg-cover bg-center'>
           <div className='relative w-full'>
-            <ReadyPanel
+            <WaitingRoom
               currentUserId={nickname}
               handleStartGame={handleStartGame}
               roomId={roomId}
               channelId={channelId}
             />
-            <GameExitButton />
           </div>
-        ) : isBoardFormat ? (
-          // Board 형식 게임
-          <div className='relative w-full'>
-            <div className='relative h-screen w-full overflow-hidden'>
-              <div
-                className={cn(
-                  gameState === 'SCORE_UPDATE'
-                    ? '-translate-y-full'
-                    : 'translate-y-0',
-                  'transition-transform duration-700 ease-in-out',
-                )}
-              >
-                <GamePlaySection />
-              </div>
-              <div
-                className={cn(
-                  'absolute top-0 left-0 h-full w-full transition-transform duration-700 ease-in-out',
-                  gameState === 'SCORE_UPDATE'
-                    ? 'translate-y-0'
-                    : 'translate-y-full',
-                )}
-              >
-                <GameBoardMap />
-              </div>
-            </div>
-            <GameExitButton />
-          </div>
-        ) : (
-          <ScoreMap roomId={roomId} nickname={nickname} channelId={channelId} />
-        )}
-      </AnimatePresence>
+        </div>
+      );
+    }
 
-      {/* 오른쪽 사이드바 - Board 형식이거나 대기 중일 때만 표시 */}
-      {(isBoardFormat || isWaiting) && (
+    return (
+      <div className='flex flex-1 justify-between bg-[url(/background.svg)] bg-cover bg-center'>
+        <div className='relative w-full'>
+          <ReadyPanel
+            currentUserId={nickname}
+            handleStartGame={handleStartGame}
+            roomId={roomId}
+            channelId={channelId}
+          />
+          <GameExitButton />
+        </div>
+
         <div className='flex max-h-screen min-h-screen w-[480px] max-w-[480px] flex-col flex-wrap items-center gap-5 bg-black/50 text-white'>
-          {gameRoomInfo?.status === 'WAITING' && <RoomPannel />}
+          <RoomPannel />
           <div className='w-full flex-1 overflow-hidden'>
             <ChatBox
               currentUserId={nickname}
@@ -159,7 +142,55 @@ export default function GameRoom({
             />
           </div>
         </div>
-      )}
+      </div>
+    );
+  }
+
+  if (isBoardFormat) {
+    return (
+      <div className='flex flex-1 justify-between bg-[url(/background.svg)] bg-cover bg-center'>
+        <div className='relative w-full'>
+          <div className='relative h-screen w-full overflow-hidden'>
+            <div
+              className={cn(
+                gameState === 'SCORE_UPDATE'
+                  ? '-translate-y-full'
+                  : 'translate-y-0',
+                'transition-transform duration-700 ease-in-out',
+              )}
+            >
+              <GamePlaySection />
+            </div>
+            <div
+              className={cn(
+                'absolute top-0 left-0 h-full w-full transition-transform duration-700 ease-in-out',
+                gameState === 'SCORE_UPDATE'
+                  ? 'translate-y-0'
+                  : 'translate-y-full',
+              )}
+            >
+              <GameBoardMap />
+            </div>
+          </div>
+          <GameExitButton />
+        </div>
+
+        <div className='flex max-h-screen min-h-screen w-[480px] max-w-[480px] flex-col flex-wrap items-center gap-5 bg-black/50 text-white'>
+          <div className='w-full flex-1 overflow-hidden'>
+            <ChatBox
+              currentUserId={nickname}
+              roomId={roomId}
+              channelId={channelId}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className='flex flex-1 justify-between bg-[url(/background.svg)] bg-cover bg-center'>
+      <ScoreMap roomId={roomId} nickname={nickname} channelId={channelId} />
     </div>
   );
 }

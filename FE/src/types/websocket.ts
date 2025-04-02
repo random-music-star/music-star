@@ -11,7 +11,7 @@ export type Mode = 'FULL' | 'DOUBLE' | 'AI';
 export interface WebSocketState {
   client: Client | null;
   subscriptions: Record<string, StompSubscription | null>;
-  connectWebSocket: () => void;
+  connectWebSocket: (nickname: string) => void;
   disconnectWebSocket: () => void;
   checkSubscription: (subscriptiontype: string) => boolean;
   updateSubscription: (

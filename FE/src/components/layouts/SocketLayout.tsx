@@ -1,5 +1,6 @@
 import { ReactNode, useEffect } from 'react';
 
+import { useNicknameStore } from '@/stores/auth/useNicknameStore';
 import { useWebSocketStore } from '@/stores/websocket/useWebsocketStore';
 
 interface SocketLayoutProps {
@@ -8,9 +9,10 @@ interface SocketLayoutProps {
 const SocketLayout = ({ children }: SocketLayoutProps) => {
   const { connectWebSocket, disconnectWebSocket, isConnected } =
     useWebSocketStore();
+  const { nickname } = useNicknameStore();
 
   useEffect(() => {
-    if (!isConnected) connectWebSocket();
+    if (!isConnected) connectWebSocket(nickname);
 
     return () => disconnectWebSocket();
   }, []);

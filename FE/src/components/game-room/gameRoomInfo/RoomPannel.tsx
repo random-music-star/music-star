@@ -1,14 +1,8 @@
 import Image from 'next/image';
 
-import { useGameInfoStore } from '@/stores/websocket/useGameRoomInfoStore';
-
 import RoomInfo from './RoomInfo';
 
 const RoomPannel = () => {
-  const { gameRoomInfo } = useGameInfoStore();
-
-  if (!gameRoomInfo) return;
-
   return (
     <div className='relative aspect-square w-full'>
       <div className='relative h-full w-full'>

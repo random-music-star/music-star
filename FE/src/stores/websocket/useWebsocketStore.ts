@@ -26,6 +26,9 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
     const client = new Client({
       webSocketFactory: () =>
         new WebSocket(`${process.env.NEXT_PUBLIC_WEBSOCKET_URL}`),
+      connectHeaders: {
+        Authorization: 'Bearer your-token-here',
+      },
       reconnectDelay: 5000,
       heartbeatIncoming: 4000,
       heartbeatOutgoing: 4000,
