@@ -41,7 +41,9 @@ export default function AccountFormDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className='bg-gray-900'>로그인 / 회원가입</Button>
+        <Button className='rounded-2xl bg-purple-700/90 hover:bg-purple-700/70'>
+          로그인 / 회원가입
+        </Button>
       </DialogTrigger>
       <DialogContent
         showCloseButton={false}

@@ -72,7 +72,7 @@ export default function Home({ userNickname }: HomeServerProps) {
             </span>
             <Button
               variant='custom'
-              className='absolute -right-26 text-purple-900/40 hover:text-purple-900/60'
+              className='cursor-pointer rounded-2xl bg-[#8352D1] px-3 py-1 hover:bg-purple-700/70'
               onClick={logout}
             >
               로그아웃
@@ -81,8 +81,11 @@ export default function Home({ userNickname }: HomeServerProps) {
         ) : (
           <div className='my-4 flex items-center justify-center gap-6'>
             <AccountFormDialog />
-            <Button className='bg-gray-900' onClick={guestLogin}>
-              원클릭 비회원 로그인
+            <Button
+              className='rounded-2xl bg-purple-700/90 hover:bg-purple-700/70'
+              onClick={guestLogin}
+            >
+              비회원 로그인
             </Button>
           </div>
         )}
