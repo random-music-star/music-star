@@ -1,6 +1,7 @@
 // GameBoardMap.jsx
 import { useEffect, useRef, useState } from 'react';
 
+import { cn } from '@/lib/utils';
 import {
   EventType,
   useGameBubbleStore,
@@ -52,32 +53,57 @@ const footholderRatios: FootholderPosition[] = [
 ];
 
 const EventOverlay = ({ eventType }: { eventType: EventType }) => {
-  const [show, setShow] = useState(true);
-  const [rotation, setRotation] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const mountedRef = useRef(false);
+  const eventTypeRef = useRef<EventType | null>(null);
 
   useEffect(() => {
-    if (eventType !== 'MARK') {
-      setRotation(true);
+    eventTypeRef.current = eventType;
+
+    if (mountedRef.current) {
+      setVisible(false);
+      setTimeout(() => {
+        setVisible(true);
+      }, 100);
+    } else {
+      mountedRef.current = true;
+      setVisible(true);
     }
-    setShow(true);
-    const timer = setTimeout(() => {
-      setShow(false);
-      setRotation(false);
-    }, 1500);
+
+    const timer = setTimeout(
+      () => {
+        setVisible(false);
+      },
+      eventType === 'MARK' ? 1500 : 2000,
+    );
+
     return () => clearTimeout(timer);
   }, [eventType]);
 
-  if (!show || !eventType) return null;
+  if (!visible || !eventType) return null;
 
   return (
-    <div className={`event-overlay ${rotation ? 'rotate-y-180' : ''}`}>
-      {/* 앞면 */}
-      <div className='flip-card-front'>
-        <EventCard eventType={'MARK'} />
-      </div>
-      {/* 뒷면 */}
-      <div className='flip-card-back'>
-        <EventCard eventType={eventType} />
+    <div className='event-overlay'>
+      <div
+        className={cn('flip-card-container w-full', {
+          'animate-scale-in animate-flip': eventType !== 'MARK',
+          'animate-scale-in': eventType === 'MARK',
+        })}
+        style={{ transformStyle: 'preserve-3d' }}
+      >
+        <div
+          className='flip-card-front'
+          style={{ backfaceVisibility: 'hidden' }}
+        >
+          <EventCard eventType={'MARK'} />
+        </div>
+
+        <div
+          className='flip-card-back'
+          style={{ backfaceVisibility: 'hidden' }}
+        >
+          <EventCard eventType={eventType} />
+        </div>
       </div>
     </div>
   );
