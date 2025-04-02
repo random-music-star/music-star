@@ -4,6 +4,7 @@ import { create } from 'zustand';
 import { WebSocketState } from '@/types/websocket';
 
 import { useNicknameStore } from '../auth/useNicknameStore';
+import { useSoundEventStore } from '../useSoundEventStore';
 import { useGameBubbleStore } from './useGameBubbleStore';
 import { useGameChatStore } from './useGameChatStore';
 import { useParticipantInfoStore } from './useGameParticipantStore';
@@ -74,6 +75,7 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
     usePublicChatStore.getState().resetPublicChatStore();
     useGameWinnerStore.getState().resetWinnerStore();
     useParticipantInfoStore.getState().resetParticipantInfo();
+    useSoundEventStore.getState().setSoundEvent(null);
 
     const newSubscriptions: Record<string, StompSubscription> = {};
 
@@ -101,6 +103,7 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
       const winnerStore = useGameWinnerStore.getState();
       const gameBubbleStore = useGameBubbleStore.getState();
       const roundHint = useRoundHintStore.getState();
+      const soundEventStore = useSoundEventStore.getState();
 
       newSubscriptions['messageQueue'] = client.subscribe(
         `/user/queue/system`,
@@ -127,10 +130,12 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
             roundHint.updateGameHint(null);
 
             gameStateStore.setGameState('ROUND_INFO');
+            soundEventStore.setSoundEvent('ROULETTE');
           }
 
           if (type === 'roundOpen') {
             gameStateStore.setGameState('ROUND_OPEN');
+            soundEventStore.setSoundEvent('ROULETTE_RESULT');
           }
 
           if (type === 'roundStart') {
@@ -211,6 +216,7 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
           if (type === 'move') {
             score.updateScore(response.username, response.position);
             gameStateStore.setGameState('SCORE_UPDATE');
+            // soundEventStore.setSoundEvent('JUMP');
           }
 
           if (type === 'refuseEnter') {
@@ -226,6 +232,7 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
             const { trigger } = response;
             gameBubbleStore.setEventType('MARK');
             gameBubbleStore.setTriggerUser(trigger);
+            soundEventStore.setSoundEvent('EVENT_CARD');
           }
 
           if (type === 'event') {
