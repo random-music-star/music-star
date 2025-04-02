@@ -95,58 +95,38 @@ export default function GameRoom({
     router.push('/game/lobby');
   }
 
-  // roomInfo가 Board 형식인지 확인
   const isBoardFormat = gameRoomInfo?.format === 'BOARD';
-
-  // 스코어 형식인지 확인
-
-  // 게임 대기 중인지 확인
   const isWaiting = gameRoomInfo === null || gameRoomInfo.status === 'WAITING';
 
-  // 대기 화면 렌더링
-  if (isWaiting) {
-    if (gameRoomInfo?.format === 'GENERAL') {
+  // BOARD 포맷
+  if (isBoardFormat) {
+    if (isWaiting) {
       return (
         <div className='flex flex-1 justify-between bg-[url(/background.svg)] bg-cover bg-center'>
           <div className='relative w-full'>
-            <WaitingRoom
+            <ReadyPanel
               currentUserId={nickname}
               handleStartGame={handleStartGame}
               roomId={roomId}
               channelId={channelId}
             />
+            <GameExitButton />
+          </div>
+
+          <div className='flex max-h-screen min-h-screen w-[480px] max-w-[480px] flex-col flex-wrap items-center gap-5 bg-black/50 text-white'>
+            <RoomPannel />
+            <div className='w-full flex-1 overflow-hidden'>
+              <ChatBox
+                currentUserId={nickname}
+                roomId={roomId}
+                channelId={channelId}
+              />
+            </div>
           </div>
         </div>
       );
     }
 
-    return (
-      <div className='flex flex-1 justify-between bg-[url(/background.svg)] bg-cover bg-center'>
-        <div className='relative w-full'>
-          <ReadyPanel
-            currentUserId={nickname}
-            handleStartGame={handleStartGame}
-            roomId={roomId}
-            channelId={channelId}
-          />
-          <GameExitButton />
-        </div>
-
-        <div className='flex max-h-screen min-h-screen w-[480px] max-w-[480px] flex-col flex-wrap items-center gap-5 bg-black/50 text-white'>
-          <RoomPannel />
-          <div className='w-full flex-1 overflow-hidden'>
-            <ChatBox
-              currentUserId={nickname}
-              roomId={roomId}
-              channelId={channelId}
-            />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (isBoardFormat) {
     return (
       <div className='flex flex-1 justify-between bg-[url(/background.svg)] bg-cover bg-center'>
         <div className='relative w-full'>
@@ -188,9 +168,43 @@ export default function GameRoom({
     );
   }
 
-  return (
-    <div className='flex flex-1 justify-between bg-[url(/background.svg)] bg-cover bg-center'>
-      <ScoreMap roomId={roomId} nickname={nickname} channelId={channelId} />
-    </div>
-  );
+  // GENERAL 또는 SCORE 포맷
+  if (gameRoomInfo?.format === 'GENERAL') {
+    return (
+      <div className='flex flex-1 justify-between bg-[url(/background.svg)] bg-cover bg-center'>
+        <div className='relative w-full'>
+          <div className='relative h-screen w-full overflow-hidden'>
+            {/* 대기 화면 (WaitingRoom) */}
+            <div
+              className={cn(
+                isWaiting ? 'translate-y-0' : '-translate-y-full',
+                'transition-transform duration-700 ease-in-out',
+              )}
+            >
+              <WaitingRoom
+                currentUserId={nickname}
+                handleStartGame={handleStartGame}
+                roomId={roomId}
+                channelId={channelId}
+              />
+            </div>
+
+            {/* 게임 화면 (ScoreMap) */}
+            <div
+              className={cn(
+                'absolute top-0 left-0 h-full w-full transition-transform duration-700 ease-in-out',
+                isWaiting ? 'translate-y-full' : 'translate-y-0',
+              )}
+            >
+              <ScoreMap
+                roomId={roomId}
+                nickname={nickname}
+                channelId={channelId}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 }
