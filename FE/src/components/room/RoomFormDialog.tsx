@@ -45,6 +45,7 @@ export default function RoomFormDialog({
 
   // 초기 데이터를 저장할 ref
   const initialDataRef = useRef<InitialDataType | null>(null);
+  const { channelId } = router.query;
 
   useEffect(() => {
     if (isOpen && mode === 'edit' && gameRoomInfo && !initialDataRef.current) {
@@ -62,8 +63,9 @@ export default function RoomFormDialog({
 
   // 방 생성 또는 수정 성공 핸들러
   const handleSuccess = (_data: RoomFormValues, newRoomId?: string) => {
+    const currentChannelId = channelId || '1';
     if (mode === 'create') {
-      router.push(`/game/room/1/${newRoomId}`);
+      router.push(`/game/room/${currentChannelId}/${newRoomId}`);
     } else if (mode === 'edit') {
       // 방 정보는 소켓 연결을 통해 자동으로 업데이트될 거라 없음
     }

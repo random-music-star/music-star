@@ -5,7 +5,7 @@ import { GetServerSideProps } from 'next';
 
 import ChatBox from '@/components/lobby/ChatBox';
 import CreateRoomButton from '@/components/lobby/CreateRoomButton';
-import Header from '@/components/lobby/Footer';
+import Header from '@/components/lobby/Header';
 import RoomList from '@/components/lobby/RoomList';
 import { useNicknameStore } from '@/stores/auth/useNicknameStore';
 import { useChannelStore } from '@/stores/lobby/useChannelStore';
@@ -67,19 +67,21 @@ const LobbyPage = ({ userNickname, channelId }: LobbyServerProps) => {
 
   return (
     <div className='flex h-screen flex-col bg-[url(/background.svg)] bg-cover bg-center'>
+      <Header channelId={channelId} />
       <main className='flex flex-1 overflow-hidden'>
-        <section className='m-10 flex flex-1 flex-col bg-gradient-to-r from-[#4F719C]/80 to-[#5F4EA0]/80 p-6'>
+        <section className='m-10 flex flex-1 flex-col rounded-2xl bg-gradient-to-r from-[#4F719C]/80 to-[#5F4EA0]/80 p-6'>
           <div className='mb-6 flex items-center justify-between'>
             <h1 className='text-2xl font-bold text-white'>게임 방 목록</h1>
             <CreateRoomButton />
           </div>
-          <RoomList channelId={channelId} />
+          <div className='neon-scrollbar flex-1 items-center overflow-y-auto'>
+            <RoomList channelId={channelId} />
+          </div>
         </section>
         <section className='w-2/10 bg-black/50 text-white'>
           <ChatBox channelId={channelId} />
         </section>
       </main>
-      <Header channelId={channelId} />
     </div>
   );
 };

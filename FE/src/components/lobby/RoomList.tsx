@@ -393,7 +393,7 @@ export default function RoomList({
   const isLastPage = currentPage === totalPages - 1 || totalPages === 0;
 
   return (
-    <div className='flex items-center justify-center'>
+    <div className='flex h-full items-center justify-center overflow-y-auto'>
       {isLoading ? (
         // 로딩 중
         <div className='flex items-center justify-center py-12'>

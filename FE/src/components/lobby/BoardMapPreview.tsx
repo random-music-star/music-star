@@ -285,7 +285,7 @@ const BoardMapPreview = () => {
 
   // 발판 크기를 컨테이너 크기에 비례하도록 계산
   const getFootholderSize = () => {
-    const size = Math.max(20, Math.min(50, containerSize.width * 0.15));
+    const size = Math.max(20, Math.min(50, containerSize.width * 0.18));
     return { width: size, height: size };
   };
 
