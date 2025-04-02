@@ -169,6 +169,18 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
             roundHint.updateGameHint(response);
           }
 
+          if (type === 'gameStart') {
+            gameStateStore.setGameState('ROUND_INFO');
+            const initialBoard = useParticipantInfoStore
+              .getState()
+              .participantInfo.reduce(
+                (acc, participant) => ({ ...acc, [participant.userName]: 0 }),
+                {} as Record<string, number>,
+              );
+
+            score.setScores(initialBoard);
+          }
+
           if (type === 'roomInfo') {
             gameRoomStore.setGameInfo(response);
 
