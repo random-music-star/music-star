@@ -56,27 +56,18 @@ export default function RoomItem({ room }: RoomItemProps) {
 
   // 년도 표시 함수
   const renderYearOptions = () => {
-    const allYears = [
-      1970, 1980, 1990, 2000, 2010, 2020, 2021, 2022, 2023, 2024,
-    ];
     const selectedYears = room.years || [];
 
     return (
-      <div className='mr-2 flex flex-col gap-1 text-[8px]'>
-        {allYears.map(year => {
-          const isSelected = selectedYears.includes(year);
-          const needSuffix = year < 2020;
-
-          return (
-            <span
-              key={year}
-              className={`rounded px-1 ${isSelected ? 'font-medium text-purple-600' : 'text-gray-700'}`}
-            >
-              {year}
-              {needSuffix ? 's' : ''}
-            </span>
-          );
-        })}
+      <div className='mr-1 flex flex-col text-[10%]'>
+        {selectedYears.map(year => (
+          <span
+            key={year}
+            className='rounded px-0.5 font-medium text-purple-600'
+          >
+            {year}
+          </span>
+        ))}
       </div>
     );
   };
@@ -84,18 +75,18 @@ export default function RoomItem({ room }: RoomItemProps) {
   return (
     <>
       <article
-        className='flex cursor-pointer flex-col'
+        className='flex h-full w-full cursor-pointer flex-col'
         onClick={handleRoomClick}
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => setIsHovering(false)}
       >
         {/* 상단 */}
-        <section className='relative flex w-full'>
+        <section className='relative w-full'>
           {/* CD 배치 */}
           <div
-            className='absolute top-[5%] left-[30%] z-0 aspect-square w-[55%]'
+            className='absolute top-[4%] left-[25%] z-0 aspect-square w-[55%]'
             style={{
-              transform: isHovering ? 'translateX(10%)' : 'translateX(0)',
+              transform: isHovering ? 'translateX(15%)' : 'translateX(5%)',
               transition: 'transform 0.5s ease-in-out',
             }}
           >
@@ -107,32 +98,32 @@ export default function RoomItem({ room }: RoomItemProps) {
                 animation: isHovering
                   ? 'spin 3s linear infinite'
                   : currentStatus === 'IN_PROGRESS'
-                    ? 'spin 10s linear infinite' // 게임 중일 경우 천천히 회전
-                    : 'none', // 대기 중일 경우 회전 없음
+                    ? 'spin 10s linear infinite'
+                    : 'none',
                 transition: 'all 0.7s ease-in-out',
               }}
             />
           </div>
 
-          {/* CD 케이스 (왼쪽 60%, CD 일부를 가림) */}
-          <div className='relative z-10 flex aspect-square w-4/5 flex-col justify-between bg-white p-2'>
+          {/* CD 케이스 (CD 일부를 가림) */}
+          <div className='relative z-10 flex aspect-square w-[60%] flex-col justify-between bg-white p-2 shadow-md'>
             {/* CD 케이스 상단 : 상태, 모드 */}
             <div className='flex w-full items-center justify-between'>
               {/* 방 상태 표시 */}
               <span
-                className={`rounded-full px-2 py-1 text-xs ${statusDisplay.className}`}
+                className={`rounded-full px-1 py-0.5 text-xs ${statusDisplay.className}`}
               >
                 {statusDisplay.text}
               </span>
               {/* 게임 모드 뱃지 */}
-              <div className='ml-2 flex flex-wrap justify-center gap-1'>
+              <div className='ml-1 flex flex-wrap justify-end gap-0.5'>
                 {room.gameModes &&
                   Array.isArray(room.gameModes) &&
                   room.gameModes.map(mode => (
                     <Badge
                       key={mode}
                       variant='outline'
-                      className={`rounded-full border px-2 text-xs ${modeBadgeVariants[mode] || defaultBadgeStyle}`}
+                      className={`rounded-full border px-1 text-xs ${modeBadgeVariants[mode] || defaultBadgeStyle}`}
                     >
                       {gameModeLabels[mode] || mode}
                     </Badge>
@@ -149,7 +140,7 @@ export default function RoomItem({ room }: RoomItemProps) {
               {/* CD 케이스 우측 : 맵, 인원 현황, 라운드 설정 값*/}
               <div className='relative flex w-full flex-col justify-center'>
                 {/* 선택한 맵 - 맵 형식에 따라 다른 컴포넌트 렌더링 */}
-                <div className='relative h-24 w-full overflow-hidden'>
+                <div className='relative h-3/5 w-full overflow-hidden rounded'>
                   {room.format === 'GENERAL' ? (
                     <GeneralMapPreview />
                   ) : (
@@ -158,9 +149,9 @@ export default function RoomItem({ room }: RoomItemProps) {
                 </div>
                 {/* 방 인원 */}
                 <div className='absolute right-0 bottom-0 flex justify-end'>
-                  <span className='mr-1 text-xs'>👨‍👩‍👦</span>
+                  <span className='mr-0.5 text-[9px]'>👨‍👩‍👦</span>
                   <span
-                    className={`${isFull ? 'text-red-600' : 'text-black'} text-xs`}
+                    className={`${isFull ? 'text-red-600' : 'text-black'} text-xs font-medium`}
                   >
                     {room.currentPlayers} / {room.maxPlayer}
                   </span>
@@ -172,30 +163,28 @@ export default function RoomItem({ room }: RoomItemProps) {
 
         {/* 하단 : 방 이름, 번호, 잠금 여부 */}
         <section className='mt-2 flex items-center justify-between'>
-          <div className='flex items-center'>
+          <div className='flex w-full items-center'>
             {/* 방 번호 */}
-            <div className='mr-2 rounded-md bg-gradient-to-b from-[#8352D1] to-[#5B3A91] px-2 py-1 text-white'>
-              {String(room.roomNumber).padStart(5, '0')}
+            <div className='text-md mr-2 rounded-md bg-gradient-to-b from-[#8352D1] to-[#5B3A91] px-1.5 py-0.5 text-white'>
+              {String(room.roomNumber).padStart(3, '0')}
             </div>
             {/* 잠금방 아이콘 표시 */}
             {room.hasPassword ? (
-              <span className='rounded-full bg-amber-100 p-1.5 text-xs font-bold text-amber-500'>
+              <span className='text-md mr-2 rounded-full bg-amber-100 p-0.5 font-bold text-amber-500'>
                 🔒
               </span>
-            ) : (
-              <span></span>
-            )}
+            ) : null}
             {/* 방 이름 */}
-            <span
-              className='my-4 truncate text-2xl font-bold text-white'
+            <h3
+              className='truncate text-xl font-bold text-white'
               style={{
-                textShadow: `-3px -3px 0 #6548B9, 3px -3px 0 #6548B9, -3px 3px 0 #6548B9, 3px 3px 0 #6548B9`,
+                textShadow: `-1px -1px 0 #6548B9, 1px -1px 0 #6548B9, -1px 1px 0 #6548B9, 1px 1px 0 #6548B9`,
               }}
             >
               {room.title.length > 10
                 ? `${room.title.slice(0, 10)}...`
                 : room.title}
-            </span>
+            </h3>
           </div>
         </section>
       </article>

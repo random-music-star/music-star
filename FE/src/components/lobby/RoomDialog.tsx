@@ -95,7 +95,9 @@ export default function RoomDialog({ room, isOpen, onClose }: RoomDialogProps) {
       }
 
       onClose();
-      router.push(`/game/room/1/${room.id}`);
+
+      const currentChannelId = router.query.channelId || '1';
+      router.push(`/game/room/${currentChannelId}/${room.id}`);
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다.';

@@ -11,8 +11,8 @@ interface GameRoomInfo {
   mode?: Mode[];
   selectedYear?: number[];
   hasPassword?: boolean;
-  maxGameRound?: number; // 추가됨
-  maxPlayer?: number; // 추가됨
+  maxGameRound?: number;
+  maxPlayer?: number;
 }
 
 /**
@@ -24,8 +24,8 @@ interface ApiRequestData {
   format?: string;
   gameModes: string[];
   selectedYears: number[];
-  maxGameRound: number; // 추가됨
-  maxPlayer: number; // 추가됨
+  maxGameRound: number;
+  maxPlayer: number;
   roomId?: number; // 방 수정하기 요청에서만 사용
   channelId?: number; // 방 생성하기 요청에서만 사용
 }
@@ -43,8 +43,8 @@ export function socketToFormData(
     years: gameRoomInfo.selectedYear || [],
     hasPassword: gameRoomInfo.hasPassword || false,
     password: '', // 서버에서는 비밀번호를 반환하지 않으므로 빈 문자열로 초기화
-    maxGameRound: gameRoomInfo.maxGameRound || 10, // 추가됨
-    maxPlayer: gameRoomInfo.maxPlayer || 4, // 추가됨
+    maxGameRound: gameRoomInfo.maxGameRound || 10,
+    maxPlayer: gameRoomInfo.maxPlayer || 4,
   };
 
   return formData;
@@ -58,17 +58,20 @@ export function formToApiData(
   const password = formData.hasPassword ? formData.password : '';
   const currentChannelId = useChannelStore.getState().currentChannelId;
 
+  // AI 모드를 TTS로 변환
+  const gameModes = formData.modes.map(mode => (mode === 'AI' ? 'TTS' : mode));
+
   if (roomId) {
     // 방 수정하기 요청 - API 명세에 맞게 구성
     const data = {
       roomId: Number(roomId),
       title: formData.title,
       password: password,
-      gameModes: formData.modes || [],
+      gameModes: gameModes,
       selectedYears: formData.years || [],
-      format: formData.format, // request에서 삭제되면 제거 필요
-      maxGameRound: formData.maxGameRound, // 추가됨
-      maxPlayer: formData.maxPlayer, // 추가됨
+      format: formData.format,
+      maxGameRound: formData.maxGameRound,
+      maxPlayer: formData.maxPlayer,
     };
 
     return data;
@@ -79,10 +82,10 @@ export function formToApiData(
       title: formData.title,
       password: password,
       format: formData.format,
-      gameModes: formData.modes || [],
+      gameModes: gameModes,
       selectedYears: formData.years || [],
-      maxGameRound: formData.maxGameRound, // 추가됨
-      maxPlayer: formData.maxPlayer, // 추가됨
+      maxGameRound: formData.maxGameRound,
+      maxPlayer: formData.maxPlayer,
     };
 
     return data;

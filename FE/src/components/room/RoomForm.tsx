@@ -81,9 +81,9 @@ export default function RoomForm({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className='mx-auto flex w-full max-w-6xl flex-col justify-between gap-8 lg:flex-row'
+        className='mx-auto flex w-full max-w-6xl flex-col justify-between gap-4 lg:flex-row'
       >
-        <section className='mt-4 w-full space-y-6 px-6 lg:w-1/2'>
+        <section className='w-full space-y-4 px-4 lg:w-1/2'>
           {/* 방 이름 */}
           <FormField
             control={form.control}
@@ -91,14 +91,14 @@ export default function RoomForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel
-                  className={`mb-3 flex justify-between text-lg font-bold ${
+                  className={`mb-2 flex justify-between text-base font-bold ${
                     form.formState.errors.title
                       ? 'text-red-400'
                       : 'text-pink-200'
                   }`}
                 >
                   <span className='drop-shadow-md'>방 이름</span>
-                  <FormMessage className='text-red-400' />
+                  <FormMessage className='text-sm text-red-400' />
                 </FormLabel>
                 <FormControl>
                   <Input
@@ -122,18 +122,18 @@ export default function RoomForm({
             render={({ field }) => (
               <FormItem className='mb-0'>
                 <FormLabel
-                  className={`mb-3 flex justify-between text-lg font-bold ${
+                  className={`mb-2 flex justify-between text-base font-bold ${
                     form.formState.errors.hasPassword
                       ? 'text-red-400'
                       : 'text-green-200'
                   } drop-shadow-md`}
                 >
                   <span>방 공개 설정</span>
-                  <FormMessage className='text-red-400' />
+                  <FormMessage className='text-sm text-red-400' />
                 </FormLabel>
                 <FormControl>
                   <RadioGroup
-                    className='mb-2 flex items-center space-y-3'
+                    className='mb-2 flex items-center space-x-4'
                     value={field.value ? 'true' : 'false'}
                     onValueChange={value => {
                       field.onChange(value === 'true');
@@ -143,25 +143,25 @@ export default function RoomForm({
                       }
                     }}
                   >
-                    <FormItem className='mb-0 flex items-center space-x-3'>
+                    <FormItem className='flex items-center space-x-2'>
                       <FormControl>
                         <RadioGroupItem
                           value='false'
-                          className='h-5 w-5 bg-white'
+                          className='h-4 w-4 bg-white'
                         />
                       </FormControl>
-                      <FormLabel className='cursor-pointer text-base font-semibold text-white'>
+                      <FormLabel className='cursor-pointer text-sm font-semibold text-white'>
                         열린 방
                       </FormLabel>
                     </FormItem>
-                    <FormItem className='flex items-center space-x-3'>
+                    <FormItem className='flex items-center space-x-2'>
                       <FormControl>
                         <RadioGroupItem
                           value='true'
-                          className='h-5 w-5 bg-white'
+                          className='h-4 w-4 bg-white'
                         />
                       </FormControl>
-                      <FormLabel className='cursor-pointer text-base font-semibold text-white'>
+                      <FormLabel className='cursor-pointer text-sm font-semibold text-white'>
                         잠금 방
                       </FormLabel>
                     </FormItem>
@@ -181,7 +181,7 @@ export default function RoomForm({
                     {...field}
                     type='text'
                     disabled={!hasPassword}
-                    className={`bg-white ${form.formState.errors.password ? 'border-red-400' : ''}`}
+                    className={`bg-white text-sm ${form.formState.errors.password ? 'border-red-400' : ''}`}
                     placeholder={
                       hasPassword
                         ? '비밀번호를 입력하세요'
@@ -189,25 +189,28 @@ export default function RoomForm({
                     }
                   />
                 </FormControl>
-                <FormMessage className='mt-1 text-red-400' />
+                <FormMessage className='mt-1 text-xs text-red-400' />
               </FormItem>
             )}
           />
+        </section>
+
+        <section className='w-full space-y-4 px-4 lg:w-1/2'>
           {/* 최대 라운드 설정 */}
           <FormField
             control={form.control}
             name='maxGameRound'
             render={({ field }) => (
-              <FormItem className='flex justify-between'>
+              <FormItem>
                 <FormLabel
-                  className={`mb-3 flex justify-between text-lg font-bold ${
+                  className={`mb-2 flex justify-between text-base font-bold ${
                     form.formState.errors.maxGameRound
                       ? 'text-red-400'
                       : 'text-cyan-200'
                   } drop-shadow-md`}
                 >
                   <span>최대 라운드</span>
-                  <FormMessage className='text-red-400' />
+                  <FormMessage className='text-sm text-red-400' />
                 </FormLabel>
                 <Select
                   onValueChange={value => field.onChange(Number(value))}
@@ -215,13 +218,17 @@ export default function RoomForm({
                   value={field.value?.toString()}
                 >
                   <FormControl>
-                    <SelectTrigger className='bg-white'>
+                    <SelectTrigger className='w-full bg-white text-sm'>
                       <SelectValue placeholder='라운드 선택' />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
                     {AVAILABLE_ROUNDS.map(round => (
-                      <SelectItem key={round} value={round.toString()}>
+                      <SelectItem
+                        key={round}
+                        value={round.toString()}
+                        className='text-sm'
+                      >
                         {round} 라운드
                       </SelectItem>
                     ))}
@@ -230,9 +237,6 @@ export default function RoomForm({
               </FormItem>
             )}
           />
-        </section>
-
-        <section className='mt-4 w-full space-y-6 px-6 lg:w-1/2'>
           {/* 최대 인원수 설정 */}
           <FormField
             control={form.control}
@@ -240,14 +244,14 @@ export default function RoomForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel
-                  className={`mb-3 flex justify-between text-lg font-bold ${
+                  className={`mb-2 flex justify-between text-base font-bold ${
                     form.formState.errors.maxPlayer
                       ? 'text-red-400'
                       : 'text-amber-200'
                   } drop-shadow-md`}
                 >
                   <span>최대 인원</span>
-                  <FormMessage className='text-red-400' />
+                  <FormMessage className='text-sm text-red-400' />
                 </FormLabel>
                 <FormControl>
                   <Input
@@ -268,14 +272,9 @@ export default function RoomForm({
                         field.onChange(value);
                       }
                     }}
-                    className={`bg-white ${form.formState.errors.maxPlayer ? 'border-red-400' : ''}`}
+                    className={`bg-white text-sm ${form.formState.errors.maxPlayer ? 'border-red-400' : ''}`}
                   />
                 </FormControl>
-                <div className='mt-1 text-xs text-white'>
-                  {selectedFormat === 'BOARD'
-                    ? '보드판 게임: 2~6인'
-                    : '점수판 게임: 2~60인'}
-                </div>
               </FormItem>
             )}
           />
@@ -286,19 +285,19 @@ export default function RoomForm({
             render={() => (
               <FormItem>
                 <FormLabel
-                  className={`mb-3 flex justify-between text-lg font-bold ${
+                  className={`mb-2 flex justify-between text-base font-bold ${
                     form.formState.errors.modes
                       ? 'text-red-400'
                       : 'text-blue-200'
                   } drop-shadow-md`}
                 >
                   <span>모드 선택</span>
-                  <FormMessage className='text-red-400' />
+                  <FormMessage className='text-sm text-red-400' />
                 </FormLabel>
                 <div>
-                  <div className='grid grid-cols-3 gap-3'>
+                  <div className='grid grid-cols-3 gap-2'>
                     {AVAILABLE_MODES.map(mode => (
-                      <FormItem key={mode} className='mb-3 flex items-center'>
+                      <FormItem key={mode} className='flex items-center'>
                         <FormControl>
                           <Checkbox
                             checked={selectedModes.includes(mode)}
@@ -309,10 +308,10 @@ export default function RoomForm({
                               form.setValue('modes', updatedModes);
                               form.trigger('modes');
                             }}
-                            className='h-5 w-5 rounded bg-white shadow-md data-[state=checked]:border-0 data-[state=checked]:bg-white data-[state=checked]:font-bold data-[state=checked]:text-purple-600'
+                            className='h-4 w-4 rounded bg-white shadow-md data-[state=checked]:border-0 data-[state=checked]:bg-white data-[state=checked]:font-bold data-[state=checked]:text-purple-600'
                           />
                         </FormControl>
-                        <FormLabel className='ml-2 cursor-pointer text-base font-semibold text-white'>
+                        <FormLabel className='ml-1 cursor-pointer text-sm font-semibold text-white'>
                           {getModeLabel(mode)}
                         </FormLabel>
                       </FormItem>
@@ -330,22 +329,19 @@ export default function RoomForm({
             render={() => (
               <FormItem>
                 <FormLabel
-                  className={`mb-3 flex justify-between text-lg font-bold ${
+                  className={`mb-2 flex justify-between text-base font-bold ${
                     form.formState.errors.years
                       ? 'text-red-400'
                       : 'text-yellow-100'
                   } drop-shadow-md`}
                 >
                   <span>연도 선택</span>
-                  <FormMessage className='text-red-400' />
+                  <FormMessage className='text-sm text-red-400' />
                 </FormLabel>
                 <div>
-                  <div className='grid grid-cols-2 gap-3 sm:grid-cols-3'>
+                  <div className='grid grid-cols-2 gap-2 sm:grid-cols-3'>
                     {AVAILABLE_YEARS.map(year => (
-                      <FormItem
-                        key={year}
-                        className='mb-3 flex items-center last:mb-0'
-                      >
+                      <FormItem key={year} className='flex items-center'>
                         <FormControl>
                           <Checkbox
                             checked={selectedYears.includes(year)}
@@ -356,10 +352,10 @@ export default function RoomForm({
                               form.setValue('years', updatedYears);
                               form.trigger('years');
                             }}
-                            className='h-5 w-5 rounded bg-white shadow-md data-[state=checked]:border-0 data-[state=checked]:bg-white data-[state=checked]:font-bold data-[state=checked]:text-purple-600'
+                            className='h-4 w-4 rounded bg-white shadow-md data-[state=checked]:border-0 data-[state=checked]:bg-white data-[state=checked]:font-bold data-[state=checked]:text-purple-600'
                           />
                         </FormControl>
-                        <FormLabel className='ml-2 cursor-pointer text-base font-semibold text-white'>
+                        <FormLabel className='ml-1 cursor-pointer text-sm font-semibold text-white'>
                           {year}년
                         </FormLabel>
                       </FormItem>
@@ -371,12 +367,12 @@ export default function RoomForm({
           />
 
           {/* 버튼 섹션 */}
-          <div className='mt-12 flex justify-center gap-4 px-6'>
+          <div className='mt-6 flex justify-center gap-3'>
             <button
               type='submit'
               disabled={loading}
               onClick={form.handleSubmit(onSubmit)}
-              className='relative flex h-[60px] w-[60px] items-center justify-center overflow-hidden rounded-full border-3 border-white bg-gradient-to-br from-purple-400 to-purple-900 font-bold text-white shadow-lg transition-all duration-300 ease-in-out hover:translate-y-[-2px] hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-70'
+              className='relative flex h-[50px] w-[50px] items-center justify-center overflow-hidden rounded-full border-3 border-white bg-gradient-to-br from-purple-400 to-purple-900 text-sm font-bold text-white shadow-lg transition-all duration-300 ease-in-out hover:translate-y-[-2px] hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-70'
             >
               {loading
                 ? mode === 'create'
@@ -389,7 +385,7 @@ export default function RoomForm({
             <button
               type='button'
               onClick={onCancel}
-              className='relative flex h-[60px] w-[60px] items-center justify-center overflow-hidden rounded-full border-3 border-white bg-gradient-to-br from-purple-400 to-purple-900 font-bold text-white shadow-lg transition-all duration-300 ease-in-out hover:translate-y-[-2px] hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-70'
+              className='relative flex h-[50px] w-[50px] items-center justify-center overflow-hidden rounded-full border-3 border-white bg-gradient-to-br from-purple-400 to-purple-900 text-sm font-bold text-white shadow-lg transition-all duration-300 ease-in-out hover:translate-y-[-2px] hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-70'
             >
               취소
             </button>
