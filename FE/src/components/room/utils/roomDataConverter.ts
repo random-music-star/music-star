@@ -11,6 +11,8 @@ interface GameRoomInfo {
   mode?: Mode[];
   selectedYear?: number[];
   hasPassword?: boolean;
+  maxGameRound?: number; // 추가됨
+  maxPlayer?: number; // 추가됨
 }
 
 /**
@@ -22,6 +24,8 @@ interface ApiRequestData {
   format?: string;
   gameModes: string[];
   selectedYears: number[];
+  maxGameRound: number; // 추가됨
+  maxPlayer: number; // 추가됨
   roomId?: number; // 방 수정하기 요청에서만 사용
   channelId?: number; // 방 생성하기 요청에서만 사용
 }
@@ -39,6 +43,8 @@ export function socketToFormData(
     years: gameRoomInfo.selectedYear || [],
     hasPassword: gameRoomInfo.hasPassword || false,
     password: '', // 서버에서는 비밀번호를 반환하지 않으므로 빈 문자열로 초기화
+    maxGameRound: gameRoomInfo.maxGameRound || 10, // 추가됨
+    maxPlayer: gameRoomInfo.maxPlayer || 4, // 추가됨
   };
 
   console.log('소켓 데이터를 폼 데이터로 변환:', {
@@ -66,6 +72,8 @@ export function formToApiData(
       gameModes: formData.modes || [],
       selectedYears: formData.years || [],
       format: formData.format, // request에서 삭제되면 제거 필요
+      maxGameRound: formData.maxGameRound, // 추가됨
+      maxPlayer: formData.maxPlayer, // 추가됨
     };
 
     return data;
@@ -78,6 +86,8 @@ export function formToApiData(
       format: formData.format,
       gameModes: formData.modes || [],
       selectedYears: formData.years || [],
+      maxGameRound: formData.maxGameRound, // 추가됨
+      maxPlayer: formData.maxPlayer, // 추가됨
     };
 
     console.log('폼 데이터를 API 요청 데이터로 변환:', {

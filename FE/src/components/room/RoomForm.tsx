@@ -9,9 +9,20 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useRoomApi } from '@/hooks/useRoomApi';
 import { type RoomFormValues, useRoomForm } from '@/hooks/useRoomForm';
-import { AVAILABLE_MODES, AVAILABLE_YEARS } from '@/types/rooms';
+import {
+  AVAILABLE_MODES,
+  AVAILABLE_ROUNDS,
+  AVAILABLE_YEARS,
+} from '@/types/rooms';
 import { Mode } from '@/types/websocket';
 
 import MapSelector from './MapSelector';
@@ -25,6 +36,8 @@ interface RoomFormProps {
     mode?: Mode[];
     selectedYear?: number[];
     hasPassword?: boolean;
+    maxGameRound?: number;
+    maxPlayer?: number;
   };
   onSuccess: (data: RoomFormValues, roomId?: string) => void;
   onCancel: () => void;
@@ -38,9 +51,10 @@ export default function RoomForm({
   onCancel,
 }: RoomFormProps) {
   // 폼 로직
-  const { form, selectedModes, selectedYears, hasPassword } = useRoomForm({
-    initialData,
-  });
+  const { form, selectedModes, selectedYears, hasPassword, selectedFormat } =
+    useRoomForm({
+      initialData,
+    });
   // API 통신 로직
   const { loading, submitForm } = useRoomApi({ mode, roomId, onSuccess });
 
@@ -179,9 +193,92 @@ export default function RoomForm({
               </FormItem>
             )}
           />
+          {/* 최대 라운드 설정 */}
+          <FormField
+            control={form.control}
+            name='maxGameRound'
+            render={({ field }) => (
+              <FormItem className='flex justify-between'>
+                <FormLabel
+                  className={`mb-3 flex justify-between text-lg font-bold ${
+                    form.formState.errors.maxGameRound
+                      ? 'text-red-400'
+                      : 'text-cyan-200'
+                  } drop-shadow-md`}
+                >
+                  <span>최대 라운드</span>
+                  <FormMessage className='text-red-400' />
+                </FormLabel>
+                <Select
+                  onValueChange={value => field.onChange(Number(value))}
+                  defaultValue={field.value?.toString()}
+                  value={field.value?.toString()}
+                >
+                  <FormControl>
+                    <SelectTrigger className='bg-white'>
+                      <SelectValue placeholder='라운드 선택' />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {AVAILABLE_ROUNDS.map(round => (
+                      <SelectItem key={round} value={round.toString()}>
+                        {round} 라운드
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormItem>
+            )}
+          />
         </section>
 
         <section className='mt-4 w-full space-y-6 px-6 lg:w-1/2'>
+          {/* 최대 인원수 설정 */}
+          <FormField
+            control={form.control}
+            name='maxPlayer'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel
+                  className={`mb-3 flex justify-between text-lg font-bold ${
+                    form.formState.errors.maxPlayer
+                      ? 'text-red-400'
+                      : 'text-amber-200'
+                  } drop-shadow-md`}
+                >
+                  <span>최대 인원</span>
+                  <FormMessage className='text-red-400' />
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    type='number'
+                    min={2}
+                    max={selectedFormat === 'BOARD' ? 6 : 60}
+                    {...field}
+                    onChange={e => {
+                      const value = parseInt(e.target.value);
+                      const min = 2;
+                      const max = selectedFormat === 'BOARD' ? 6 : 60;
+
+                      if (value < min) {
+                        field.onChange(min);
+                      } else if (value > max) {
+                        field.onChange(max);
+                      } else {
+                        field.onChange(value);
+                      }
+                    }}
+                    className={`bg-white ${form.formState.errors.maxPlayer ? 'border-red-400' : ''}`}
+                  />
+                </FormControl>
+                <div className='mt-1 text-xs text-white'>
+                  {selectedFormat === 'BOARD'
+                    ? '보드판 게임: 2~6인'
+                    : '점수판 게임: 2~60인'}
+                </div>
+              </FormItem>
+            )}
+          />
           {/* 모드 선택 */}
           <FormField
             control={form.control}
