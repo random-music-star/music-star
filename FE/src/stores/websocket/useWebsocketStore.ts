@@ -108,7 +108,13 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
 
       newSubscriptions['messageQueue'] = client.subscribe(
         `/user/queue/system`,
-        () => {},
+        message => {
+          const { type } = JSON.parse(message.body);
+
+          if (type === 'refuseEnter') {
+            gameStateStore.setGameState('REFUSED');
+          }
+        },
         {
           Authorization: useNicknameStore.getState().nickname,
         },
@@ -170,7 +176,7 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
               gameChatStore.setGameChattings({
                 sender: 'system',
                 messageType: 'winner',
-                message: `${response.winner}님이 정답을 맞췄습니다! `,
+                message: `${response.winner}님이 정답을 맞혔습니다! `,
               });
             }
           }
@@ -219,10 +225,6 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
             score.updateScore(response.username, response.position);
             gameStateStore.setGameState('SCORE_UPDATE');
             // soundEventStore.setSoundEvent('JUMP');
-          }
-
-          if (type === 'refuseEnter') {
-            gameStateStore.setGameState('REFUSED');
           }
 
           if (type === 'gameEnd') {

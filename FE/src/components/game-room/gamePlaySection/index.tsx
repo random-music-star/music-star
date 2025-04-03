@@ -116,8 +116,8 @@ const GamePlaySection = () => {
         <motion.div
           className='h-[40%] w-full'
           initial={{ height: 0, opacity: 0 }}
-          animate={{ height: 200, opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
+          animate={{ height: 300, opacity: 1 }}
+          transition={{ duration: 1.2, delay: 0.2 }}
         >
           <div className='flex items-center justify-center p-8'>
             <RoundInformation />

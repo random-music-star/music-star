@@ -2,6 +2,18 @@ import { create } from 'zustand';
 
 import { Mode } from '@/types/websocket';
 
+export type SelectedYearType =
+  | 1970
+  | 1980
+  | 1990
+  | 2000
+  | 2010
+  | 2020
+  | 2021
+  | 2022
+  | 2023
+  | 2024;
+
 interface GameInfoStore {
   gameRoomInfo: GameInfoState | null;
   setGameInfo: (newGameRoomInfo: GameInfoState) => void;
@@ -13,7 +25,7 @@ interface GameInfoState {
   hasPassword: boolean;
   maxGameRound: number;
   format: 'GENERAL' | 'BOARD';
-  selectedYear: number[];
+  selectedYear: SelectedYearType[];
   mode: Mode[];
   status: 'WAITING' | 'IN_PROGRESS';
 }

@@ -12,7 +12,7 @@ export interface GameHint {
   singer2: string;
 }
 
-const ScoreRoundPlayContent = () => {
+const RoundPlayContent = () => {
   const { roundHint } = useRoundHintStore();
   const { roundInfo } = useGameRoundInfoStore();
 
@@ -29,7 +29,7 @@ const ScoreRoundPlayContent = () => {
       >
         {isDualMode ? (
           // 더 컴팩트한 DUAL 모드 UI
-          <div className='space-y-6 text-base text-xl'>
+          <div className='space-y-6 text-xl'>
             {/* 첫 번째 노래 정보 (한 줄에 표시) */}
             <div className='flex items-center'>
               <div className='mr-4 h-4 w-4 rounded-full bg-pink-400'></div>
@@ -101,4 +101,4 @@ const ScoreRoundPlayContent = () => {
   );
 };
 
-export default ScoreRoundPlayContent;
+export default RoundPlayContent;

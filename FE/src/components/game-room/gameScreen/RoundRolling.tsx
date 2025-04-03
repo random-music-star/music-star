@@ -9,7 +9,7 @@ import {
 } from '@/stores/websocket/useGameRoundInfoStore';
 import { useGameStateStore } from '@/stores/websocket/useGameStateStore';
 
-const ScoreRoundRolling = () => {
+const RoundRolling = () => {
   const { gameRoomInfo } = useGameInfoStore();
   const { gameState } = useGameStateStore();
   const { roundInfo } = useGameRoundInfoStore();
@@ -97,4 +97,4 @@ const ScoreRoundRolling = () => {
   );
 };
 
-export default ScoreRoundRolling;
+export default RoundRolling;

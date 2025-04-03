@@ -17,7 +17,7 @@ const initialRoundInfo: RoundInfo = {
 };
 
 export const MODE_DICT = {
-  FULL: '힌곡모드',
+  FULL: '한곡모드',
   DUAL: '두곡모드',
   TTS: 'AI모드',
 };

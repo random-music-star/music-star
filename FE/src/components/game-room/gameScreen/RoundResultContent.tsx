@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { useGameRoundInfoStore } from '@/stores/websocket/useGameRoundInfoStore';
 import { useGameRoundResultStore } from '@/stores/websocket/useGameRoundResultStore';
 
-const ScoreRoundResultContent = () => {
+const RoundResultContent = () => {
   const { gameRoundResult } = useGameRoundResultStore();
   const { roundInfo } = useGameRoundInfoStore();
   const { mode } = roundInfo;
@@ -65,7 +65,7 @@ const ScoreRoundResultContent = () => {
           // 기존 단일 모드 UI
           <div className='space-y-4'>
             <div className='flex items-center justify-between'>
-              <span className='text-lg font-bold text-cyan-200'>가수</span>
+              <span className='mr-2 text-lg font-bold text-cyan-200'>가수</span>
               <div className='overflow-hidden rounded-md border-2 border-purple-400/30 px-4 py-1.5'>
                 <span className='text-lg font-bold break-words text-white'>
                   {gameRoundResult.singer || '정보 없음'}
@@ -74,7 +74,7 @@ const ScoreRoundResultContent = () => {
             </div>
 
             <div className='flex items-center justify-between'>
-              <span className='text-lg font-bold text-cyan-200'>제목</span>
+              <span className='mr-2 text-lg font-bold text-cyan-200'>제목</span>
               <div className='overflow-hidden rounded-md border-2 border-cyan-400/30 px-4 py-1.5'>
                 <span className='text-lg font-bold break-words text-white'>
                   {gameRoundResult.songTitle || '정보 없음'}
@@ -88,4 +88,4 @@ const ScoreRoundResultContent = () => {
   );
 };
 
-export default ScoreRoundResultContent;
+export default RoundResultContent;

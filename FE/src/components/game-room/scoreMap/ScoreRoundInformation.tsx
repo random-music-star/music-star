@@ -2,10 +2,10 @@ import { AnimatePresence, motion } from 'framer-motion';
 
 import { useGameStateStore } from '@/stores/websocket/useGameStateStore';
 
-import YoutubePlayer from '../gamePlaySection/YoutubePlayer';
-import ScoreGameMusicPlayer from './ScoreGameMusicPlayer';
-import ScoreGameResultContent from './ScoreGameResultContent';
-import ScoreRoundRolling from './ScoreRoundRolling';
+import GameMusicPlayer from '../gameScreen/GameMusicPlayer';
+import GameResultContent from '../gameScreen/GameResultContent';
+import RoundRolling from '../gameScreen/RoundRolling';
+import YoutubePlayer from '../gameScreen/YoutubePlayer';
 
 const ScoreRoundInformation = () => {
   const { gameState } = useGameStateStore();
@@ -39,7 +39,7 @@ const ScoreRoundInformation = () => {
               exit='exit'
               className='h-full w-full'
             >
-              <ScoreRoundRolling />
+              <RoundRolling />
             </motion.div>
           )}
 
@@ -52,7 +52,7 @@ const ScoreRoundInformation = () => {
               exit='exit'
               className='h-full w-full'
             >
-              <ScoreGameResultContent />
+              <GameResultContent />
             </motion.div>
           )}
 
@@ -67,7 +67,7 @@ const ScoreRoundInformation = () => {
               exit='exit'
               className='h-full w-full'
             >
-              <ScoreGameMusicPlayer gameState={gameState} />
+              <GameMusicPlayer gameState={gameState} />
             </motion.div>
           )}
         </AnimatePresence>
