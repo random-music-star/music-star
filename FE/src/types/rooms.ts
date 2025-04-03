@@ -60,7 +60,7 @@ export const createRoomFormSchema = z
 
 export type RoomFormValues = z.infer<typeof createRoomFormSchema>;
 
-export const AVAILABLE_MODES = ['FULL', 'DOUBLE', 'AI'] as const;
+export const AVAILABLE_MODES = ['FULL', 'DUAL', 'TTS'] as const;
 export const AVAILABLE_YEARS = [
   1970, 1980, 1990, 2000, 2010, 2020, 2021, 2022, 2023, 2024,
 ] as const;

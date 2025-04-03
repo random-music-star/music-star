@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { useGameInfoStore } from '@/stores/websocket/useGameRoomInfoStore';
 import { RoomFormValues } from '@/types/rooms';
+import { Mode } from '@/types/websocket';
 
 import RoomForm from './RoomForm';
 
@@ -25,7 +26,7 @@ interface RoomFormDialogProps {
 interface InitialDataType {
   roomTitle?: string;
   format?: 'GENERAL' | 'BOARD';
-  mode?: ('FULL' | 'DOUBLE' | 'AI')[];
+  mode?: Mode[];
   selectedYear?: number[];
   hasPassword?: boolean;
   maxGameRound?: number;

@@ -8,7 +8,9 @@ interface GameRoundResultStore {
 export interface GameRoundResult {
   winner: string;
   songTitle: string;
+  songTitle2: string;
   singer: string;
+  singer2: string;
   score: number;
 }
 

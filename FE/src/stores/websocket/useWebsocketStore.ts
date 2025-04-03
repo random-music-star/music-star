@@ -76,6 +76,7 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
     useGameWinnerStore.getState().resetWinnerStore();
     useParticipantInfoStore.getState().resetParticipantInfo();
     useSoundEventStore.getState().setSoundEvent(null);
+    useGameRoundInfoStore.getState().resetRoundInfo();
 
     const newSubscriptions: Record<string, StompSubscription> = {};
 
@@ -125,7 +126,8 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
               message: `곧 다음 라운드가 시작됩니다. `,
             });
 
-            // url, round, mode 설정 및 힌트는 null 처리
+            // url, round, mode 설정 및 힌트는 null 처리 + songUrl2는 듀얼 모드에서만
+            // 임의로 songUrl2 설정해봄
             roundInfo.setRoundInfo(response);
             roundHint.updateGameHint(null);
 
