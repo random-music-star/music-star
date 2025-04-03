@@ -10,6 +10,7 @@ import ChatBox from '@/components/lobby/ChatBox';
 import CreateRoomButton from '@/components/lobby/CreateRoomButton';
 import Header from '@/components/lobby/Header';
 import RoomList from '@/components/lobby/RoomList';
+import RoomSearchDialog from '@/components/lobby/RoomSearchDialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useNicknameStore } from '@/stores/auth/useNicknameStore';
 import { useChannelStore } from '@/stores/lobby/useChannelStore';
@@ -32,19 +33,19 @@ const ACTION_TYPES = {
 } as const;
 
 export type Room = {
-  id: number;
+  id: string;
   title: string;
-  hostName: string;
-  format: 'BOARD' | 'GENERAL';
-  maxPlayer: number;
-  currentPlayers: number;
-  maxGameRound: number;
-  playTime: number;
+  hostName?: string;
+  format?: 'BOARD' | 'GENERAL';
+  maxPlayer?: number;
+  currentPlayers?: number;
+  maxGameRound?: number;
+  playTime?: number;
   status: string;
   hasPassword: boolean;
-  gameModes: string[] | null;
-  years: number[];
-  roomNumber: number;
+  gameModes?: string[] | null;
+  years?: number[];
+  roomNumber?: number;
   disabled?: boolean;
 };
 
@@ -621,7 +622,10 @@ const LobbyPage = ({ userNickname, channelId }: LobbyServerProps) => {
         <section className='m-10 flex flex-1 flex-col rounded-2xl bg-gradient-to-r from-[#4F719C]/80 to-[#5F4EA0]/80 p-6'>
           <div className='mb-6 flex items-center justify-between'>
             <h1 className='text-2xl font-bold text-white'>게임 방 목록</h1>
-            <CreateRoomButton />
+            <div>
+              <RoomSearchDialog />
+              <CreateRoomButton />
+            </div>
           </div>
           <div className='neon-scrollbar flex-1 items-center overflow-y-auto'>
             <RoomList
