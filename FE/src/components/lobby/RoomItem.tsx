@@ -44,7 +44,10 @@ export default function RoomItem({ room }: RoomItemProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
 
-  const isFull = room.currentPlayers >= room.maxPlayer;
+  const currentPlayers = room.currentPlayers ?? 0;
+  const maxPlayer = room.maxPlayer ?? 4;
+
+  const isFull = currentPlayers >= maxPlayer;
   const currentStatus = room.status || 'WAITING';
   const statusDisplay = statusConfig[currentStatus] || statusConfig['WAITING'];
 

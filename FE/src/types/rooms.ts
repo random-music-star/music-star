@@ -17,7 +17,10 @@ export interface CreateRoomResponse {
 
 export const createRoomFormSchema = z
   .object({
-    title: z.string().min(1, '방 이름을 설정해주세요'),
+    title: z
+      .string()
+      .min(1, '방 이름을 설정해주세요')
+      .max(15, '방 이름은 15글자 미만이어야 합니다'),
     format: z.string().min(1, '맵을 선택해주세요'),
     modes: z.array(z.string()).min(1, '모드를 선택해주세요'),
     years: z.array(z.number()).min(1, '연도를 선택해주세요'),
