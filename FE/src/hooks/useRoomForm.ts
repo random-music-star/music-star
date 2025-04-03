@@ -23,7 +23,6 @@ interface UseRoomFormProps {
 }
 
 export function useRoomForm({ initialData }: UseRoomFormProps = {}) {
-  // React Hook Form 설정
   const form = useForm<RoomFormValues>({
     resolver: zodResolver(createRoomFormSchema),
     defaultValues: {

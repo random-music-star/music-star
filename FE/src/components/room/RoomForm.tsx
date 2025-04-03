@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/select';
 import { useRoomApi } from '@/hooks/useRoomApi';
 import { type RoomFormValues, useRoomForm } from '@/hooks/useRoomForm';
+import { MODE_DICT } from '@/stores/websocket/useGameRoundInfoStore';
 import {
   AVAILABLE_MODES,
   AVAILABLE_ROUNDS,
@@ -50,31 +51,14 @@ export default function RoomForm({
   onSuccess,
   onCancel,
 }: RoomFormProps) {
-  // 폼 로직
   const { form, selectedModes, selectedYears, hasPassword, selectedFormat } =
     useRoomForm({
       initialData,
     });
-  // API 통신 로직
   const { loading, submitForm } = useRoomApi({ mode, roomId, onSuccess });
 
-  // 폼 제출 핸들러
   const onSubmit = async (data: RoomFormValues) => {
     await submitForm(data);
-  };
-
-  // 모드 레이블 매핑
-  const getModeLabel = (mode: Mode) => {
-    switch (mode) {
-      case 'FULL':
-        return '전곡 재생';
-      case 'DOUBLE':
-        return '2배속';
-      case 'AI':
-        return 'AI';
-      default:
-        return mode;
-    }
   };
 
   return (
@@ -312,7 +296,7 @@ export default function RoomForm({
                           />
                         </FormControl>
                         <FormLabel className='ml-1 cursor-pointer text-sm font-semibold text-white'>
-                          {getModeLabel(mode)}
+                          {MODE_DICT[mode]}
                         </FormLabel>
                       </FormItem>
                     ))}

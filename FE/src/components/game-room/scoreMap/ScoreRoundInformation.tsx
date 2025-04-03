@@ -10,7 +10,6 @@ import ScoreRoundRolling from './ScoreRoundRolling';
 const ScoreRoundInformation = () => {
   const { gameState } = useGameStateStore();
 
-  // 각 상태에 맞는 애니메이션 효과를 위한 변수들
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {

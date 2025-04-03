@@ -7,6 +7,7 @@ import {
   useParticipantInfoStore,
 } from '@/stores/websocket/useGameParticipantStore';
 import { useGameInfoStore } from '@/stores/websocket/useGameRoomInfoStore';
+import { MODE_DICT } from '@/stores/websocket/useGameRoundInfoStore';
 
 import ScoreChatBox from '../ScoreChatBox';
 
@@ -22,10 +23,6 @@ type StatusConfig = {
   [key: string]: { text: string; color: string };
 };
 
-type FormatText = {
-  [key: string]: string;
-};
-
 const ScoreWaitingPanel = ({
   currentUserId,
   handleStartGame,
@@ -38,14 +35,12 @@ const ScoreWaitingPanel = ({
   const isHost = currentUserId === hostNickname;
 
   const [currentPage, setCurrentPage] = useState(1);
-  const rowsPerPage = 3; // 3줄 고정
-  const colsPerPage = 6; // 6열 고정 => 총 18칸
+  const rowsPerPage = 3;
+  const colsPerPage = 5;
   const participantsPerPage = rowsPerPage * colsPerPage;
 
-  // 전체 페이지 수 계산
   const totalPages = Math.ceil(participantInfo.length / participantsPerPage);
 
-  // 현재 페이지에 표시할 참가자 목록
   const currentParticipants = participantInfo.slice(
     (currentPage - 1) * participantsPerPage,
     currentPage * participantsPerPage,
@@ -58,7 +53,6 @@ const ScoreWaitingPanel = ({
     displayParticipants.push(null);
   }
 
-  // 페이지 변경 핸들러
   const handlePageChange = (direction: 'prev' | 'next') => {
     if (direction === 'prev' && currentPage > 1) {
       setCurrentPage(currentPage - 1);
@@ -67,7 +61,6 @@ const ScoreWaitingPanel = ({
     }
   };
 
-  // 상태 설정 (진한 보라색 배경에 밝은 텍스트)
   const statusConfig: StatusConfig = {
     WAITING: { text: '대기 중', color: 'text-purple-100 bg-purple-800' },
     IN_PROGRESS: {
@@ -77,10 +70,9 @@ const ScoreWaitingPanel = ({
     FINISHED: { text: '종료됨', color: 'text-gray-100 bg-purple-800' },
   };
 
-  const formatText: FormatText = {
+  const formatText = {
     GENERAL: '일반',
     BOARD: '보드',
-    SCORE: '스코어',
   };
 
   if (!gameRoomInfo) return null;
@@ -120,7 +112,6 @@ const ScoreWaitingPanel = ({
           </div>
         </div>
 
-        {/* 참가자 목록 - 페이지 탐색 UI와 함께 */}
         <div className='mb-3'>
           <div className='mb-1 flex items-center justify-between'>
             <h3 className='text-lg font-medium text-purple-100'>참가자 목록</h3>
@@ -145,14 +136,13 @@ const ScoreWaitingPanel = ({
             </div>
           </div>
 
-          {/* 참가자 그리드 - 3줄 고정 (6열 x 3줄) */}
           <div className='rounded-lg bg-purple-900/50 p-3 shadow-inner'>
-            <div className='grid grid-cols-6 grid-rows-3 gap-2'>
+            <div className='grid grid-cols-5 grid-rows-3 gap-5'>
               {displayParticipants.map((participant, index) => (
                 <div
                   key={participant ? participant.userName : `empty-${index}`}
                   className={cn(
-                    'flex items-center justify-start rounded-md p-3 transition-all',
+                    'flex items-center justify-start rounded-md p-3 py-6 transition-all',
                     participant
                       ? participant.userName === hostNickname
                         ? 'border border-purple-300 bg-purple-700'
@@ -162,22 +152,14 @@ const ScoreWaitingPanel = ({
                 >
                   {participant ? (
                     <>
-                      <div className='relative mr-2 h-8 w-8 flex-shrink-0'>
+                      <div className='relative mr-4 h-8 w-8 flex-shrink-0'>
                         <div className='flex h-full w-full items-center justify-center rounded-full bg-purple-600'>
                           <span className='text-xs font-bold text-purple-100'>
                             {participant.userName.charAt(0)}
                           </span>
                         </div>
-                        {/* 호스트 표시 아이콘 */}
-                        {participant.userName === hostNickname && (
-                          <div className='absolute -top-1 -right-1 flex h-3 w-3 items-center justify-center rounded-full bg-yellow-400 shadow-sm'>
-                            <span className='text-[8px] text-purple-900'>
-                              👑
-                            </span>
-                          </div>
-                        )}
                       </div>
-                      <span className='w-full truncate text-left text-xs text-purple-100'>
+                      <span className='w-full truncate text-left text-purple-100'>
                         {participant.userName}
                       </span>
                     </>
@@ -249,7 +231,7 @@ const ScoreWaitingPanel = ({
                       key={`mode-${index}`}
                       className='inline-block rounded-full bg-pink-400/40 px-2 py-0.5 text-sm font-medium text-white shadow-sm'
                     >
-                      {m}
+                      {MODE_DICT[m]}
                     </span>
                   ))}
                 </div>
