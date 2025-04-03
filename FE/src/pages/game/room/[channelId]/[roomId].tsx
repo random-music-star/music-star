@@ -91,7 +91,7 @@ export default function GameRoom({
   };
 
   if (gameState === 'REFUSED') {
-    router.push('/game/lobby');
+    router.push(`/game/lobby/${channelId}`);
   }
 
   const isBoardFormat = gameRoomInfo?.format === 'BOARD';
@@ -112,15 +112,13 @@ export default function GameRoom({
             <GameExitButton />
           </div>
 
-          <div className='flex max-h-screen min-h-screen w-[480px] max-w-[480px] flex-col flex-wrap items-center gap-5 bg-black/50 text-white'>
+          <div className='flex max-h-screen min-h-screen w-[480px] grid-rows-[1fr_4fr] flex-col flex-wrap items-center'>
             <RoomPannel />
-            <div className='w-full flex-1 overflow-hidden'>
-              <ChatBox
-                currentUserId={nickname}
-                roomId={roomId}
-                channelId={channelId}
-              />
-            </div>
+            <ChatBox
+              currentUserId={nickname}
+              roomId={roomId}
+              channelId={channelId}
+            />
           </div>
         </div>
       );
@@ -133,14 +131,12 @@ export default function GameRoom({
           <GameExitButton />
         </div>
 
-        <div className='flex max-h-screen min-h-screen w-[480px] max-w-[480px] flex-col flex-wrap items-center gap-5 bg-black/50 text-white'>
-          <div className='w-full flex-1 overflow-hidden'>
-            <ChatBox
-              currentUserId={nickname}
-              roomId={roomId}
-              channelId={channelId}
-            />
-          </div>
+        <div className='flex max-h-screen min-h-screen w-[480px] max-w-[480px] flex-col flex-wrap items-center gap-5'>
+          <ChatBox
+            currentUserId={nickname}
+            roomId={roomId}
+            channelId={channelId}
+          />
         </div>
       </div>
     );

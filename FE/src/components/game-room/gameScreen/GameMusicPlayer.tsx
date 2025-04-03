@@ -2,14 +2,14 @@ import React from 'react';
 
 import { useGameRoundInfoStore } from '@/stores/websocket/useGameRoundInfoStore';
 
-import ScoreRoundPlayContent from './ScoreRoundPlayContent';
-import ScoreRoundResultContent from './ScoreRoundResultContent';
+import RoundPlayContent from './RoundPlayContent';
+import RoundResultContent from './RoundResultContent';
 
 interface MusicPlayerProps {
   gameState: 'GAME_RESULT' | 'ROUND_START' | 'SCORE_UPDATE';
 }
 
-const ScoreGameMusicPlayer = ({ gameState }: MusicPlayerProps) => {
+const GameMusicPlayer = ({ gameState }: MusicPlayerProps) => {
   const { roundInfo } = useGameRoundInfoStore();
   if (!roundInfo) return null;
   const { round: currentRound, mode } = roundInfo;
@@ -56,13 +56,13 @@ const ScoreGameMusicPlayer = ({ gameState }: MusicPlayerProps) => {
 
       <div className='grow rounded-md bg-white/5 p-3'>
         {gameState === 'ROUND_START' ? (
-          <ScoreRoundPlayContent />
+          <RoundPlayContent />
         ) : (
-          <ScoreRoundResultContent />
+          <RoundResultContent />
         )}
       </div>
     </div>
   );
 };
 
-export default ScoreGameMusicPlayer;
+export default GameMusicPlayer;

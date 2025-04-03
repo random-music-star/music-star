@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 
 import { useGameWinnerStore } from '@/stores/websocket/useGameWinnerStore';
 
-const ScoreGameResultContent = () => {
+const GameResultContent = () => {
   const { winner } = useGameWinnerStore();
 
   return (
@@ -74,4 +74,4 @@ const ScoreGameResultContent = () => {
   );
 };
 
-export default ScoreGameResultContent;
+export default GameResultContent;
