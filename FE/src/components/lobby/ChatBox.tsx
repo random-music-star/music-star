@@ -53,13 +53,12 @@ export default function ChatBox({ channelId }: { channelId: string }) {
 
   return (
     <div className='flex h-full flex-col overflow-hidden rounded-lg shadow-sm'>
-      <div className='rounded-t-lg border-b border-[#30FFFF] px-4 py-3 text-white shadow-sm'>
+      {/* <div className='rounded-t-lg border-b border-[#30FFFF] px-4 py-3 text-white shadow-sm'>
         <h2 className='text-lg font-semibold'>전체 채팅</h2>
-      </div>
-
+      </div> */}
       <div
         ref={chatContainerRef}
-        className='neon-scrollbar flex-1 space-y-2 overflow-y-auto bg-black/30 p-4'
+        className='neon-scrollbar flex-1 space-y-2 overflow-y-auto p-4'
       >
         {publicChattings.length === 0 ? (
           <div className='py-6 text-center text-[#30FFFF]/50'>
