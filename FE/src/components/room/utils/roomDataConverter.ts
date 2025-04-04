@@ -24,9 +24,9 @@ interface ApiRequestData {
   format?: string;
   gameModes: string[];
   selectedYears: number[];
-  maxGameRound: number;
-  maxPlayer: number;
-  roomId?: number; // 방 수정하기 요청에서만 사용
+  maxGameRound?: number;
+  maxPlayer?: number;
+  roomId?: string; // 방 수정하기 요청에서만 사용
   channelId?: number; // 방 생성하기 요청에서만 사용
 }
 
@@ -64,10 +64,10 @@ export function formToApiData(
   if (roomId) {
     // 방 수정하기 요청 - API 명세에 맞게 구성
     const data = {
-      roomId: Number(roomId),
+      roomId: roomId,
       title: formData.title,
       password: password,
-      gameModes: gameModes,
+      gameModes: gameModes || [],
       selectedYears: formData.years || [],
       format: formData.format,
       maxGameRound: formData.maxGameRound,

@@ -56,7 +56,7 @@ export default function Home({ userNickname }: HomeServerProps) {
           }}
         >
           <h1 className='text-9xl font-extrabold drop-shadow-lg md:text-8xl'>
-            <span className='text-pink-100'>알쏭달쏭</span>
+            <span className='text-pink-100'>랜덤뮤직스타</span>
           </h1>
         </motion.div>
       </motion.main>
@@ -70,7 +70,7 @@ export default function Home({ userNickname }: HomeServerProps) {
         {nickname ? (
           <div className='relative my-4 flex items-center justify-center gap-6'>
             <span className='rounded-2xl bg-purple-950/70 px-4 py-1 text-center text-lg text-pink-100'>
-              {nickname} 님, 알쏭달쏭에 오신 걸 환영합니다!
+              {nickname} 님, 랜덤뮤직스타에 오신 걸 환영합니다!
             </span>
             <Button
               variant='custom'

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 
+import { Lock } from 'lucide-react';
 import Image from 'next/image';
 
 import { Badge } from '@/components/ui/badge';
@@ -172,11 +173,11 @@ export default function RoomItem({ room }: RoomItemProps) {
               {String(room.roomNumber).padStart(3, '0')}
             </div>
             {/* 잠금방 아이콘 표시 */}
-            {room.hasPassword ? (
-              <span className='text-md mr-2 rounded-full bg-amber-100 p-0.5 font-bold text-amber-500'>
-                🔒
-              </span>
-            ) : null}
+            <div className='mr-2'>
+              {room.hasPassword && (
+                <Lock className='mb-[1px] ml-2 h-5 w-5 text-yellow-200' />
+              )}
+            </div>
             {/* 방 이름 */}
             <h3
               className='truncate text-xl font-bold text-white'
