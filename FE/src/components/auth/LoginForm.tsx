@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { toast } from 'sonner';
 import * as z from 'zod';
 
 import { Button } from '@/components/ui/button';
@@ -62,10 +61,6 @@ export default function LoginForm({
     try {
       await userLogin(data);
       form.reset();
-      toast.success('로그인 성공', {
-        description: '환영합니다!',
-      });
-
       onSuccess?.();
     } catch {
       const username = form.getValues('username');

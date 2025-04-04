@@ -124,7 +124,6 @@ const LobbyPage = ({ userNickname, channelId }: LobbyServerProps) => {
     setCurrentChannelId(Number(channelId));
   }, [userNickname, channelId, setNickname, setCurrentChannelId]);
 
-  // rooms 상태가 변경될 때마다 ref도 업데이트
   useEffect(() => {
     roomsRef.current = rooms;
   }, [rooms]);
@@ -133,7 +132,6 @@ const LobbyPage = ({ userNickname, channelId }: LobbyServerProps) => {
     currentPageRef.current = currentPage;
   }, [currentPage]);
 
-  // URL 쿼리 파라미터에서 페이지 정보 가져오기
   useEffect(() => {
     const { page } = router.query;
     if (page && !isNaN(Number(page))) {
@@ -144,7 +142,6 @@ const LobbyPage = ({ userNickname, channelId }: LobbyServerProps) => {
     }
   }, [router.query, currentPage]);
 
-  // 페이지 로딩 시 GET 요청으로 방 목록 가져옴
   useEffect(() => {
     setIsLoading(true);
     const fetchInitialRooms = async () => {

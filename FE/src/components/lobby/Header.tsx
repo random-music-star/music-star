@@ -23,16 +23,13 @@ export default function Header({ channelId }: HeaderProps) {
 
   return (
     <header className='flex items-center justify-between bg-[#6548B9] px-5 py-2 text-white'>
-      {/* 서비스 로고 / 채널 */}
       <section className='flex items-center'>
         <h1 className='mr-6 text-xl font-bold'>아르송모르송</h1>
         <span className='mr-3'>채널 {channelId}</span>
       </section>
-      {/* 메인 */}
       <section className='flex items-center justify-end'>
         <span className='mr-3'>{nickname}님 환영합니다</span>
       </section>
-      {/* 버튼튼 */}
       <section>
         <button
           onClick={handleChannelExit}

@@ -2,7 +2,6 @@ import { useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { toast } from 'sonner';
 import * as z from 'zod';
 
 import { Button } from '@/components/ui/button';
@@ -21,11 +20,24 @@ const signupFormSchema = z.object({
   username: z
     .string()
     .min(1, { message: '사용자명을 입력해주세요.' })
-    .max(20, { message: '사용자명은 20글자 이하여야 합니다.' }),
+    .max(20, { message: '사용자명은 20글자 이하여야 합니다.' })
+    .refine(value => value.trim().length > 0, {
+      message: '공백만으로는 사용자명을 만들 수 없습니다.',
+    })
+    .refine(value => /^[a-zA-Z0-9가-힣_-]+$/.test(value), {
+      message:
+        '사용자명은 영문, 숫자, 한글, 밑줄(_) 및 하이픈(-)만 포함할 수 있습니다.',
+    }),
   password: z
     .string()
     .min(1, { message: '비밀번호를 입력해주세요.' })
-    .max(30, { message: '비밀번호는 30글자 이하여야 합니다.' }),
+    .max(30, { message: '비밀번호는 30글자 이하여야 합니다.' })
+    .refine(value => value.trim().length > 0, {
+      message: '공백만으로는 비밀번호를 만들 수 없습니다.',
+    })
+    .refine(value => !/\s/.test(value), {
+      message: '비밀번호에는 공백을 포함할 수 없습니다.',
+    }),
 });
 
 type SignupFormValues = z.infer<typeof signupFormSchema>;
@@ -50,14 +62,13 @@ export default function SignupForm({ onSuccess }: SignupFormProps) {
     setIsLoading(true);
 
     try {
-      await signUp(data);
-      toast.success('회원가입 성공', {
-        description: '로그인하여 시작하세요!',
-      });
-      onSuccess?.(data.username);
-      form.reset();
+      const result = await signUp(data);
+      if (result) {
+        form.reset();
+        onSuccess?.(data.username);
+      }
     } catch {
-      form.reset();
+      // 에러는 useAuth 내부에서 toast로 처리됨
     } finally {
       setIsLoading(false);
     }
