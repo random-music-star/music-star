@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Lock, Unlock } from 'lucide-react';
+import { Lock } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { useParticipantInfoStore } from '@/stores/websocket/useGameParticipantStore';
@@ -32,6 +32,7 @@ const GameRoomInfo = () => {
 
   const {
     roomTitle,
+    roomNumber,
     hasPassword,
     maxPlayer,
     maxGameRound,
@@ -80,13 +81,14 @@ const GameRoomInfo = () => {
       <div className='flex h-full w-full flex-col gap-6 rounded-xl border border-purple-400 bg-purple-800/20 p-4'>
         <div className='flex items-center justify-between border-b border-purple-700 pb-3'>
           <div className='flex items-center'>
+            <div className='text-md mr-2 rounded-md bg-purple-500/60 px-3 py-1.5 font-bold text-purple-100'>
+              {String(roomNumber).padStart(3, '0')}
+            </div>
             <h2 className='text-center text-xl font-extrabold text-purple-100'>
               {roomTitle || '방 정보'}
             </h2>
-            {hasPassword ? (
+            {hasPassword && (
               <Lock className='mb-[1px] ml-2 h-5 w-5 text-yellow-200' />
-            ) : (
-              <Unlock className='mb-[1px] ml-2 h-5 w-5 text-green-200' />
             )}
           </div>
           <div className='flex'>

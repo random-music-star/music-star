@@ -12,6 +12,7 @@ import { useGameInfoStore } from '@/stores/websocket/useGameRoomInfoStore';
 import { MODE_DICT } from '@/stores/websocket/useGameRoundInfoStore';
 
 import ScoreChatBox from '../ScoreChatBox';
+import EditRoomButton from '../gameRoomInfo/EditRoomButton';
 
 interface ScoreWaitingPanelProps {
   currentUserId: string;
@@ -86,6 +87,7 @@ const ScoreWaitingPanel = ({
 
   const {
     roomTitle,
+    roomNumber,
     hasPassword,
     maxPlayer,
     maxGameRound,
@@ -102,12 +104,17 @@ const ScoreWaitingPanel = ({
       <div className='flex h-full flex-col px-4 py-3'>
         <div className='mb-3 flex items-center justify-between'>
           <div className='flex-1'>
-            <h1 className='drop-shadow-glow flex items-center justify-center text-4xl font-bold text-purple-100'>
-              {roomTitle || '게임 대기실'}
-              <span className='ml-2 text-base text-purple-200'>
-                {hasPassword ? '🔒' : '🔓'}
-              </span>
-            </h1>
+            <div className='flex w-full justify-center'>
+              <div className='mr-2 rounded-md bg-purple-500/60 px-3 py-1.5 text-3xl font-bold text-purple-100'>
+                {String(roomNumber).padStart(3, '0')}
+              </div>
+              <h1 className='drop-shadow-glow flex items-center justify-center text-4xl font-bold text-purple-100'>
+                {roomTitle || '게임 대기실'}
+                <span className='ml-2 text-base text-purple-200'>
+                  {hasPassword ? '🔒' : '🔓'}
+                </span>
+              </h1>
+            </div>
             <div className='mt-1 flex items-center justify-center gap-3'>
               <span
                 className={`rounded-md px-3 py-1 text-sm font-medium ${statusConfig[status].color}`}
@@ -199,9 +206,12 @@ const ScoreWaitingPanel = ({
         {/* 하단 섹션 - 채팅과 방 정보를 나란히 표시 */}
         <div className='flex flex-1 flex-col gap-4 overflow-hidden md:flex-row'>
           <div className='rounded-lg bg-purple-700/40 p-2.5 shadow-md backdrop-blur-sm md:w-[40%]'>
-            <h2 className='mb-1.5 border-b border-purple-400/40 pb-1 text-3xl font-bold text-purple-100'>
-              <span className='mr-1'>🎮</span> 방 정보
-            </h2>
+            <div className='flex justify-between'>
+              <h2 className='mb-1.5 border-b border-purple-400/40 pb-1 text-3xl font-bold text-purple-100'>
+                <span className='mr-1'>🎮</span> 방 정보
+              </h2>
+              <EditRoomButton buttonClassName='rounded-md bg-purple-500/60 px-3 py-1.5 text-sm font-bold text-white shadow-md transition-all hover:bg-purple-400/70 hover:shadow-lg' />
+            </div>
 
             {/* 3열 레이아웃으로 변경 */}
             <div className='mb-2 grid grid-cols-2 gap-2'>
