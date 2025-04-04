@@ -5,6 +5,7 @@ import { getCookie } from 'cookies-next';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
 
+import SEO from '@/components/SEO';
 import ChannelMemberList from '@/components/lobby/ChannelMemberList';
 import ChatBox from '@/components/lobby/ChatBox';
 import CreateRoomButton from '@/components/lobby/CreateRoomButton';
@@ -614,6 +615,7 @@ const LobbyPage = ({ userNickname, channelId }: LobbyServerProps) => {
 
   return (
     <div className='flex h-screen flex-col bg-[url(/background.svg)] bg-cover bg-center'>
+      <SEO title='로비' />
       <Header channelId={channelId} />
       <main className='flex flex-1 overflow-hidden'>
         <section className='m-10 flex flex-1 flex-col rounded-2xl bg-gradient-to-r from-[#4F719C]/80 to-[#5F4EA0]/80 p-6'>
