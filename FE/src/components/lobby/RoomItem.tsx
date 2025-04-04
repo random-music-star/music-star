@@ -15,8 +15,8 @@ interface RoomItemProps {
 
 // 게임 모드 매핑
 const gameModeLabels: Record<string, string> = {
-  FULL: '전곡',
-  DUAL: '2배속',
+  FULL: '한곡',
+  DUAL: '믹스',
   TTS: 'AI',
 };
 

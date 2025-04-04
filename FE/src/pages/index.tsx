@@ -4,6 +4,7 @@ import { getCookie } from 'cookies-next';
 import { motion } from 'framer-motion';
 import { GetServerSideProps } from 'next';
 
+import SEO from '@/components/SEO';
 import AccountFormDialog from '@/components/auth/AccountFormDialog';
 import JumpingAnimation from '@/components/home/JumpingAnimation';
 import ChannelList from '@/components/home/channel/ChannelList';
@@ -37,6 +38,7 @@ export default function Home({ userNickname }: HomeServerProps) {
     <div
       className={`flex max-h-screen min-h-screen flex-col items-center bg-[url('/background.svg')] bg-cover bg-center p-12`}
     >
+      <SEO title='채널 입장' />
       <motion.main
         className='flex text-center'
         initial={{ opacity: 0, y: 20 }}

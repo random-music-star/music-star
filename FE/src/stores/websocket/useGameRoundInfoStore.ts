@@ -18,7 +18,7 @@ const initialRoundInfo: RoundInfo = {
 
 export const MODE_DICT = {
   FULL: '한곡모드',
-  DUAL: '두곡모드',
+  DUAL: '믹스모드',
   TTS: 'AI모드',
 };
 
