@@ -1,5 +1,7 @@
 import { useState } from 'react';
 
+import { useRouter } from 'next/router';
+
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import {
@@ -29,6 +31,7 @@ const ScoreWaitingPanel = ({
   roomId,
   channelId,
 }: ScoreWaitingPanelProps) => {
+  const router = useRouter();
   const { gameRoomInfo } = useGameInfoStore();
   const { participantInfo, hostNickname } = useParticipantInfoStore();
 
@@ -59,6 +62,10 @@ const ScoreWaitingPanel = ({
     } else if (direction === 'next' && currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
     }
+  };
+
+  const handleExit = () => {
+    router.push(`/game/lobby/${channelId}`);
   };
 
   const statusConfig: StatusConfig = {
@@ -93,23 +100,31 @@ const ScoreWaitingPanel = ({
   return (
     <div className='relative h-screen w-full overflow-hidden'>
       <div className='flex h-full flex-col px-4 py-3'>
-        <div className='mb-3 text-center'>
-          <h1 className='drop-shadow-glow flex items-center justify-center text-4xl font-bold text-purple-100'>
-            {roomTitle || '게임 대기실'}
-            <span className='ml-2 text-base text-purple-200'>
-              {hasPassword ? '🔒' : '🔓'}
-            </span>
-          </h1>
-          <div className='mt-1 flex items-center justify-center gap-3'>
-            <span
-              className={`rounded-md px-3 py-1 text-sm font-medium ${statusConfig[status].color}`}
-            >
-              {statusConfig[status].text}
-            </span>
-            <span className='rounded-md bg-purple-800 px-3 py-1 text-sm font-medium text-purple-100'>
-              {formatText[format]} 모드
-            </span>
+        <div className='mb-3 flex items-center justify-between'>
+          <div className='flex-1'>
+            <h1 className='drop-shadow-glow flex items-center justify-center text-4xl font-bold text-purple-100'>
+              {roomTitle || '게임 대기실'}
+              <span className='ml-2 text-base text-purple-200'>
+                {hasPassword ? '🔒' : '🔓'}
+              </span>
+            </h1>
+            <div className='mt-1 flex items-center justify-center gap-3'>
+              <span
+                className={`rounded-md px-3 py-1 text-sm font-medium ${statusConfig[status].color}`}
+              >
+                {statusConfig[status].text}
+              </span>
+              <span className='rounded-md bg-purple-800 px-3 py-1 text-sm font-medium text-purple-100'>
+                {formatText[format]} 모드
+              </span>
+            </div>
           </div>
+          <Button
+            onClick={handleExit}
+            className='absolute top-3 right-4 bg-red-500/70 px-4 py-2 text-sm font-medium text-white hover:bg-red-600/80'
+          >
+            나가기
+          </Button>
         </div>
 
         <div className='mb-3'>
@@ -205,7 +220,6 @@ const ScoreWaitingPanel = ({
                 </div>
               </div>
 
-              {/* 게임 라운드 */}
               <div className='rounded-md bg-purple-600/30 p-1.5 shadow-sm backdrop-blur-sm'>
                 <span className='block font-medium text-purple-200'>
                   게임 라운드
