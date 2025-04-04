@@ -163,7 +163,7 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
           }
 
           if (type === 'next') {
-            if (gameRoundResult.gameRoundResult) {
+            if (useGameRoundInfoStore.getState().roundInfo) {
               gameStateStore.setGameState('SCORE_UPDATE');
             }
           }
