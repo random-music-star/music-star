@@ -21,6 +21,7 @@ interface GameInfoStore {
 
 interface GameInfoState {
   roomTitle: string;
+  roomNumber: number;
   maxPlayer: number;
   hasPassword: boolean;
   maxGameRound: number;
