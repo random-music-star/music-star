@@ -18,8 +18,11 @@ const SEO = ({ title }: SEOProps) => {
         property='og:description'
         content='랜덤뮤직스타에서 랜덤 음악 퀴즈를 시작해보세요!'
       />
-      <meta property='og:image' content='/og/ogimage.png' />
-      <meta property='og:url' content='https://arsongmrsong.com' />
+      <meta
+        property='og:image'
+        content='https://www.music-random.com/og/ogimage.png'
+      />
+      <meta property='og:url' content='https://www.music-random.com' />
       <link rel='icon' href='/favicon.ico' />
       <link
         rel='icon'
