@@ -50,13 +50,6 @@ export default function RoomList({
       ) : (
         // SSE 연결 완료 & 방 목록 내려받기 완료
         <div className='flex flex-1'>
-          {!sseConnected && (
-            <Alert className='mb-4 border-amber-200 bg-amber-50'>
-              <AlertDescription className='text-sm text-amber-700'>
-                ⚠️ 실시간 연결이 불가능합니다.
-              </AlertDescription>
-            </Alert>
-          )}
           {/* 방 목록 표시 */}
           <div className='flex flex-1 items-center justify-between'>
             {/* 이전 버튼 */}
@@ -76,7 +69,7 @@ export default function RoomList({
                   </AlertDescription>
                 </Alert>
               )}
-              <div className='grid min-h-[400px] grid-cols-2 gap-4 lg:grid-cols-3'>
+              <div className='grid min-h-[500px] grid-cols-2 gap-4 lg:grid-cols-3'>
                 {rooms.map(room => (
                   <RoomItem key={room.id} room={room} />
                 ))}

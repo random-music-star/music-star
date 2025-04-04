@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
@@ -55,10 +57,34 @@ export default function RoomForm({
     useRoomForm({
       initialData,
     });
-  const { loading, submitForm } = useRoomApi({ mode, roomId, onSuccess });
+  // useRoomApi에서 error 상태도 가져옴
+  const { loading, error, submitForm } = useRoomApi({
+    mode,
+    roomId,
+    onSuccess,
+  });
+  // 폼 제출 에러를 관리하기 위한 상태
+  const [formSubmitError, setFormSubmitError] = useState<string | null>(null);
 
+  /**
+   * 폼 제출 핸들러
+   * @param data - 제출할 폼 데이터
+   */
   const onSubmit = async (data: RoomFormValues) => {
-    await submitForm(data);
+    // 폼 제출 시 에러 상태 초기화
+    setFormSubmitError(null);
+
+    try {
+      // submitForm 결과가 false인 경우 에러 처리
+      const success = await submitForm(data);
+      if (!success) {
+        setFormSubmitError('방 생성/수정 중 오류가 발생했습니다.');
+      }
+    } catch (err) {
+      // 예상치 못한 에러 처리
+      console.error('Unexpected error:', err);
+      setFormSubmitError('예상치 못한 오류가 발생했습니다. 다시 시도해주세요.');
+    }
   };
 
   return (
@@ -352,6 +378,15 @@ export default function RoomForm({
             />
           </div>
 
+          {/* 에러 메시지 표시 영역 */}
+          {(error || formSubmitError) && (
+            <div className='w-full rounded-md border border-red-400 bg-red-100 px-4 py-2 text-sm text-red-700'>
+              {formSubmitError ||
+                error?.message ||
+                '오류가 발생했습니다. 다시 시도해주세요.'}
+            </div>
+          )}
+
           {/* 버튼 섹션 */}
           <div className='mt-6 flex justify-center gap-3'>
             <button
@@ -369,8 +404,8 @@ export default function RoomForm({
             >
               {loading
                 ? mode === 'create'
-                  ? '생성'
-                  : '수정'
+                  ? '처리중'
+                  : '처리중'
                 : mode === 'create'
                   ? '생성'
                   : '수정'}
