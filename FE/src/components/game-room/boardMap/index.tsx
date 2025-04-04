@@ -12,7 +12,7 @@ const BoardMap = () => {
   const { gameState } = useGameStateStore();
   const { soundEvent, setSoundEvent } = useSoundEventStore();
 
-  const playSound = useSound([
+  const { play, stop } = useSound([
     { key: 'EVENT_CARD', url: '/audio/playsound/event-card.mp3' },
     { key: 'JUMP', url: '/audio/playsound/jump.mp3' },
     { key: 'ROULETTE', url: '/audio/playsound/roulette.mp3' },
@@ -20,9 +20,16 @@ const BoardMap = () => {
   ]);
 
   useEffect(() => {
-    if (soundEvent) playSound(soundEvent);
+    if (soundEvent) play(soundEvent);
     setSoundEvent(null);
-  }, [soundEvent]);
+  }, [soundEvent, play, setSoundEvent]);
+
+  useEffect(() => {
+    return () => {
+      stop();
+      setSoundEvent(null);
+    };
+  }, [stop, setSoundEvent]);
 
   return (
     <div className='relative h-screen w-full overflow-hidden'>

@@ -17,15 +17,22 @@ const ScoreMap = ({
   channelId: string;
 }) => {
   const { soundEvent, setSoundEvent } = useSoundEventStore();
-  const playSound = useSound([
+  const { play, stop } = useSound([
     { key: 'ROULETTE', url: '/audio/playsound/roulette.mp3' },
     { key: 'ROULETTE_RESULT', url: '/audio/playsound/roulette-result.mp3' },
   ]);
 
   useEffect(() => {
-    if (soundEvent) playSound(soundEvent);
+    if (soundEvent) play(soundEvent);
     setSoundEvent(null);
-  }, [soundEvent]);
+  }, [soundEvent, play, setSoundEvent]);
+
+  useEffect(() => {
+    return () => {
+      stop();
+      setSoundEvent(null);
+    };
+  }, [stop, setSoundEvent]);
 
   return (
     <div className='flex h-full w-full'>
@@ -43,7 +50,6 @@ const ScoreMap = ({
         </div>
       </div>
 
-      {/* 우측 영역 (1/4) - ScoreboardTable */}
       <div className='h-full w-[30%] overflow-auto p-4'>
         <ScoreboardTable />
       </div>
