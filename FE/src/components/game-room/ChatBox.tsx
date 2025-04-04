@@ -43,10 +43,10 @@ const ChatBox = ({ currentUserId, roomId, channelId }: ChatBoxProps) => {
   };
 
   return (
-    <div className='w-full flex-1 overflow-hidden bg-black/50 pt-3 text-white backdrop-blur-md'>
+    <div className='flex w-full flex-1 grow flex-col overflow-hidden bg-black/50 pt-3 text-white backdrop-blur-md'>
       <div
         ref={chatContainerRef}
-        className='neon-scrollbar flex-1 overflow-y-auto px-2 py-2'
+        className='neon-scrollbar flex-1 grow overflow-y-auto px-2 py-2'
         style={{ height: 'calc(100% - 90px)' }}
       >
         {gameChattings.map((message, index) => (
