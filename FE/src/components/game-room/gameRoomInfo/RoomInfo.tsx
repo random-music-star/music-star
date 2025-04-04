@@ -10,6 +10,8 @@ import {
 } from '@/stores/websocket/useGameRoomInfoStore';
 import { MODE_DICT } from '@/stores/websocket/useGameRoundInfoStore';
 
+import EditRoomButton from './EditRoomButton';
+
 export type StatusConfig = {
   [key: string]: { text: string; color: string; bgColor: string };
 };
@@ -87,10 +89,13 @@ const GameRoomInfo = () => {
               <Unlock className='mb-[1px] ml-2 h-5 w-5 text-green-200' />
             )}
           </div>
-          <div
-            className={`rounded-full px-3 py-1 ${currentStatus.bgColor} ${currentStatus.color} text-xs font-medium`}
-          >
-            {currentStatus.text}
+          <div className='flex'>
+            <div
+              className={`flex items-center rounded-full px-3 py-1 ${currentStatus.bgColor} ${currentStatus.color} text-xs font-medium`}
+            >
+              {currentStatus.text}
+            </div>
+            <EditRoomButton />
           </div>
         </div>
 

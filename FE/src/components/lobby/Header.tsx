@@ -22,9 +22,9 @@ export default function Header({ channelId }: HeaderProps) {
   };
 
   return (
-    <header className='flex items-center justify-between bg-[#6548B9] px-5 py-2 text-white'>
+    <header className='flex items-center justify-between bg-[#8352D1]/80 px-5 py-2 text-white'>
       <section className='flex items-center'>
-        <h1 className='mr-6 text-xl font-bold'>아르송모르송</h1>
+        <h1 className='mr-6 text-xl font-bold'>랜덤뮤직스타</h1>
         <span className='mr-3'>채널 {channelId}</span>
       </section>
       <section className='flex items-center justify-end'>
@@ -33,13 +33,13 @@ export default function Header({ channelId }: HeaderProps) {
       <section>
         <button
           onClick={handleChannelExit}
-          className='mr-2 cursor-pointer rounded bg-[#8352D1] px-3 py-1'
+          className='mr-2 cursor-pointer rounded bg-[#6548B9] px-3 py-1'
         >
           채널 나가기
         </button>
         <button
           onClick={handleLogout}
-          className='cursor-pointer rounded bg-[#8352D1] px-3 py-1'
+          className='cursor-pointer rounded bg-[#6548B9] px-3 py-1'
         >
           로그아웃
         </button>

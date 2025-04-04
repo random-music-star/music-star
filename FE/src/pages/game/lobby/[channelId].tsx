@@ -660,7 +660,7 @@ const LobbyPage = ({ userNickname, channelId }: LobbyServerProps) => {
 
             <TabsContent
               value='chat'
-              className='flex-grow overflow-hidden border-t-5 border-[#30FFFF]/80 bg-black/50'
+              className='flex-grow overflow-hidden border-t-5 border-[#30FFFF] bg-black/50'
             >
               <ChatBox channelId={channelId} />
             </TabsContent>
