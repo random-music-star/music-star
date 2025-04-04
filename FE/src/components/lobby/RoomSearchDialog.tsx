@@ -97,7 +97,7 @@ const RoomSearchDialog = () => {
   return (
     <>
       <button
-        className='hover:bg-opacity-80 mr-2 rounded-full bg-[#DA9FFE] px-5 py-1.5 font-bold text-black hover:bg-[#DA9FFE]/80'
+        className='hover:bg-opacity-80 mr-2 cursor-pointer rounded-full bg-[#DA9FFE] px-5 py-1.5 text-sm font-bold text-black hover:bg-[#DA9FFE]/80'
         onClick={() => setIsSearchDialogOpen(true)}
       >
         방 검색

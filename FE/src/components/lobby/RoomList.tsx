@@ -69,15 +69,22 @@ export default function RoomList({
             </button>
             {/* 방 목록 */}
             <div className='relative flex flex-1 flex-col justify-between'>
-              <div className='absolute top-[-50px] left-[50%] text-center text-sm font-medium text-white'>
-                {totalPages > 0
-                  ? `${currentPage + 1} / ${totalPages}`
-                  : '0 / 0'}
-              </div>
+              {!sseConnected && (
+                <Alert className='mb-4 border-amber-200 bg-amber-50'>
+                  <AlertDescription className='text-sm text-amber-700'>
+                    ⚠️ 실시간 연결이 불가능합니다.
+                  </AlertDescription>
+                </Alert>
+              )}
               <div className='grid min-h-[400px] grid-cols-2 gap-4 lg:grid-cols-3'>
                 {rooms.map(room => (
                   <RoomItem key={room.id} room={room} />
                 ))}
+              </div>
+              <div className='absolute bottom-[-40px] left-[50%] text-center text-sm font-medium text-white'>
+                {totalPages > 0
+                  ? `${currentPage + 1} / ${totalPages}`
+                  : '0 / 0'}
               </div>
             </div>
             {/* 다음 버튼 */}
