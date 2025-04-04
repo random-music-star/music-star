@@ -1,3 +1,8 @@
+import { useEffect } from 'react';
+
+import useSound from '@/hooks/useSound';
+import { useSoundEventStore } from '@/stores/useSoundEventStore';
+
 import ScoreChatBox from '../ScoreChatBox';
 import ScoreboardTable from './ScoreBoardTable';
 import ScoreRoundInformation from './ScoreRoundInformation';
@@ -11,6 +16,17 @@ const ScoreMap = ({
   roomId: string;
   channelId: string;
 }) => {
+  const { soundEvent, setSoundEvent } = useSoundEventStore();
+  const playSound = useSound([
+    { key: 'ROULETTE', url: '/audio/playsound/roulette.mp3' },
+    { key: 'ROULETTE_RESULT', url: '/audio/playsound/roulette-result.mp3' },
+  ]);
+
+  useEffect(() => {
+    if (soundEvent) playSound(soundEvent);
+    setSoundEvent(null);
+  }, [soundEvent]);
+
   return (
     <div className='flex h-full w-full'>
       <div className='flex w-[70%] flex-col pt-10'>

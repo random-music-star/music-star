@@ -63,7 +63,7 @@ export default function RoomList({
             <button
               onClick={() => !isFirstPage && onPageChange(currentPage - 1)}
               disabled={isFirstPage}
-              className={`${isFirstPage ? 'opacity-10' : 'hover:cursor-pointer hover:text-[#82cdce]'} mr-3 text-7xl text-[#9FFCFE]`}
+              className={`${isFirstPage ? 'opacity-10' : 'hover:cursor-pointer hover:text-[#82cdce]'} mr-3 text-4xl text-[#9FFCFE]`}
             >
               ◀
             </button>
@@ -84,7 +84,7 @@ export default function RoomList({
             <button
               onClick={() => !isLastPage && onPageChange(currentPage + 1)}
               disabled={isLastPage}
-              className={`${isLastPage ? 'opacity-10' : 'hover:cursor-pointer hover:text-[#82cdce]'} ml-3 text-7xl text-[#9FFCFE]`}
+              className={`${isLastPage ? 'opacity-10' : 'hover:cursor-pointer hover:text-[#82cdce]'} ml-3 text-4xl text-[#9FFCFE]`}
             >
               ▶
             </button>

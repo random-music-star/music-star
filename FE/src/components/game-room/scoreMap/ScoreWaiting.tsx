@@ -137,12 +137,12 @@ const ScoreWaitingPanel = ({
           </div>
 
           <div className='rounded-lg bg-purple-900/50 p-3 shadow-inner'>
-            <div className='grid grid-cols-5 grid-rows-3 gap-5'>
+            <div className='grid grid-cols-5 grid-rows-3 gap-3'>
               {displayParticipants.map((participant, index) => (
                 <div
                   key={participant ? participant.userName : `empty-${index}`}
                   className={cn(
-                    'flex items-center justify-start rounded-md p-3 py-6 transition-all',
+                    'flex items-center justify-start rounded-md p-3 transition-all',
                     participant
                       ? participant.userName === hostNickname
                         ? 'border border-purple-300 bg-purple-700'

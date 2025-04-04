@@ -97,7 +97,6 @@ export default function GameRoom({
   const isBoardFormat = gameRoomInfo?.format === 'BOARD';
   const isWaiting = gameRoomInfo === null || gameRoomInfo.status === 'WAITING';
 
-  // BOARD 포맷
   if (isBoardFormat) {
     if (isWaiting) {
       return (
@@ -142,13 +141,11 @@ export default function GameRoom({
     );
   }
 
-  // GENERAL 또는 SCORE 포맷
   if (gameRoomInfo?.format === 'GENERAL') {
     return (
       <div className='flex flex-1 justify-between bg-[url(/background.svg)] bg-cover bg-center'>
         <div className='relative w-full'>
           <div className='relative h-screen w-full overflow-hidden'>
-            {/* 대기 화면 (WaitingRoom) */}
             <div
               className={cn(
                 isWaiting ? 'translate-y-0' : '-translate-y-full',
@@ -162,8 +159,6 @@ export default function GameRoom({
                 channelId={channelId}
               />
             </div>
-
-            {/* 게임 화면 (ScoreMap) */}
             <div
               className={cn(
                 'absolute top-0 left-0 h-full w-full transition-transform duration-700 ease-in-out',
