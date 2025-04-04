@@ -24,9 +24,8 @@ const signupFormSchema = z.object({
     .refine(value => value.trim().length > 0, {
       message: '공백만으로는 사용자명을 만들 수 없습니다.',
     })
-    .refine(value => /^[a-zA-Z0-9가-힣_-]+$/.test(value), {
-      message:
-        '사용자명은 영문, 숫자, 한글, 밑줄(_) 및 하이픈(-)만 포함할 수 있습니다.',
+    .refine(value => /^[a-zA-Z0-9_-]+$/.test(value), {
+      message: '영문, 숫자, 밑줄(_) 및 하이픈(-)만 포함할 수 있습니다.',
     }),
   password: z
     .string()
