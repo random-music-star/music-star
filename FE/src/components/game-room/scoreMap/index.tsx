@@ -27,6 +27,7 @@ const ScoreMap = ({
     setSoundEvent(null);
   }, [soundEvent, play, setSoundEvent]);
 
+  // 컴포넌트 언마운트 시 사운드 정리
   useEffect(() => {
     return () => {
       stop();
@@ -50,6 +51,7 @@ const ScoreMap = ({
         </div>
       </div>
 
+      {/* 우측 영역 (1/4) - ScoreboardTable */}
       <div className='h-full w-[30%] overflow-auto p-4'>
         <ScoreboardTable />
       </div>

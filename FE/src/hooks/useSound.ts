@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useRef } from 'react';
 
 interface SoundFile {
   key: string;
@@ -14,36 +14,15 @@ const useSound = (soundFiles: SoundFile[]): SoundControls => {
   const sounds = useRef<Record<string, HTMLAudioElement>>({});
   const currentPlaying = useRef<HTMLAudioElement | null>(null);
 
-  // 사운드 파일 로드
-  useEffect(() => {
-    soundFiles.forEach(({ key, url }) => {
-      if (!sounds.current[key]) {
-        const audio = new Audio(url);
-        audio.preload = 'auto';
-        sounds.current[key] = audio;
-      }
-    });
+  // 컴포넌트 본문에서 직접 초기화 (작동하는 버전과 동일)
+  soundFiles.forEach(({ key, url }) => {
+    if (!sounds.current[key]) {
+      const audio = new Audio(url);
+      audio.preload = 'auto';
+      sounds.current[key] = audio;
+    }
+  });
 
-    // 컴포넌트 언마운트 시 클린업
-    return () => {
-      // 현재 재생 중인 사운드 중지
-      if (currentPlaying.current) {
-        currentPlaying.current.pause();
-        currentPlaying.current.currentTime = 0;
-        currentPlaying.current = null;
-      }
-
-      // 모든 오디오 요소 정리
-      Object.values(sounds.current).forEach(audio => {
-        audio.pause();
-        audio.src = '';
-      });
-
-      sounds.current = {};
-    };
-  }, [soundFiles]);
-
-  // 사운드 재생 함수
   const playSound = useCallback((key: string) => {
     const sound = sounds.current[key];
     if (sound) {
@@ -60,7 +39,6 @@ const useSound = (soundFiles: SoundFile[]): SoundControls => {
     }
   }, []);
 
-  // 현재 재생 중인 사운드 중지 함수
   const stopSound = useCallback(() => {
     if (currentPlaying.current) {
       currentPlaying.current.pause();
