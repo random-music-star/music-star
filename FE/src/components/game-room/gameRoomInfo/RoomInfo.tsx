@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { Lock, Unlock } from 'lucide-react';
+
 import { cn } from '@/lib/utils';
 import { useParticipantInfoStore } from '@/stores/websocket/useGameParticipantStore';
 import {
@@ -79,21 +81,10 @@ const GameRoomInfo = () => {
             <h2 className='text-center text-xl font-extrabold text-purple-100'>
               {roomTitle || '방 정보'}
             </h2>
-            {!hasPassword && (
-              <svg
-                xmlns='http://www.w3.org/2000/svg'
-                className='mb-[1px] ml-2 h-5 w-5 font-medium text-yellow-200'
-                fill='none'
-                viewBox='0 0 24 24'
-                stroke='currentColor'
-              >
-                <path
-                  strokeLinecap='round'
-                  strokeLinejoin='round'
-                  strokeWidth={2}
-                  d='M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z'
-                />
-              </svg>
+            {hasPassword ? (
+              <Lock className='mb-[1px] ml-2 h-5 w-5 text-yellow-200' />
+            ) : (
+              <Unlock className='mb-[1px] ml-2 h-5 w-5 text-green-200' />
             )}
           </div>
           <div
