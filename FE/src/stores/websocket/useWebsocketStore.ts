@@ -7,6 +7,7 @@ import { useNicknameStore } from '../auth/useNicknameStore';
 import { useSoundEventStore } from '../useSoundEventStore';
 import { useGameBubbleStore } from './useGameBubbleStore';
 import { useGameChatStore } from './useGameChatStore';
+import { useGameDiceStore } from './useGameDiceStore';
 import { useParticipantInfoStore } from './useGameParticipantStore';
 import { useGameInfoStore } from './useGameRoomInfoStore';
 import { useGameRoundInfoStore } from './useGameRoundInfoStore';
@@ -105,6 +106,7 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
       const gameBubbleStore = useGameBubbleStore.getState();
       const roundHint = useRoundHintStore.getState();
       const soundEventStore = useSoundEventStore.getState();
+      const gameDiceStore = useGameDiceStore.getState();
 
       newSubscriptions['messageQueue'] = client.subscribe(
         `/user/queue/system`,
@@ -163,8 +165,9 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
           }
 
           if (type === 'next') {
-            if (useGameRoundInfoStore.getState().roundInfo) {
+            if (useGameRoundResultStore.getState().gameRoundResult) {
               gameStateStore.setGameState('SCORE_UPDATE');
+              gameDiceStore.setDice(response);
             }
           }
 
@@ -199,18 +202,6 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
 
           if (type === 'roomInfo') {
             gameRoomStore.setGameInfo(response);
-
-            if (response.status === 'IN_PROGRESS') {
-              gameStateStore.setGameState('ROUND_INFO');
-              const initialBoard = useParticipantInfoStore
-                .getState()
-                .participantInfo.reduce(
-                  (acc, participant) => ({ ...acc, [participant.userName]: 0 }),
-                  {} as Record<string, number>,
-                );
-
-              score.setScores(initialBoard);
-            }
           }
 
           if (type === 'userInfo') {
@@ -221,10 +212,16 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
             participantInfoStore.setIsAllReady(response.allReady);
           }
 
+          if (type === 'diceStart') {
+            gameDiceStore.setIsActiveDice(true);
+          }
+          if (type === 'diceEnd') {
+            gameDiceStore.setIsActiveDice(false);
+          }
+
           if (type === 'move') {
             score.updateScore(response.username, response.position);
             gameStateStore.setGameState('SCORE_UPDATE');
-            // soundEventStore.setSoundEvent('JUMP');
           }
 
           if (type === 'gameEnd') {

@@ -1,11 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 
+import Image from 'next/image';
+
 import { cn } from '@/lib/utils';
 import { useSoundEventStore } from '@/stores/useSoundEventStore';
 import {
   EventType,
   useGameBubbleStore,
 } from '@/stores/websocket/useGameBubbleStore';
+import { useGameDiceStore } from '@/stores/websocket/useGameDiceStore';
 import { useParticipantInfoStore } from '@/stores/websocket/useGameParticipantStore';
 import { useScoreStore } from '@/stores/websocket/useScoreStore';
 
@@ -51,6 +54,19 @@ const footholderRatios: FootholderPosition[] = [
   { xRatio: 0.78, yRatio: 0.16, size: 1.5 },
   { xRatio: 0.92, yRatio: 0.14, size: 2 },
 ];
+
+// bubble.svg를 사용할 발판 번호 목록
+const bubbleRightMap: Record<number, boolean> = {
+  0: true,
+  1: true,
+  2: true,
+  10: true,
+  11: true,
+  12: true,
+  13: true,
+  14: true,
+  15: true,
+};
 
 const EventOverlay = ({ eventType }: { eventType: EventType }) => {
   const [visible, setVisible] = useState(false);
@@ -109,11 +125,84 @@ const EventOverlay = ({ eventType }: { eventType: EventType }) => {
   );
 };
 
+const BubbleContent = ({ isActive }: { isActive: boolean }) => {
+  const [currentImage, setCurrentImage] = useState(1);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const { diceTotalmovement } = useGameDiceStore();
+  const animationRef = useRef<NodeJS.Timeout | null>(null);
+
+  const imagePaths = [
+    '/eventemoji/move_1.png',
+    '/eventemoji/move_2.png',
+    '/eventemoji/move_3.png',
+  ];
+
+  useEffect(() => {
+    if (isActive && !isAnimating) {
+      setIsAnimating(true);
+
+      let count = 0;
+      const startAnimation = () => {
+        animationRef.current = setInterval(() => {
+          count++;
+          setCurrentImage(prev => (prev % 3) + 1);
+
+          if (count >= 6) {
+            if (animationRef.current) {
+              clearInterval(animationRef.current);
+            }
+            if (diceTotalmovement) setCurrentImage(diceTotalmovement);
+            setIsAnimating(false);
+          }
+        }, 167);
+      };
+
+      startAnimation();
+    }
+
+    return () => {
+      if (animationRef.current) {
+        clearInterval(animationRef.current);
+      }
+    };
+  }, [isActive, diceTotalmovement]);
+
+  useEffect(() => {
+    if (!isActive) {
+      setIsAnimating(false);
+      if (animationRef.current) {
+        clearInterval(animationRef.current);
+      }
+    }
+  }, [isActive]);
+
+  if (!diceTotalmovement) return null;
+
+  return (
+    <div className='relative flex h-full w-full items-center justify-center'>
+      {imagePaths.map((path, index) => (
+        <Image
+          key={index}
+          className={cn(
+            currentImage !== index + 1 ? 'opacity-0' : 'opacity-100',
+            `absolute top-1/4 left-1/4 -mt-2 h-1/2 w-1/2 object-contain transition-opacity duration-100 ease-in-out`,
+          )}
+          src={path}
+          alt={`Move ${index + 1}`}
+          width={200}
+          height={200}
+        />
+      ))}
+    </div>
+  );
+};
+
 const GameBoard = () => {
   const { scores } = useScoreStore();
   const { targetUser, triggerUser, eventType } = useGameBubbleStore();
   const { participantInfo } = useParticipantInfoStore();
   const { setSoundEvent } = useSoundEventStore();
+  const { isActiveDice, diceUsername } = useGameDiceStore();
   const [isLoading, setIsLoading] = useState(true);
   const [characters, setCharacters] = useState<UserCharacter[]>([]);
   const [windowSize, setWindowSize] = useState({
@@ -334,12 +423,45 @@ const GameBoard = () => {
         const nameX = x;
         const nameY = y - charHeight - 30 - characterYOffset;
         const characterRenderKey = `char-${index}-${character.name}`;
+
+        const isLeftSide = bubbleRightMap[character.position] || false;
+        const bubbleImage = isLeftSide ? '/bubble.svg' : '/bubble_left.svg';
+
+        const bubbleSize = charWidth * 2;
+
+        const bubbleX = characterX - bubbleSize + 20;
+        const bubbleY = characterY - bubbleSize + 20;
+
+        const isCurrentPlayer = character.name === diceUsername;
+
         return (
           <div
             key={characterRenderKey}
             className='character'
             style={{ transform: `translateY(${character.animationOffset}px)` }}
           >
+            {/* 말풍선 표시 */}
+            <div
+              className='bubble'
+              style={{
+                position: 'absolute',
+                left: isLeftSide ? `${bubbleX + 200}px` : `${bubbleX}px`,
+                top: `${bubbleY}px`,
+                width: `${bubbleSize}px`,
+                height: `${bubbleSize}px`,
+                backgroundImage: `url(${bubbleImage})`,
+                backgroundSize: 'contain',
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: 'center',
+                zIndex: 10,
+                opacity: isActiveDice && isCurrentPlayer ? 1 : 0,
+                transition: 'opacity 0.3s ease-in-out',
+              }}
+            >
+              {/* 말풍선 내부 이동 숫자 애니메이션 */}
+              <BubbleContent isActive={isActiveDice && isCurrentPlayer} />
+            </div>
+
             <div
               className='character-name'
               style={{ left: `${nameX}px`, top: `${nameY}px` }}
