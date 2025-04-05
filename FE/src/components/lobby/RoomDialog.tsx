@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Room } from '@/pages/game/lobby/[channelId]';
+import { useNicknameStore } from '@/stores/auth/useNicknameStore';
 
 const passwordSchema = z.object({
   password: z
@@ -50,6 +51,7 @@ export default function RoomDialog({ room, isOpen, onClose }: RoomDialogProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const { nickname } = useNicknameStore();
 
   // 창이 열릴 때마다 에러 메시지와 로딩 상태 초기화
   useEffect(() => {
@@ -73,7 +75,10 @@ export default function RoomDialog({ room, isOpen, onClose }: RoomDialogProps) {
     try {
       const response = await fetch(`${API_URL}/room/enter`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          Authorization: nickname,
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
           roomId: room.id,
           password: password,
