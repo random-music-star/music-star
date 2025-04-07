@@ -5,7 +5,7 @@ export default function CreateRoomButton() {
     <RoomFormDialog
       mode='create'
       buttonText='방 생성'
-      buttonClassName='bg-[#9FFCFE] text-black font-bold hover:bg-opacity-80 rounded-full px-6 hover:bg-[#9FFCFE]/80'
+      buttonClassName='h-auto cursor-pointer bg-[#9FFCFE] text-sm text-black font-bold hover:bg-opacity-80 rounded-full px-5 py-1.5 hover:bg-[#9FFCFE]/80'
     />
   );
 }

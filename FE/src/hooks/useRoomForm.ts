@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
-import { createRoomFormSchema } from '@/types/rooms';
+import { createRoomFormSchema } from '@/schemas/roomFormSchema';
 import { Mode } from '@/types/websocket';
 
 // Zod 스키마로부터 타입 추론

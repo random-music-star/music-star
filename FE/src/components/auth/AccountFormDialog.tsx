@@ -41,7 +41,7 @@ export default function AccountFormDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className='rounded-2xl bg-purple-700/90 hover:bg-purple-700/70'>
+        <Button className='cursor-pointer rounded-2xl bg-purple-700/90 hover:bg-purple-700/70'>
           로그인 / 회원가입
         </Button>
       </DialogTrigger>
@@ -66,13 +66,13 @@ export default function AccountFormDialog() {
         >
           <TabsList className='absolute top-[-40px] right-[-7px] flex flex-row space-x-1 bg-transparent'>
             <TabsTrigger
-              className='h-[45px] w-[120px] rounded-lg rounded-br-none rounded-bl-none border-4 border-white bg-[#9F89EB] text-lg font-bold text-white data-[state=active]:border-b-0 data-[state=active]:bg-gradient-to-b data-[state=active]:shadow-none data-[state=inactive]:bg-[#C6B6FF]'
+              className={`h-[45px] w-[120px] rounded-lg rounded-br-none rounded-bl-none border-4 border-white bg-[#9F89EB] text-lg font-bold text-white data-[state=active]:border-b-0 data-[state=active]:bg-gradient-to-b data-[state=active]:shadow-none data-[state=inactive]:bg-[#C6B6FF] ${activeTab !== 'signup' ? 'cursor-pointer' : ''}`}
               value='signup'
             >
               회원가입
             </TabsTrigger>
             <TabsTrigger
-              className='h-[45px] w-[120px] rounded-lg rounded-br-none rounded-bl-none border-4 border-white bg-[#9F89EB] text-lg font-bold text-white data-[state=active]:border-b-0 data-[state=active]:bg-gradient-to-b data-[state=active]:shadow-none data-[state=inactive]:bg-[#C6B6FF]'
+              className={`h-[45px] w-[120px] rounded-lg rounded-br-none rounded-bl-none border-4 border-white bg-[#9F89EB] text-lg font-bold text-white data-[state=active]:border-b-0 data-[state=active]:bg-gradient-to-b data-[state=active]:shadow-none data-[state=inactive]:bg-[#C6B6FF] ${activeTab !== 'login' ? 'cursor-pointer' : ''}`}
               value='login'
             >
               로그인

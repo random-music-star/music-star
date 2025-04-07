@@ -51,9 +51,25 @@ const RoomSearchDialog = () => {
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     setError('');
+
+    // 방 번호로 검색 시 입력값 검증
+    if (searchType === 'number') {
+      if (!searchQuery.trim()) {
+        setError('방 번호를 숫자값으로 입력해주세요.');
+        return;
+      }
+
+      // 숫자값 이외의 값이 입력된 경우 검증
+      if (!/^\d+$/.test(searchQuery.trim())) {
+        setError('방 번호는 숫자만 입력 가능합니다.');
+        return;
+      }
+    }
+
+    setIsLoading(true);
     setRooms([]);
+
     try {
       const endpoint =
         searchType === 'title'
@@ -116,7 +132,7 @@ const RoomSearchDialog = () => {
                 textShadow: `-3px -3px 0 #6548B9, 3px -3px 0 #6548B9, -3px 3px 0 #6548B9, 3px 3px 0 #6548B9`,
               }}
             >
-              방 검색
+              ROOM SEARCH
             </DialogTitle>
           </DialogHeader>
           <section className='mt-3'>
@@ -171,7 +187,7 @@ const RoomSearchDialog = () => {
               <button
                 type='submit'
                 disabled={isLoading}
-                className='ml-2 rounded bg-purple-600 px-4 py-2 text-white hover:bg-purple-700 disabled:opacity-50'
+                className='ml-2 rounded-full bg-purple-600 px-4 py-2 text-white shadow-md hover:bg-purple-700 disabled:opacity-50'
               >
                 검색
               </button>

@@ -70,6 +70,18 @@ export const getServerSideProps: GetServerSideProps = async ({
   const userNickname = (await getCookie('userNickname', { req, res })) || '';
   const { channelId } = params as { channelId: string };
 
+  // 유효하지 않은 채널 ID 검증 (숫자가 아니거나 범위를 벗어난 경우)
+  if (
+    !channelId ||
+    !/^\d+$/.test(channelId) || // 숫자만 허용
+    parseInt(channelId) <= 0 || // 양수만 허용
+    parseInt(channelId) > 6
+  ) {
+    return {
+      notFound: true,
+    };
+  }
+
   if (!userNickname) {
     return {
       redirect: {
@@ -143,16 +155,16 @@ const LobbyPage = ({ userNickname, channelId }: LobbyServerProps) => {
     }
   }, [router.query, currentPage]);
 
+  // 컴포넌트 마운트 시에만 로딩 상태 설정
   useEffect(() => {
     setIsLoading(true);
-    const fetchInitialRooms = async () => {
-      try {
-        const pageToFetch = router.query.page ? Number(router.query.page) : 0;
 
+    const fetchInitialData = async () => {
+      try {
         const response = await axios.get(`${API_URL}/room`, {
           params: {
             channelId: channelId,
-            page: pageToFetch,
+            page: 0,
             size: pageSize,
           },
         });
@@ -163,13 +175,15 @@ const LobbyPage = ({ userNickname, channelId }: LobbyServerProps) => {
         setTotalPages(data.totalPages || 1);
         setIsLoading(false);
       } catch (error) {
-        console.error('초기 방 목록 가져오기 오류:', error);
+        console.error('초기 데이터 로딩 오류:', error);
         setIsLoading(false);
       }
     };
 
-    fetchInitialRooms();
-  }, [channelId, pageSize, router.query.page]);
+    fetchInitialData();
+
+    // 이 useEffect는 컴포넌트가 마운트될 때 한 번만 실행됩니다
+  }, []);
 
   // 채널 멤버 목록 가져오기
   useEffect(() => {
@@ -211,8 +225,6 @@ const LobbyPage = ({ userNickname, channelId }: LobbyServerProps) => {
   // 페이지 전환 처리 함수
   const handlePageChange = async (newPage: number) => {
     try {
-      setIsLoading(true);
-
       await router.push(
         {
           pathname: router.pathname,
@@ -237,10 +249,8 @@ const LobbyPage = ({ userNickname, channelId }: LobbyServerProps) => {
       setRooms(data.content || []);
       setCurrentPage(data.pageable?.pageNumber || newPage);
       setTotalPages(data.totalPages || 1);
-      setIsLoading(false);
     } catch (error) {
       console.error('방 목록 가져오기 오류:', error);
-      setIsLoading(false);
     }
   };
 
@@ -645,13 +655,13 @@ const LobbyPage = ({ userNickname, channelId }: LobbyServerProps) => {
           >
             <TabsList className='flex flex-row space-x-1 bg-transparent'>
               <TabsTrigger
-                className='h-[45px] w-[120px] rounded-lg rounded-br-none rounded-bl-none bg-black/70 text-lg font-bold text-[#30FFFF] data-[state=active]:bg-[#30FFFF]/50 data-[state=active]:text-white data-[state=inactive]:bg-black/10 data-[state=inactive]:text-[#30FFFF]'
+                className='h-[45px] w-[120px] rounded-lg rounded-br-none rounded-bl-none bg-black/70 text-lg font-bold text-[#30FFFF] data-[state=active]:bg-[#1C8C9A] data-[state=active]:text-white data-[state=inactive]:bg-black/10 data-[state=inactive]:text-[#30FFFF] data-[state=inactive]:hover:cursor-pointer'
                 value='chat'
               >
                 채팅
               </TabsTrigger>
               <TabsTrigger
-                className='h-[45px] w-[120px] rounded-lg rounded-br-none rounded-bl-none bg-black/70 text-lg font-bold text-[#30FFFF] data-[state=active]:bg-[#30FFFF]/50 data-[state=active]:text-white data-[state=inactive]:bg-black/10 data-[state=inactive]:text-[#30FFFF]'
+                className='h-[45px] w-[120px] rounded-lg rounded-br-none rounded-bl-none bg-black/70 text-lg font-bold text-[#30FFFF] data-[state=active]:bg-[#1C8C9A] data-[state=active]:text-white data-[state=inactive]:bg-black/10 data-[state=inactive]:text-[#30FFFF] data-[state=inactive]:hover:cursor-pointer'
                 value='members'
               >
                 멤버 목록
@@ -660,14 +670,14 @@ const LobbyPage = ({ userNickname, channelId }: LobbyServerProps) => {
 
             <TabsContent
               value='chat'
-              className='flex-grow overflow-hidden border-t-5 border-[#30FFFF] bg-black/50'
+              className='flex-grow overflow-hidden border-t-5 border-[#1C8C9A] bg-black/50'
             >
               <ChatBox channelId={channelId} />
             </TabsContent>
 
             <TabsContent
               value='members'
-              className='flex-grow overflow-hidden border-t-5 border-[#30FFFF]/80 bg-black/50'
+              className='flex-grow overflow-hidden border-t-5 border-[#1C8C9A] bg-black/50'
             >
               <ChannelMemberList
                 members={members}

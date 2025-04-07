@@ -1,5 +1,5 @@
+import { RoomFormValues } from '@/schemas/roomFormSchema';
 import { useChannelStore } from '@/stores/lobby/useChannelStore';
-import { RoomFormValues } from '@/types/rooms';
 import { Mode } from '@/types/websocket';
 
 /**

@@ -76,12 +76,16 @@ export default function ChatBox({ channelId }: { channelId: string }) {
                 </div>
               ) : (
                 <div className='text-base text-white'>
-                  <span className='font-medium'>
-                    {chat.sender === nickname
-                      ? `${chat.sender}(나)`
-                      : chat.sender}
-                  </span>
-                  <span> : </span>
+                  {chat.sender === nickname ? (
+                    <span className='font-medium text-cyan-300'>
+                      {chat.sender}(나)
+                    </span>
+                  ) : (
+                    <span className='font-medium text-fuchsia-200'>
+                      {chat.sender}
+                    </span>
+                  )}
+                  <span className='text-fuchsia-300'> : </span>
                   <span>{chat.message}</span>
                 </div>
               )}

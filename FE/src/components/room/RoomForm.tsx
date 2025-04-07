@@ -66,10 +66,6 @@ export default function RoomForm({
   // 폼 제출 에러를 관리하기 위한 상태
   const [formSubmitError, setFormSubmitError] = useState<string | null>(null);
 
-  /**
-   * 폼 제출 핸들러
-   * @param data - 제출할 폼 데이터
-   */
   const onSubmit = async (data: RoomFormValues) => {
     // 폼 제출 시 에러 상태 초기화
     setFormSubmitError(null);
@@ -91,15 +87,15 @@ export default function RoomForm({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className='mx-auto flex w-full max-w-6xl flex-col justify-between gap-4 lg:flex-row'
+        className='m-3 mx-auto flex w-full max-w-6xl flex-col justify-between gap-4 lg:flex-row'
       >
-        <section className='w-full space-y-4 px-4 lg:w-1/2'>
+        <section className='w-full space-y-6 px-4 lg:w-1/2'>
           {/* 방 이름 */}
           <FormField
             control={form.control}
             name='title'
             render={({ field }) => (
-              <FormItem>
+              <FormItem className='mb-6'>
                 <FormLabel
                   className={`mb-2 flex justify-between text-base font-bold ${
                     form.formState.errors.title
@@ -122,7 +118,9 @@ export default function RoomForm({
 
           {/* 맵 선택 - 새로운 비주얼 맵 선택기 */}
           {mode && (
-            <MapSelector form={form} error={!!form.formState.errors.format} />
+            <div className='mb-6'>
+              <MapSelector form={form} error={!!form.formState.errors.format} />
+            </div>
           )}
 
           {/* 방 공개 설정 */}
@@ -133,13 +131,16 @@ export default function RoomForm({
               <FormItem className='mb-0'>
                 <FormLabel
                   className={`mb-2 flex justify-between text-base font-bold ${
-                    form.formState.errors.hasPassword
+                    form.formState.errors.hasPassword ||
+                    (form.formState.errors.password && hasPassword)
                       ? 'text-red-400'
                       : 'text-green-200'
                   } drop-shadow-md`}
                 >
                   <span>방 공개 설정</span>
-                  <FormMessage className='text-sm text-red-400' />
+                  <FormMessage className='text-sm text-red-400'>
+                    {hasPassword ? form.formState.errors.password?.message : ''}
+                  </FormMessage>
                 </FormLabel>
                 <FormControl>
                   <RadioGroup
@@ -147,9 +148,9 @@ export default function RoomForm({
                     value={field.value ? 'true' : 'false'}
                     onValueChange={value => {
                       field.onChange(value === 'true');
-                      // 열린 방으로 변경 시 비밀번호 필드 초기화
                       if (value === 'false') {
                         form.setValue('password', '');
+                        form.clearErrors('password');
                       }
                     }}
                   >
@@ -185,7 +186,7 @@ export default function RoomForm({
             control={form.control}
             name='password'
             render={({ field }) => (
-              <FormItem>
+              <FormItem className='mb-6'>
                 <FormControl>
                   <Input
                     {...field}
@@ -199,20 +200,19 @@ export default function RoomForm({
                     }
                   />
                 </FormControl>
-                <FormMessage className='mt-1 text-xs text-red-400' />
               </FormItem>
             )}
           />
         </section>
 
         <section className='flex w-full flex-col justify-between space-y-4 px-4 lg:w-1/2'>
-          <div>
+          <div className='space-y-6'>
             {/* 최대 라운드 설정 */}
             <FormField
               control={form.control}
               name='maxGameRound'
               render={({ field }) => (
-                <FormItem>
+                <FormItem className='mb-6'>
                   <FormLabel
                     className={`mb-2 flex justify-between text-base font-bold ${
                       form.formState.errors.maxGameRound
@@ -253,7 +253,7 @@ export default function RoomForm({
               control={form.control}
               name='maxPlayer'
               render={({ field }) => (
-                <FormItem>
+                <FormItem className='mb-6'>
                   <FormLabel
                     className={`mb-2 flex justify-between text-base font-bold ${
                       form.formState.errors.maxPlayer
@@ -294,7 +294,7 @@ export default function RoomForm({
               control={form.control}
               name='modes'
               render={() => (
-                <FormItem>
+                <FormItem className='mb-6'>
                   <FormLabel
                     className={`mb-2 flex justify-between text-base font-bold ${
                       form.formState.errors.modes
@@ -338,7 +338,7 @@ export default function RoomForm({
               control={form.control}
               name='years'
               render={() => (
-                <FormItem>
+                <FormItem className='mb-6'>
                   <FormLabel
                     className={`mb-2 flex justify-between text-base font-bold ${
                       form.formState.errors.years
@@ -392,7 +392,7 @@ export default function RoomForm({
             <button
               type='button'
               onClick={onCancel}
-              className='relative flex h-[50px] w-[50px] items-center justify-center overflow-hidden rounded-full border-3 border-white bg-gradient-to-br from-purple-400 to-purple-900 text-sm font-bold text-white shadow-lg transition-all duration-300 ease-in-out hover:translate-y-[-2px] hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-70'
+              className='relative flex h-[50px] w-[50px] cursor-pointer items-center justify-center overflow-hidden rounded-full border-3 border-white bg-gradient-to-br from-purple-400 to-purple-900 text-sm font-bold text-white shadow-lg transition-all duration-300 ease-in-out hover:translate-y-[-2px] hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-70'
             >
               취소
             </button>
@@ -400,15 +400,9 @@ export default function RoomForm({
               type='submit'
               disabled={loading}
               onClick={form.handleSubmit(onSubmit)}
-              className='relative flex h-[50px] w-[50px] items-center justify-center overflow-hidden rounded-full border-3 border-white bg-gradient-to-br from-purple-400 to-purple-900 text-sm font-bold text-white shadow-lg transition-all duration-300 ease-in-out hover:translate-y-[-2px] hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-70'
+              className='relative flex h-[50px] w-[50px] cursor-pointer items-center justify-center overflow-hidden rounded-full border-3 border-white bg-gradient-to-br from-purple-400 to-purple-900 text-sm font-bold text-white shadow-lg transition-all duration-300 ease-in-out hover:translate-y-[-2px] hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-70'
             >
-              {loading
-                ? mode === 'create'
-                  ? '처리중'
-                  : '처리중'
-                : mode === 'create'
-                  ? '생성'
-                  : '수정'}
+              {loading ? '처리중' : mode === 'create' ? '생성' : '수정'}
             </button>
           </div>
         </section>
