@@ -198,8 +198,7 @@ const GeneralMapPreview = () => {
   return (
     <div
       ref={containerRef}
-      className='relative h-full w-full overflow-hidden'
-      style={{ backgroundColor: '#5D72A6' }}
+      className='relative h-full w-full overflow-hidden bg-[url(/background.svg)] bg-cover bg-center'
       data-testid='general-map-preview'
     >
       {/* 시상대 */}

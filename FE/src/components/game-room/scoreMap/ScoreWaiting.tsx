@@ -22,11 +22,6 @@ interface ScoreWaitingPanelProps {
   channelId: string;
 }
 
-// 상태 설정 타입
-type StatusConfig = {
-  [key: string]: { text: string; color: string };
-};
-
 const ScoreWaitingPanel = ({
   currentUserId,
   handleStartGame,
@@ -70,14 +65,6 @@ const ScoreWaitingPanel = ({
     router.push(`/game/lobby/${channelId}`);
   };
 
-  const statusConfig: StatusConfig = {
-    WAITING: { text: '대기 중', color: 'text-blue-300 bg-blue-950/40' },
-    IN_PROGRESS: {
-      text: '게임 진행 중',
-      color: 'text-green-100 bg-purple-900',
-    },
-    FINISHED: { text: '종료됨', color: 'text-gray-100 bg-purple-800' },
-  };
 
   if (!gameRoomInfo) return null;
 
@@ -89,7 +76,6 @@ const ScoreWaitingPanel = ({
     maxGameRound,
     selectedYear,
     mode,
-    status,
   } = gameRoomInfo;
   const modeArray = Array.isArray(mode) ? mode : [mode];
   const yearArray = Array.isArray(selectedYear) ? selectedYear : [selectedYear];

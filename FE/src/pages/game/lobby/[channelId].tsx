@@ -655,7 +655,7 @@ const LobbyPage = ({ userNickname, channelId }: LobbyServerProps) => {
             onValueChange={handleTabChange}
             className='flex h-full flex-col gap-0'
           >
-            <TabsList className='flex flex-row space-x-1 bg-transparent'>
+            <TabsList className='flex flex-row space-x-1 bg-transparent p-0'>
               <TabsTrigger
                 className='h-[45px] w-[120px] rounded-lg rounded-br-none rounded-bl-none bg-black/70 text-lg font-bold text-[#30FFFF] data-[state=active]:bg-[#1C8C9A] data-[state=active]:text-white data-[state=inactive]:bg-black/10 data-[state=inactive]:text-[#30FFFF] data-[state=inactive]:hover:cursor-pointer'
                 value='chat'

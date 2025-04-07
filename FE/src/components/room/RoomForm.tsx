@@ -119,7 +119,14 @@ export default function RoomForm({
           {/* 맵 선택 - 새로운 비주얼 맵 선택기 */}
           {mode && (
             <div className='mb-6'>
-              <MapSelector form={form} error={!!form.formState.errors.format} />
+              <MapSelector
+                form={form}
+                error={!!form.formState.errors.format}
+                initialFormat={
+                  mode === 'edit' ? initialData?.format : undefined
+                }
+                mode={mode}
+              />
             </div>
           )}
 
