@@ -6,6 +6,7 @@ import { GetServerSideProps } from 'next';
 
 import SEO from '@/components/SEO';
 import AccountFormDialog from '@/components/auth/AccountFormDialog';
+import BackgroundMusic from '@/components/common/BackgroundMusic';
 import JumpingAnimation from '@/components/home/JumpingAnimation';
 import ChannelList from '@/components/home/channel/ChannelList';
 import { Button } from '@/components/ui/button';
@@ -99,6 +100,7 @@ export default function Home({ userNickname }: HomeServerProps) {
       <div className='flex w-full flex-1 flex-col justify-end'>
         <JumpingAnimation />
       </div>
+      <BackgroundMusic pageType='home' />
     </div>
   );
 }
