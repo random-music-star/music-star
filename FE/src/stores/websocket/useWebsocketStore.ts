@@ -240,7 +240,6 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
 
           if (type === 'diceStart') {
             gameDiceStore.setIsActiveDice(true);
-            // soundEventStore.setSoundEvent('ROULETTE_123');
           }
           if (type === 'diceEnd') {
             gameDiceStore.setIsActiveDice(false);

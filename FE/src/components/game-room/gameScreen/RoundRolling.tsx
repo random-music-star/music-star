@@ -26,7 +26,7 @@ const RoundRolling = () => {
   if (!gameRoomInfo || !roundInfo) return null;
 
   return (
-    <div className='flex flex-col items-center justify-center py-6'>
+    <div className='flex min-w-[240px] flex-col items-center justify-center py-6'>
       <h3 className='mb-4 text-xl font-bold text-purple-200'>게임 모드 선택</h3>
       <div className='relative h-20 w-full max-w-xs overflow-hidden rounded-lg border border-purple-500/30 bg-purple-700/50 shadow-inner backdrop-blur-sm'>
         <div className='absolute top-0 z-10 h-8 w-full bg-gradient-to-b from-purple-900 to-transparent'></div>
