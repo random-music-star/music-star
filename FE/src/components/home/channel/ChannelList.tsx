@@ -147,7 +147,7 @@ const ChannelList = () => {
               <>
                 <div className='mb-3 flex flex-col items-center justify-center font-bold text-gray-700'>
                   <span className='text-base'>채널</span>
-                  <span className='min-w-4 rounded-3xl bg-purple-500 p-1 text-center text-sm text-white lg:min-w-12'>
+                  <span className='min-w-4 rounded-3xl bg-gradient-to-b from-purple-500 to-purple-700 p-1 text-center text-sm text-white lg:min-w-12'>
                     {channelData[p.channelIndex].channelId}
                   </span>
                 </div>

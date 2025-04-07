@@ -74,7 +74,7 @@ export default function Home({ userNickname }: HomeServerProps) {
             </span>
             <Button
               variant='custom'
-              className='cursor-pointer rounded-2xl bg-[#8352D1] px-3 py-1 hover:bg-purple-700/70'
+              className='cursor-pointer rounded-2xl bg-gradient-to-b from-purple-600/70 to-purple-800/70 px-3 py-1 hover:bg-gradient-to-t hover:from-purple-900/50 hover:to-purple-900/90'
               onClick={logout}
             >
               로그아웃
