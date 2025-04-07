@@ -60,13 +60,15 @@ const ScoreChatBox = ({
       >
         {gameChattings.map((message, index) => (
           <div key={`${message.sender}-${index}`} className='mb-2'>
-            {message.messageType === 'notice' ? (
+            {message.messageType === 'notice' && (
               <div className='my-2 text-center'>
                 <span className='inline-block rounded-full bg-purple-700/40 px-3 py-1 text-sm tracking-tight text-purple-100'>
                   {message.message}
                 </span>
               </div>
-            ) : message.messageType === 'winner' ? (
+            )}
+
+            {message.messageType === 'winner' && (
               <div className='my-3'>
                 <div className='rounded-lg bg-gradient-to-r from-purple-600/80 via-cyan-500/80 to-purple-600/80 p-0.5 shadow-lg'>
                   <div className='flex w-full items-center justify-center gap-10 rounded-md bg-purple-900/90 p-2 text-center'>
@@ -79,7 +81,21 @@ const ScoreChatBox = ({
                   </div>
                 </div>
               </div>
-            ) : (
+            )}
+
+            {message.messageType === 'warning' && (
+              <div className='my-3'>
+                <div className='rounded-lg bg-gradient-to-r from-amber-300 via-amber-200 to-amber-300 p-0.5 shadow-lg'>
+                  <div className='flex w-full flex-col items-center justify-center gap-1 rounded-md bg-amber-700/50 p-2 text-center'>
+                    <div className='text-base font-medium text-white'>
+                      {message.message}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {message.messageType === 'default' && (
               <div className='flex items-start space-x-1'>
                 <div className='w-[100px] flex-shrink-0 overflow-hidden'>
                   <span

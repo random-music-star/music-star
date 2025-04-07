@@ -20,6 +20,10 @@ const ScoreMap = ({
   const { play, stop } = useSound([
     { key: 'ROULETTE', url: '/audio/playsound/roulette.mp3' },
     { key: 'ROULETTE_RESULT', url: '/audio/playsound/roulette-result.mp3' },
+
+    { key: 'WARNING', url: '/audio/playsound/warning.mp3' },
+    { key: 'CORRECT', url: '/audio/playsound/correct.mp3' },
+    { key: 'WINNER', url: '/audio/playsound/winner.mp3' },
   ]);
 
   useEffect(() => {
