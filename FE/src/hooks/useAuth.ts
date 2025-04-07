@@ -1,4 +1,5 @@
 import { deleteCookie, setCookie } from 'cookies-next';
+import { useRouter } from 'next/router';
 import { toast } from 'sonner';
 
 import { useNicknameStore } from '@/stores/auth/useNicknameStore';
@@ -14,6 +15,7 @@ interface GuestLoginResponse {
 
 export function useAuth() {
   const { setNickname } = useNicknameStore();
+  const router = useRouter();
 
   const guestLogin = async () => {
     try {
@@ -134,6 +136,7 @@ export function useAuth() {
       deleteCookie('userNickname', { path: '/' });
       setNickname('');
       toast.success('로그아웃 되었습니다.');
+      router.push('/');
     } catch {
       toast.error('로그아웃 중 오류가 발생했습니다.');
     }

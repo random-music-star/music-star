@@ -1,9 +1,3 @@
-import { useState } from 'react';
-
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import * as z from 'zod';
-
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -14,64 +8,16 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { useAuth } from '@/hooks/useAuth';
-
-const signupFormSchema = z.object({
-  username: z
-    .string()
-    .min(1, { message: '사용자명을 입력해주세요.' })
-    .max(20, { message: '사용자명은 20글자 이하여야 합니다.' })
-    .refine(value => value.trim().length > 0, {
-      message: '공백만으로는 사용자명을 만들 수 없습니다.',
-    })
-    .refine(value => /^[a-zA-Z0-9_-]+$/.test(value), {
-      message: '영문, 숫자, 밑줄(_) 및 하이픈(-)만 포함할 수 있습니다.',
-    }),
-  password: z
-    .string()
-    .min(1, { message: '비밀번호를 입력해주세요.' })
-    .max(30, { message: '비밀번호는 30글자 이하여야 합니다.' })
-    .refine(value => value.trim().length > 0, {
-      message: '공백만으로는 비밀번호를 만들 수 없습니다.',
-    })
-    .refine(value => !/\s/.test(value), {
-      message: '비밀번호에는 공백을 포함할 수 없습니다.',
-    }),
-});
-
-type SignupFormValues = z.infer<typeof signupFormSchema>;
+import { useSignupForm } from '@/hooks/useSignupForm';
 
 interface SignupFormProps {
   onSuccess?: (username: string) => void;
 }
 
 export default function SignupForm({ onSuccess }: SignupFormProps) {
-  const { signUp } = useAuth();
-  const [isLoading, setIsLoading] = useState(false);
-
-  const form = useForm<SignupFormValues>({
-    resolver: zodResolver(signupFormSchema),
-    defaultValues: {
-      username: '',
-      password: '',
-    },
+  const { form, isLoading, onSubmit } = useSignupForm({
+    onSuccess,
   });
-
-  const onSubmit = async (data: SignupFormValues) => {
-    setIsLoading(true);
-
-    try {
-      const result = await signUp(data);
-      if (result) {
-        form.reset();
-        onSuccess?.(data.username);
-      }
-    } catch {
-      // 에러는 useAuth 내부에서 toast로 처리됨
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   return (
     <Form {...form}>
@@ -135,7 +81,7 @@ export default function SignupForm({ onSuccess }: SignupFormProps) {
           <Button
             type='submit'
             disabled={isLoading}
-            className='rounded-3xl bg-gradient-to-b from-[#5a4ca1] to-[#352f74] px-2 py-5 text-white shadow-md shadow-white/10 transition-transform duration-300 ease-in-out hover:-translate-y-1 hover:from-[#4a4586] disabled:opacity-50'
+            className='cursor-pointer rounded-3xl bg-gradient-to-b from-[#5a4ca1] to-[#352f74] px-2 py-5 text-white shadow-md shadow-white/10 transition-transform duration-300 ease-in-out hover:-translate-y-1 hover:from-[#4a4586] disabled:opacity-50'
           >
             {isLoading ? '처리 중...' : '회원가입'}
           </Button>

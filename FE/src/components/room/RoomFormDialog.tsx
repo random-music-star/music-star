@@ -9,8 +9,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { RoomFormValues } from '@/schemas/roomFormSchema';
 import { useGameInfoStore } from '@/stores/websocket/useGameRoomInfoStore';
-import { RoomFormValues } from '@/types/rooms';
 import { Mode } from '@/types/websocket';
 
 import RoomForm from './RoomForm';
@@ -56,8 +56,8 @@ export default function RoomFormDialog({
         mode: gameRoomInfo.mode,
         selectedYear: gameRoomInfo.selectedYear,
         hasPassword: gameRoomInfo.hasPassword,
-        maxGameRound: gameRoomInfo.maxGameRound, // 추가됨
-        maxPlayer: gameRoomInfo.maxPlayer, // 추가됨
+        maxGameRound: gameRoomInfo.maxGameRound,
+        maxPlayer: gameRoomInfo.maxPlayer,
       };
     }
   }, [isOpen, mode, gameRoomInfo]);
@@ -91,7 +91,7 @@ export default function RoomFormDialog({
     }
   };
 
-  const defaultButtonText = mode === 'create' ? '방 생성' : '방 정보 수정';
+  const defaultButtonText = mode === 'create' ? '방 생성' : '방 수정';
 
   return (
     <>

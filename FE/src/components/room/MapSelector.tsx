@@ -12,7 +12,8 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { GameFormat, RoomFormValues } from '@/types/rooms';
+import { RoomFormValues } from '@/schemas/roomFormSchema';
+import { GameFormat } from '@/types/rooms';
 
 // 맵 데이터 타입 정의
 interface MapData {
@@ -68,7 +69,7 @@ export default function MapSelector({ form, error }: MapSelectorProps) {
       render={() => (
         <FormItem className='w-full'>
           <FormLabel
-            className={`mb-3 flex justify-between text-lg font-bold ${error ? 'label-error' : 'text-[#D7EEA0]'}`}
+            className={`mb-2 flex justify-between text-lg font-bold ${error ? 'label-error' : 'text-[#D7EEA0]'}`}
           >
             <span style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.2)' }}>
               맵 선택
@@ -117,7 +118,7 @@ export default function MapSelector({ form, error }: MapSelectorProps) {
               </div>
 
               {/* 맵 이름 표시 */}
-              <div className='mb-2 w-28 rounded px-3 py-1 text-center sm:w-32 sm:px-4 sm:py-2'>
+              <div className='w-28 text-center sm:w-32 sm:px-4 sm:py-2'>
                 <p className='text-sm font-bold text-white sm:text-base'>
                   {currentMap.name}
                 </p>

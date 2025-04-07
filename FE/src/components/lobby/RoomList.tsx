@@ -61,7 +61,7 @@ export default function RoomList({
               ◀
             </button>
             {/* 방 목록 */}
-            <div className='relative flex flex-1 flex-col justify-between'>
+            <div className='mt-2 flex flex-1 flex-col justify-between'>
               {!sseConnected && (
                 <Alert className='mb-4 border-amber-200 bg-amber-50'>
                   <AlertDescription className='text-sm text-amber-700'>
@@ -74,7 +74,7 @@ export default function RoomList({
                   <RoomItem key={room.id} room={room} />
                 ))}
               </div>
-              <div className='absolute bottom-[-40px] left-[50%] text-center text-sm font-medium text-white'>
+              <div className='text-center text-sm font-medium text-white'>
                 {totalPages > 0
                   ? `${currentPage + 1} / ${totalPages}`
                   : '0 / 0'}

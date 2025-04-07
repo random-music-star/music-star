@@ -1,9 +1,3 @@
-import { useEffect, useState } from 'react';
-
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import * as z from 'zod';
-
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -14,20 +8,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { useAuth } from '@/hooks/useAuth';
-
-const loginFormSchema = z.object({
-  username: z
-    .string()
-    .min(1, { message: '닉네임을 입력해주세요.' })
-    .max(20, { message: '닉네임은 20글자 이하여야 합니다.' }),
-  password: z
-    .string()
-    .min(1, { message: '비밀번호를 입력해주세요.' })
-    .max(30, { message: '비밀번호는 30글자 이하여야 합니다.' }),
-});
-
-type LoginFormValues = z.infer<typeof loginFormSchema>;
+import { useLoginForm } from '@/hooks/useLoginForm';
 
 interface LoginFormProps {
   onSuccess?: () => void;
@@ -38,37 +19,10 @@ export default function LoginForm({
   onSuccess,
   initialUsername,
 }: LoginFormProps) {
-  const { userLogin } = useAuth();
-  const [isLoading, setIsLoading] = useState(false);
-
-  const form = useForm<LoginFormValues>({
-    resolver: zodResolver(loginFormSchema),
-    defaultValues: {
-      username: initialUsername || '',
-      password: '',
-    },
+  const { form, isLoading, onSubmit } = useLoginForm({
+    onSuccess,
+    initialUsername,
   });
-
-  useEffect(() => {
-    if (initialUsername) {
-      form.setValue('username', initialUsername);
-    }
-  }, [initialUsername, form]);
-
-  const onSubmit = async (data: LoginFormValues) => {
-    setIsLoading(true);
-
-    try {
-      await userLogin(data);
-      form.reset();
-      onSuccess?.();
-    } catch {
-      const username = form.getValues('username');
-      form.reset({ username, password: '' });
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   return (
     <Form {...form}>
@@ -132,7 +86,7 @@ export default function LoginForm({
           <Button
             type='submit'
             disabled={isLoading}
-            className='rounded-3xl bg-gradient-to-b from-[#5a4ca1] to-[#352f74] p-2 py-5 text-white shadow-md shadow-white/10 transition-transform duration-300 ease-in-out hover:-translate-y-1 hover:from-[#4a4586] disabled:opacity-50'
+            className='cursor-pointer rounded-3xl bg-gradient-to-b from-[#5a4ca1] to-[#352f74] p-2 py-5 text-white shadow-md shadow-white/10 transition-transform duration-300 ease-in-out hover:-translate-y-1 hover:from-[#4a4586] disabled:opacity-50'
           >
             {isLoading ? '로그인 중...' : '회원 로그인'}
           </Button>
