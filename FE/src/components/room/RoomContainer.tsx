@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 
 import { useRouter } from 'next/router';
 
+import BackgroundMusic from '@/components/common/BackgroundMusic';
 import ChatBox from '@/components/game-room/ChatBox';
 import GameExitButton from '@/components/game-room/GameExitButton';
 import BoardMap from '@/components/game-room/boardMap';
@@ -69,6 +70,7 @@ export default function GameRoomContainer({
     if (isWaiting) {
       return (
         <div className='flex flex-1 justify-between bg-[url(/background.svg)] bg-cover bg-center'>
+          <BackgroundMusic pageType='waitingRoom' />
           <div className='relative w-full'>
             <ReadyPanel
               currentUserId={nickname}
@@ -122,6 +124,7 @@ export default function GameRoomContainer({
                 'transition-transform duration-700 ease-in-out',
               )}
             >
+              <BackgroundMusic pageType='waitingRoom' />
               <WaitingRoom
                 currentUserId={nickname}
                 handleStartGame={handleStartGame}
