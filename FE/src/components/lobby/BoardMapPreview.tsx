@@ -437,7 +437,7 @@ const BoardMapPreview = () => {
   return (
     <div
       ref={containerRef}
-      className='relative h-full w-full overflow-hidden bg-[#9176CC]'
+      className='relative h-full w-full overflow-hidden bg-[url(/background.svg)] bg-cover bg-center'
     >
       {/* 발판 3개 */}
       {footholderPositions.map((position, index) => (
