@@ -32,27 +32,29 @@ interface UserCharacter {
   moveStartTime: number;
 }
 
+// 테두리에 50px 패딩을 적용하고 좌우 대칭을 맞춘 footholderRatios
 const footholderRatios: FootholderPosition[] = [
-  { xRatio: 0.08, yRatio: 0.92, size: 2 },
-  { xRatio: 0.22, yRatio: 0.9, size: 1.5 },
-  { xRatio: 0.36, yRatio: 0.85, size: 1.5 },
-  { xRatio: 0.5, yRatio: 0.8, size: 1.5 },
-  { xRatio: 0.64, yRatio: 0.75, size: 1.5 },
-  { xRatio: 0.78, yRatio: 0.7, size: 1.5 },
-  { xRatio: 0.92, yRatio: 0.65, size: 1.5 },
-  { xRatio: 0.87, yRatio: 0.49, size: 1.5 },
-  { xRatio: 0.72, yRatio: 0.54, size: 1.5 },
-  { xRatio: 0.57, yRatio: 0.51, size: 1.5 },
-  { xRatio: 0.42, yRatio: 0.5, size: 1.5 },
-  { xRatio: 0.27, yRatio: 0.52, size: 1.5 },
-  { xRatio: 0.12, yRatio: 0.48, size: 1.5 },
-  { xRatio: 0.08, yRatio: 0.3, size: 1.5 },
-  { xRatio: 0.22, yRatio: 0.27, size: 1.5 },
-  { xRatio: 0.36, yRatio: 0.24, size: 1.5 },
-  { xRatio: 0.5, yRatio: 0.21, size: 1.5 },
-  { xRatio: 0.64, yRatio: 0.18, size: 1.5 },
-  { xRatio: 0.78, yRatio: 0.16, size: 1.5 },
-  { xRatio: 0.92, yRatio: 0.14, size: 2 },
+  { xRatio: 0.1, yRatio: 0.88, size: 2 }, // 0번 위치
+  { xRatio: 0.23, yRatio: 0.86, size: 1.5 }, // 1번 위치
+  { xRatio: 0.36, yRatio: 0.83, size: 1.5 }, // 2번 위치
+  { xRatio: 0.49, yRatio: 0.79, size: 1.5 }, // 3번 위치
+  { xRatio: 0.62, yRatio: 0.75, size: 1.5 }, // 4번 위치
+  { xRatio: 0.75, yRatio: 0.71, size: 1.5 }, // 5번 위치
+  { xRatio: 0.88, yRatio: 0.67, size: 1.5 }, // 6번 위치
+  { xRatio: 0.88, yRatio: 0.52, size: 1.5 }, // 7번 위치
+  { xRatio: 0.75, yRatio: 0.55, size: 1.5 }, // 8번 위치
+  { xRatio: 0.62, yRatio: 0.53, size: 1.5 }, // 9번 위치
+  { xRatio: 0.49, yRatio: 0.51, size: 1.5 }, // 10번 위치
+  { xRatio: 0.36, yRatio: 0.53, size: 1.5 }, // 11번 위치
+  { xRatio: 0.23, yRatio: 0.55, size: 1.5 }, // 12번 위치
+  { xRatio: 0.1, yRatio: 0.52, size: 1.5 }, // 13번 위치
+  { xRatio: 0.1, yRatio: 0.35, size: 1.5 }, // 14번 위치
+  { xRatio: 0.23, yRatio: 0.32, size: 1.5 }, // 15번 위치
+  { xRatio: 0.36, yRatio: 0.29, size: 1.5 }, // 16번 위치
+  { xRatio: 0.49, yRatio: 0.25, size: 1.5 }, // 17번 위치
+  { xRatio: 0.62, yRatio: 0.22, size: 1.5 }, // 18번 위치
+  { xRatio: 0.75, yRatio: 0.19, size: 1.5 }, // 19번 위치
+  { xRatio: 0.88, yRatio: 0.16, size: 2 }, // 20번 위치
 ];
 
 // bubble.svg를 사용할 발판 번호 목록
@@ -66,6 +68,8 @@ const bubbleRightMap: Record<number, boolean> = {
   13: true,
   14: true,
   15: true,
+  16: true,
+  17: true,
 };
 
 const EventOverlay = ({ eventType }: { eventType: EventType }) => {
@@ -130,6 +134,7 @@ const BubbleContent = ({ isActive }: { isActive: boolean }) => {
   const [isAnimating, setIsAnimating] = useState(false);
   const { diceTotalmovement } = useGameDiceStore();
   const animationRef = useRef<NodeJS.Timeout | null>(null);
+  const { setSoundEvent } = useSoundEventStore();
 
   const imagePaths = [
     '/eventemoji/move_1.png',
@@ -140,6 +145,7 @@ const BubbleContent = ({ isActive }: { isActive: boolean }) => {
   useEffect(() => {
     if (isActive && !isAnimating) {
       setIsAnimating(true);
+      setSoundEvent('ROULETTE_123');
 
       let count = 0;
       const startAnimation = () => {
@@ -151,7 +157,10 @@ const BubbleContent = ({ isActive }: { isActive: boolean }) => {
             if (animationRef.current) {
               clearInterval(animationRef.current);
             }
-            if (diceTotalmovement) setCurrentImage(diceTotalmovement);
+            if (diceTotalmovement) {
+              setCurrentImage(diceTotalmovement);
+              setSoundEvent('ROULETTE_123_RESULT');
+            }
             setIsAnimating(false);
           }
         }, 167);
@@ -364,25 +373,44 @@ const GameBoard = () => {
 
   const renderKey = `${targetUser}-${triggerUser}-${eventType}`;
 
+  // 화면 테두리에 패딩 적용
+  const padding = 50;
+  const paddedWidth = windowSize.width - padding * 2;
+  const paddedHeight = windowSize.height - padding * 2;
+
   return (
-    <div key={renderKey} className='game-board'>
+    <div
+      key={renderKey}
+      className='game-board'
+      style={{
+        padding: `${padding}px`,
+        position: 'relative',
+        boxSizing: 'border-box',
+        width: '100%',
+        height: '100%',
+      }}
+    >
       {eventType && <EventOverlay eventType={eventType} />}
       {footholderRatios.map((position, index) => {
-        const leftSectionWidth = windowSize.width * 0.75;
+        const leftSectionWidth = paddedWidth * 0.75; // 패딩이 적용된 너비
         const baseSize = Math.min(48, leftSectionWidth * 0.08);
         const size = baseSize * (position.size || 1.5);
-        const x = position.xRatio * leftSectionWidth;
-        const y = position.yRatio * windowSize.height;
+        const x = padding + position.xRatio * leftSectionWidth;
+        const y = padding + position.yRatio * paddedHeight;
         return (
           <div
             key={`footholder-${index}`}
             className='footholder'
             style={{
+              position: 'absolute',
               left: `${x - size / 2}px`,
               top: `${y - size / 2}px`,
               width: `${size}px`,
               height: `${size}px`,
               backgroundImage: 'url(/footholder.svg)',
+              backgroundSize: 'contain',
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'center',
             }}
           />
         );
@@ -390,11 +418,11 @@ const GameBoard = () => {
 
       {/* 캐릭터 렌더링 */}
       {characters.map((character, index) => {
-        const leftSectionWidth = windowSize.width * 0.75;
+        const leftSectionWidth = paddedWidth * 0.75; // 패딩이 적용된 너비
         const baseSize = Math.min(48, leftSectionWidth * 0.08);
         const charWidth = baseSize * 1.5;
         const charHeight = charWidth * 1.25;
-        const characterYOffset = 20;
+        const characterYOffset = 55;
         let x = 0,
           y = 0;
         if (character.isMoving) {
@@ -406,22 +434,27 @@ const GameBoard = () => {
               toPos,
               character.moveProgress,
               leftSectionWidth,
-              windowSize.height,
+              paddedHeight, // 패딩이 적용된 높이
             );
-            x = pos.x;
-            y = pos.y;
+            x = padding + pos.x; // 패딩 적용
+            y = padding + pos.y; // 패딩 적용
           }
         } else {
           const pos = footholderRatios[character.position];
           if (pos) {
-            x = pos.xRatio * leftSectionWidth;
-            y = pos.yRatio * windowSize.height;
+            x = padding + pos.xRatio * leftSectionWidth; // 패딩 적용
+            y = padding + pos.yRatio * paddedHeight; // 패딩 적용
           }
         }
-        const characterX = x - charWidth / 2 - 10;
-        const characterY = y - charHeight - characterYOffset;
-        const nameX = x;
+
+        // 원본 코드 계산 방식을 정확히 유지
+        const characterX = x - charWidth / 2 - 55; // 원본 계산 방식 유지
+        const characterY = y - charHeight - characterYOffset; // 원본 계산 방식 유지
+
+        // 캐릭터 이름도 원본 계산 방식 유지
+        const nameX = x - 10;
         const nameY = y - charHeight - 30 - characterYOffset;
+
         const characterRenderKey = `char-${index}-${character.name}`;
 
         const isLeftSide = bubbleRightMap[character.position] || false;
@@ -429,8 +462,9 @@ const GameBoard = () => {
 
         const bubbleSize = charWidth * 2;
 
+        // 말풍선 위치 조정 - 원본 접근법 유지
         const bubbleX = characterX - bubbleSize + 20;
-        const bubbleY = characterY - bubbleSize + 20;
+        const bubbleY = characterY - bubbleSize + 20 + character.position / 2;
 
         const isCurrentPlayer = character.name === diceUsername;
 
@@ -445,7 +479,7 @@ const GameBoard = () => {
               className='bubble'
               style={{
                 position: 'absolute',
-                left: isLeftSide ? `${bubbleX + 200}px` : `${bubbleX}px`,
+                left: isLeftSide ? `${bubbleX + 210}px` : `${bubbleX}px`,
                 top: `${bubbleY}px`,
                 width: `${bubbleSize}px`,
                 height: `${bubbleSize}px`,
@@ -464,18 +498,29 @@ const GameBoard = () => {
 
             <div
               className='character-name'
-              style={{ left: `${nameX}px`, top: `${nameY}px` }}
+              style={{
+                position: 'absolute',
+                left: `${nameX}px`,
+                top: `${nameY}px`,
+                textAlign: 'center',
+                transform: 'translateX(-50%)',
+                whiteSpace: 'nowrap',
+              }}
             >
               {character.name}
             </div>
             <div
               className='character-image'
               style={{
+                position: 'absolute',
                 left: `${characterX}px`,
                 top: `${characterY}px`,
                 width: `${charWidth}px`,
                 height: `${charHeight}px`,
                 backgroundImage: `url(${character.imageSrc})`,
+                backgroundSize: 'contain',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
               }}
             />
           </div>

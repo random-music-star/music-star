@@ -3,12 +3,10 @@ import { create } from 'zustand';
 interface ParticipantInfoStore {
   participantInfo: ParticipantInfo[];
   setParticipantInfo: (newPariticipantInfo: ParticipantInfo[]) => void;
+  resetReadyInfo: () => void;
   hostNickname: string | null;
-  readyPlayers: ParticipantInfo[];
-  notReadyPlayers: ParticipantInfo[];
   isAllReady: boolean;
   setIsAllReady: (state: boolean) => void;
-  updateParticipantReadyStates: (userInfoList: ParticipantInfo[]) => void;
   resetParticipantInfo: () => void;
 }
 
@@ -17,20 +15,17 @@ export interface ParticipantInfo {
   isReady: boolean;
   isHost: boolean;
   character: string;
+  colorNumber: number;
 }
 
 const initialState = {
   participantInfo: [],
-  readyPlayers: [],
-  notReadyPlayers: [],
   hostNickname: null,
   isAllReady: false,
 };
 
 export const useParticipantInfoStore = create<ParticipantInfoStore>(set => ({
   participantInfo: [],
-  readyPlayers: [],
-  notReadyPlayers: [],
   hostNickname: null,
   isAllReady: false,
 
@@ -40,9 +35,9 @@ export const useParticipantInfoStore = create<ParticipantInfoStore>(set => ({
     newParticipantInfo: Omit<ParticipantInfo, 'character'>[],
   ) => {
     set(() => {
-      const updatedParticipants = newParticipantInfo.map((user, index) => ({
+      const updatedParticipants = newParticipantInfo.map(user => ({
         ...user,
-        character: `/character/character_${index}.svg`,
+        character: `/character/character_${user.colorNumber}.svg`,
       }));
 
       const host = updatedParticipants.find(user => user.isHost);
@@ -54,11 +49,13 @@ export const useParticipantInfoStore = create<ParticipantInfoStore>(set => ({
     });
   },
 
-  updateParticipantReadyStates: (userInfoList: ParticipantInfo[]) => {
-    set({
-      readyPlayers: userInfoList.filter(user => user.isReady),
-      notReadyPlayers: userInfoList.filter(user => !user.isReady),
-    });
+  resetReadyInfo: () => {
+    set(prev => ({
+      participantInfo: prev.participantInfo.map(participant => ({
+        ...participant,
+        isReady: false,
+      })),
+    }));
   },
 
   resetParticipantInfo: () => set(initialState),

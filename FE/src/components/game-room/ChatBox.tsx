@@ -51,13 +51,14 @@ const ChatBox = ({ currentUserId, roomId, channelId }: ChatBoxProps) => {
       >
         {gameChattings.map((message, index) => (
           <div key={`${message.sender}-${index}`} className='mb-2'>
-            {message.messageType === 'notice' ? (
+            {message.messageType === 'notice' && (
               <div className='my-2 text-center'>
                 <span className='inline-block rounded-full bg-purple-500/80 px-3 py-1 text-sm tracking-tight text-white'>
                   {message.message}
                 </span>
               </div>
-            ) : message.messageType === 'winner' ? (
+            )}
+            {message.messageType === 'winner' && (
               <div className='my-3'>
                 <div className='rounded-lg bg-gradient-to-r from-cyan-600/80 via-cyan-500/80 to-cyan-600/80 p-0.5 shadow-lg'>
                   <div className='flex w-full flex-col items-center justify-center gap-1 rounded-md bg-cyan-900/90 p-2 text-center'>
@@ -70,7 +71,20 @@ const ChatBox = ({ currentUserId, roomId, channelId }: ChatBoxProps) => {
                   </div>
                 </div>
               </div>
-            ) : (
+            )}
+            {message.messageType === 'warning' && (
+              <div className='my-3'>
+                <div className='rounded-lg bg-gradient-to-r from-amber-300 via-amber-200 to-amber-300 p-0.5 shadow-lg'>
+                  <div className='flex w-full flex-col items-center justify-center gap-1 rounded-md bg-amber-700/50 p-2 text-center'>
+                    <div className='text-base font-medium text-white'>
+                      {message.message}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {message.messageType === 'default' && (
               <div className='flex flex-wrap items-center space-x-1 text-sm'>
                 <p
                   className={cn(

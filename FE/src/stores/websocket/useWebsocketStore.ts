@@ -150,6 +150,33 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
 
           if (type === 'roundStart') {
             gameStateStore.setGameState('ROUND_START');
+
+            const currentRound =
+              useGameRoundInfoStore.getState().roundInfo.round;
+
+            const maxRound =
+              useGameInfoStore.getState().gameRoomInfo?.maxGameRound;
+
+            if (maxRound) {
+              const remainRound = maxRound - currentRound + 1;
+
+              if (remainRound > 3) return;
+
+              soundEventStore.setSoundEvent('WARNING');
+              if (remainRound === 1) {
+                gameChatStore.setGameChattings({
+                  sender: 'system',
+                  messageType: 'warning',
+                  message: `마지막 라운드입니다!`,
+                });
+                return;
+              }
+              gameChatStore.setGameChattings({
+                sender: 'system',
+                messageType: 'warning',
+                message: `${remainRound}라운드 남았습니다!`,
+              });
+            }
           }
 
           if (type === 'gameChat') {
@@ -174,6 +201,7 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
           if (type === 'gameResult') {
             gameRoundResult.setGameRoundResult(response);
             gameStateStore.setGameState('GAME_RESULT');
+            soundEventStore.setSoundEvent('CORRECT');
 
             if (response.winner) {
               gameChatStore.setGameChattings({
@@ -206,14 +234,12 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
 
           if (type === 'userInfo') {
             participantInfoStore.setParticipantInfo(response.userInfoList);
-            participantInfoStore.updateParticipantReadyStates(
-              response.userInfoList,
-            );
             participantInfoStore.setIsAllReady(response.allReady);
           }
 
           if (type === 'diceStart') {
             gameDiceStore.setIsActiveDice(true);
+            // soundEventStore.setSoundEvent('ROULETTE_123');
           }
           if (type === 'diceEnd') {
             gameDiceStore.setIsActiveDice(false);
@@ -227,6 +253,7 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
           if (type === 'gameEnd') {
             gameStateStore.setGameState('GAME_END');
             winnerStore.setWinner(response.winner);
+            participantInfoStore.resetReadyInfo();
           }
 
           if (type === 'eventTrigger') {

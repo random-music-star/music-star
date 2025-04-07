@@ -3,6 +3,11 @@ import { create } from 'zustand';
 type SoundEventKeys =
   | 'EVENT_CARD'
   | 'ROULETTE'
+  | 'ROULETTE_123'
+  | 'ROULETTE_123_RESULT'
+  | 'WARNING'
+  | 'WINNER'
+  | 'CORRECT'
   | 'ROULETTE_RESULT'
   | 'JUMP'
   | null;

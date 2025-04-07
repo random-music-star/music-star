@@ -39,7 +39,10 @@ const EventCentent: Record<EventType, EventContent> = {
     title: '이벤트 발생!!',
     explanation: '어떤 이벤트가 발생했는지 확인해볼까요?',
   },
-  OVERLAP: { title: '', explanation: '' },
+  OVERLAP: {
+    title: '따라잡기',
+    explanation: '따라 잡은 플레이어를 뒤로 보내요',
+  },
 };
 
 const EventCard = ({ eventType }: { eventType: EventType }) => {
