@@ -37,6 +37,7 @@ const channelCongestion = (playerCount: number, maxPlayers: number) => {
   const ratio = playerCount / maxPlayers;
 
   let color, congestion;
+
   if (ratio < 0.3) {
     color = 'from-green-400 to-green-600';
     congestion = '여유';
@@ -167,7 +168,7 @@ const ChannelList = () => {
                       }}
                     ></div>
                   </div>
-                  <span className='text-xs'>
+                  <span className='mt-2 text-xs text-fuchsia-200'>
                     {
                       channelCongestion(
                         channelData[p.channelIndex].playerCount,
