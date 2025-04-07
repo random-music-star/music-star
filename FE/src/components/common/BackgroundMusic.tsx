@@ -116,7 +116,7 @@ const BackgroundMusic = ({ pageType }: BackgroundMusicProps) => {
         muted={isMuted}
       />
 
-      <div className='fixed bottom-5 left-5 z-50 flex items-center space-x-2'>
+      <div className='fixed bottom-5 left-5 z-50 flex flex-col-reverse items-start space-y-4'>
         <button
           onClick={toggleMute}
           className='rounded-full bg-black/50 p-3 text-white transition-all hover:bg-black/70'
@@ -132,7 +132,7 @@ const BackgroundMusic = ({ pageType }: BackgroundMusicProps) => {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.3 }}
-              className='rounded-lg bg-black/70 px-4 py-2 text-sm whitespace-nowrap text-white'
+              className='mb-1 ml-8 rounded-lg bg-black/70 px-4 py-2 text-sm whitespace-nowrap text-white'
             >
               배경 음악을 켜보세요! (🔼 위 방향키: 음악 켜기, 🔽 아래 방향키:
               음악 끄기)
