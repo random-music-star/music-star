@@ -138,6 +138,7 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
             // 임의로 songUrl2 설정해봄
             roundInfo.setRoundInfo(response);
             roundHint.updateGameHint(null);
+            useGameRoundResultStore.getState().setGameRoundResult(null);
 
             gameStateStore.setGameState('ROUND_INFO');
             soundEventStore.setSoundEvent('ROULETTE');

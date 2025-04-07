@@ -2,7 +2,7 @@ import { create } from 'zustand';
 
 interface GameRoundResultStore {
   gameRoundResult: null | GameRoundResult;
-  setGameRoundResult: (newGameRoundResult: GameRoundResult) => void;
+  setGameRoundResult: (newGameRoundResult: GameRoundResult | null) => void;
 }
 
 export interface GameRoundResult {
@@ -16,7 +16,7 @@ export interface GameRoundResult {
 
 export const useGameRoundResultStore = create<GameRoundResultStore>(set => ({
   gameRoundResult: null,
-  setGameRoundResult: (newGameRoundResult: GameRoundResult) => {
+  setGameRoundResult: (newGameRoundResult: GameRoundResult | null) => {
     set({ gameRoundResult: newGameRoundResult });
   },
 }));
