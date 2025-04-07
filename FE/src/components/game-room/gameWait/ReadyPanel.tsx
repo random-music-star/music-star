@@ -141,7 +141,7 @@ const ReadyPanel = ({
   };
 
   return (
-    <div className='relative h-full w-full overflow-hidden'>
+    <div className='relative h-screen w-full overflow-hidden'>
       <div className='relative mt-[100px] h-[40%] w-full'>
         <Image
           src='/staff.png'

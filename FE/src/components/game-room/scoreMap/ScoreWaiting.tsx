@@ -1,5 +1,6 @@
 import { useState } from 'react';
 
+import { Lock } from 'lucide-react';
 import { useRouter } from 'next/router';
 
 import { Button } from '@/components/ui/button';
@@ -70,17 +71,12 @@ const ScoreWaitingPanel = ({
   };
 
   const statusConfig: StatusConfig = {
-    WAITING: { text: '대기 중', color: 'text-purple-100 bg-purple-800' },
+    WAITING: { text: '대기 중', color: 'text-blue-300 bg-blue-950/40' },
     IN_PROGRESS: {
       text: '게임 진행 중',
       color: 'text-green-100 bg-purple-900',
     },
     FINISHED: { text: '종료됨', color: 'text-gray-100 bg-purple-800' },
-  };
-
-  const formatText = {
-    GENERAL: '일반',
-    BOARD: '보드',
   };
 
   if (!gameRoomInfo) return null;
@@ -91,7 +87,6 @@ const ScoreWaitingPanel = ({
     hasPassword,
     maxPlayer,
     maxGameRound,
-    format,
     selectedYear,
     mode,
     status,
@@ -111,19 +106,11 @@ const ScoreWaitingPanel = ({
               <h1 className='drop-shadow-glow flex items-center justify-center text-4xl font-bold text-purple-100'>
                 {roomTitle || '게임 대기실'}
                 <span className='ml-2 text-base text-purple-200'>
-                  {hasPassword ? '🔒' : '🔓'}
+                  {hasPassword && (
+                    <Lock className='mb-[1px] ml-2 h-7 w-7 text-yellow-200' />
+                  )}
                 </span>
               </h1>
-            </div>
-            <div className='mt-1 flex items-center justify-center gap-3'>
-              <span
-                className={`rounded-md px-3 py-1 text-sm font-medium ${statusConfig[status].color}`}
-              >
-                {statusConfig[status].text}
-              </span>
-              <span className='rounded-md bg-purple-800 px-3 py-1 text-sm font-medium text-purple-100'>
-                {formatText[format]} 모드
-              </span>
             </div>
           </div>
           <Button
