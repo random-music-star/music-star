@@ -73,35 +73,6 @@ const bubbleRightMap: Record<number, boolean> = {
 };
 
 const EventOverlay = ({ eventType }: { eventType: EventType }) => {
-  const [visible, setVisible] = useState(false);
-  const mountedRef = useRef(false);
-  const eventTypeRef = useRef<EventType | null>(null);
-
-  useEffect(() => {
-    eventTypeRef.current = eventType;
-
-    if (mountedRef.current) {
-      setVisible(false);
-      setTimeout(() => {
-        setVisible(true);
-      }, 100);
-    } else {
-      mountedRef.current = true;
-      setVisible(true);
-    }
-
-    const timer = setTimeout(
-      () => {
-        setVisible(false);
-      },
-      eventType === 'MARK' ? 1500 : 2000,
-    );
-
-    return () => clearTimeout(timer);
-  }, [eventType]);
-
-  if (!visible || !eventType) return null;
-
   return (
     <div className='event-overlay'>
       <div
