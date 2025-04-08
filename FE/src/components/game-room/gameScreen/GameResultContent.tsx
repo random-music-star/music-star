@@ -10,10 +10,7 @@ const GameResultContent = () => {
   return (
     <div className='flex w-full flex-col items-center justify-center py-6'>
       <div className='relative w-full max-w-md rounded-lg border border-purple-500/30 bg-gradient-to-r from-purple-600/40 to-purple-700/40 p-6 shadow-lg backdrop-blur-sm'>
-        {/* 빛나는 효과 배경 */}
         <div className='absolute inset-0 rounded-lg bg-purple-600/10 blur-xl'></div>
-
-        {/* 컨텐츠 */}
         <div className='relative z-10 flex flex-col items-center'>
           <motion.div
             className='mb-2 text-lg font-bold text-purple-200'
@@ -22,7 +19,6 @@ const GameResultContent = () => {
           >
             축하합니다!
           </motion.div>
-
           <div className='mb-6 text-xl font-extrabold text-purple-100'>
             WINNER
           </div>
@@ -49,8 +45,6 @@ const GameResultContent = () => {
           >
             {winner}
           </motion.div>
-
-          {/* 장식 효과 */}
           <div className='mt-6 flex space-x-4'>
             {[0, 1, 2].map(i => (
               <motion.div

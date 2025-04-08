@@ -5,6 +5,7 @@ import { useRouter } from 'next/router';
 
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useNicknameStore } from '@/stores/auth/useNicknameStore';
 import {
   ParticipantInfo,
   useParticipantInfoStore,
@@ -31,6 +32,7 @@ const ScoreWaitingPanel = ({
   const router = useRouter();
   const { gameRoomInfo } = useGameInfoStore();
   const { participantInfo, hostNickname } = useParticipantInfoStore();
+  const { nickname: currentNickname } = useNicknameStore();
 
   const isHost = currentUserId === hostNickname;
 
@@ -64,7 +66,6 @@ const ScoreWaitingPanel = ({
   const handleExit = () => {
     router.push(`/game/lobby/${channelId}`);
   };
-
 
   if (!gameRoomInfo) return null;
 
@@ -139,7 +140,7 @@ const ScoreWaitingPanel = ({
                   className={cn(
                     'flex items-center justify-start rounded-md p-3 transition-all',
                     participant
-                      ? participant.userName === hostNickname
+                      ? participant.userName === currentNickname
                         ? 'border border-purple-300 bg-purple-700'
                         : 'border border-purple-700 bg-purple-800'
                       : 'border border-dashed border-purple-700 bg-purple-900/30',

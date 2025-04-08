@@ -1,11 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 
+import { useGameInfoStore } from '@/stores/websocket/useGameRoomInfoStore';
 import { useGameRoundInfoStore } from '@/stores/websocket/useGameRoundInfoStore';
 import { useGameStateStore } from '@/stores/websocket/useGameStateStore';
 
 const YoutubePlayer = () => {
   const url = useGameRoundInfoStore(state => state.roundInfo.songUrl);
   const url2 = useGameRoundInfoStore(state => state.roundInfo.songUrl2);
+
+  const roomInfo = useGameInfoStore(state => state.gameRoomInfo?.status);
 
   const roundState = useGameStateStore(state => state.gameState);
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -114,21 +117,41 @@ const YoutubePlayer = () => {
     if (currentVideoId && !playerReadyRef.current) {
       playerReadyRef.current = true;
 
-      if (roundState === 'ROUND_INFO' || roundState === 'ROUND_OPEN') {
+      if (
+        roundState === 'ROUND_INFO' ||
+        roundState === 'ROUND_OPEN' ||
+        roomInfo === 'WAITING'
+      ) {
         pauseVideo();
       }
     }
-  }, [currentVideoId, roundState]);
+  }, [currentVideoId, roundState, roomInfo]);
 
   useEffect(() => {
     if (currentVideoId2 && !player2ReadyRef.current) {
       player2ReadyRef.current = true;
 
-      if (roundState === 'ROUND_INFO' || roundState === 'ROUND_OPEN') {
+      if (
+        roundState === 'ROUND_INFO' ||
+        roundState === 'ROUND_OPEN' ||
+        roomInfo === 'WAITING'
+      ) {
         pauseVideo2();
       }
     }
-  }, [currentVideoId2, roundState]);
+  }, [currentVideoId2, roundState, roomInfo]);
+
+  // 추가된 useEffect - roomInfo가 변경될 때 처리
+  useEffect(() => {
+    if (roomInfo === 'WAITING') {
+      pauseVideo();
+      pauseVideo2();
+      hasStartedRef.current = false;
+      hasStarted2Ref.current = false;
+      wasPlayingRef.current = false;
+      wasPlaying2Ref.current = false;
+    }
+  }, [roomInfo]);
 
   const handleIframeLoad = () => {
     if (iframeRef.current && iframeRef.current.contentWindow) {
@@ -161,7 +184,11 @@ const YoutubePlayer = () => {
   };
 
   useEffect(() => {
-    if (roundState === 'ROUND_INFO' || roundState === 'ROUND_OPEN') {
+    if (
+      roundState === 'ROUND_INFO' ||
+      roundState === 'ROUND_OPEN' ||
+      roomInfo === 'WAITING'
+    ) {
       pauseVideo();
       pauseVideo2();
       hasStartedRef.current = false;
@@ -176,7 +203,7 @@ const YoutubePlayer = () => {
         playVideo2();
       }
     }
-  }, [roundState, currentVideoId2]);
+  }, [roundState, currentVideoId2, roomInfo]);
 
   const checkAndPlayOrPause = () => {
     if (
@@ -187,7 +214,11 @@ const YoutubePlayer = () => {
       return;
     }
 
-    if (roundState === 'ROUND_INFO' || roundState === 'ROUND_OPEN') {
+    if (
+      roundState === 'ROUND_INFO' ||
+      roundState === 'ROUND_OPEN' ||
+      roomInfo === 'WAITING'
+    ) {
       pauseVideo();
     } else {
       if (!wasPlayingRef.current) {
@@ -205,7 +236,11 @@ const YoutubePlayer = () => {
       return;
     }
 
-    if (roundState === 'ROUND_INFO' || roundState === 'ROUND_OPEN') {
+    if (
+      roundState === 'ROUND_INFO' ||
+      roundState === 'ROUND_OPEN' ||
+      roomInfo === 'WAITING'
+    ) {
       pauseVideo2();
     } else {
       if (!wasPlaying2Ref.current) {
@@ -217,7 +252,11 @@ const YoutubePlayer = () => {
   const playVideo = () => {
     if (wasPlayingRef.current) return; // 이미 재생 중이면 무시
 
-    if (roundState === 'ROUND_INFO' || roundState === 'ROUND_OPEN') {
+    if (
+      roundState === 'ROUND_INFO' ||
+      roundState === 'ROUND_OPEN' ||
+      roomInfo === 'WAITING'
+    ) {
       return;
     }
 
@@ -243,7 +282,11 @@ const YoutubePlayer = () => {
   const playVideo2 = () => {
     if (wasPlaying2Ref.current || !currentVideoId2) return; // 이미 재생 중이거나 URL2가 없으면 무시
 
-    if (roundState === 'ROUND_INFO' || roundState === 'ROUND_OPEN') {
+    if (
+      roundState === 'ROUND_INFO' ||
+      roundState === 'ROUND_OPEN' ||
+      roomInfo === 'WAITING'
+    ) {
       return;
     }
 
