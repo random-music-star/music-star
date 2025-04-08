@@ -75,7 +75,7 @@ export default function ChatBox({ channelId }: { channelId: string }) {
                   </span>
                 </div>
               ) : (
-                <div className='text-base text-white'>
+                <div className='text-base break-words text-white'>
                   {chat.sender === nickname ? (
                     <span className='font-medium text-cyan-300'>
                       {chat.sender}(나)
@@ -86,7 +86,7 @@ export default function ChatBox({ channelId }: { channelId: string }) {
                     </span>
                   )}
                   <span className='text-fuchsia-300'> : </span>
-                  <span>{chat.message}</span>
+                  <span className='break-all'>{chat.message}</span>
                 </div>
               )}
             </div>
