@@ -21,11 +21,6 @@ export default function ChannelMemberList({
     return '';
   };
 
-  const getMemberDisplayName = (member: ChannelMember): string => {
-    const typePrefix = member.memberType === 'USER' ? '사용자' : '게스트';
-    return `${typePrefix} ${member.username}`;
-  };
-
   const filteredMembers = members.filter(member => member !== undefined);
 
   return (
@@ -70,7 +65,7 @@ export default function ChannelMemberList({
                         나
                       </span>
                     )}
-                    {getMemberDisplayName(member)}
+                    {member.username}
                   </span>
                   <span
                     className={`rounded px-2 py-1 text-xs ${
