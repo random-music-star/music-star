@@ -24,7 +24,6 @@ const GameMusicPlayer = ({ gameState }: MusicPlayerProps) => {
           </span>
         </div>
 
-        {/* 중앙에 안내 문구 추가 */}
         {gameState === 'ROUND_START' && (
           <div className='text-sm text-white'>
             {isDualMode ? (
