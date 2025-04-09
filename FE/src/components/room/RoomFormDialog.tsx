@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useRouter } from 'next/router';
 
@@ -44,13 +44,14 @@ export default function RoomFormDialog({
   const { gameRoomInfo } = useGameInfoStore();
   const router = useRouter();
 
-  // 초기 데이터를 저장할 ref
-  const initialDataRef = useRef<InitialDataType | null>(null);
+  // 대화상자가 열릴 때마다 새로 설정할 초기 데이터 상태
+  const [initialData, setInitialData] = useState<InitialDataType | null>(null);
   const { channelId } = router.query;
 
+  // isOpen이 true로 바뀔 때에만 initialData 설정
   useEffect(() => {
-    if (isOpen && mode === 'edit' && gameRoomInfo && !initialDataRef.current) {
-      initialDataRef.current = {
+    if (isOpen && mode === 'edit' && gameRoomInfo) {
+      setInitialData({
         roomTitle: gameRoomInfo.roomTitle,
         format: gameRoomInfo.format,
         mode: gameRoomInfo.mode,
@@ -58,20 +59,18 @@ export default function RoomFormDialog({
         hasPassword: gameRoomInfo.hasPassword,
         maxGameRound: gameRoomInfo.maxGameRound,
         maxPlayer: gameRoomInfo.maxPlayer,
-      };
+      });
     }
-  }, [isOpen, mode, gameRoomInfo]);
+  }, [isOpen]); // isOpen만 의존성에 포함
 
   // 방 생성 또는 수정 성공 핸들러
   const handleSuccess = (_data: RoomFormValues, newRoomId?: string) => {
     const currentChannelId = channelId || '1';
     if (mode === 'create') {
       router.push(`/game/room/${currentChannelId}/${newRoomId}`);
-    } else if (mode === 'edit') {
-      // 방 정보는 소켓 연결을 통해 자동으로 업데이트될 거라 없음
     }
     setIsOpen(false);
-    initialDataRef.current = null;
+    setInitialData(null); // 성공 후 초기화
 
     if (onDialogClose) {
       onDialogClose();
@@ -81,7 +80,7 @@ export default function RoomFormDialog({
   // 다이얼로그 상태 변경 핸들러
   const handleOpenChange = (open: boolean) => {
     if (!open) {
-      initialDataRef.current = null;
+      setInitialData(null); // 대화상자가 닫힐 때 초기화
     }
 
     setIsOpen(open);
@@ -117,18 +116,7 @@ export default function RoomFormDialog({
           <RoomForm
             mode={mode}
             roomId={roomId}
-            initialData={
-              initialDataRef.current ||
-              (mode === 'edit' && gameRoomInfo
-                ? {
-                    roomTitle: gameRoomInfo.roomTitle,
-                    format: gameRoomInfo.format,
-                    mode: gameRoomInfo.mode,
-                    selectedYear: gameRoomInfo.selectedYear,
-                    hasPassword: gameRoomInfo.hasPassword,
-                  }
-                : undefined)
-            }
+            initialData={initialData || undefined}
             onSuccess={handleSuccess}
             onCancel={() => handleOpenChange(false)}
           />

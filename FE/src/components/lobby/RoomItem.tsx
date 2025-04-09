@@ -24,8 +24,8 @@ const gameModeLabels: Record<string, string> = {
 // 게임 모드 배지 스타일
 const modeBadgeVariants: Record<string, string> = {
   FULL: 'bg-purple-100 text-purple-800 border-purple-200',
-  DOUBLE: 'bg-amber-100 text-amber-800 border-amber-200',
-  AI: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+  DUAL: 'bg-amber-100 text-amber-800 border-amber-200',
+  TTS: 'bg-emerald-100 text-emerald-800 border-emerald-200',
 };
 
 const statusConfig: Record<string, { className: string; text: string }> = {
@@ -52,37 +52,23 @@ export default function RoomItem({ room }: RoomItemProps) {
   const currentStatus = room.status || 'WAITING';
   const statusDisplay = statusConfig[currentStatus] || statusConfig['WAITING'];
 
+  // LP 이미지 경로 결정
+  const lpImageSrc =
+    currentStatus === 'IN_PROGRESS' ? '/lp_playing.svg' : '/lp_waiting.svg';
+
   // 방 클릭 처리
   const handleRoomClick = () => {
-    if (isFull) return;
     setIsDialogOpen(true);
-  };
-
-  // 년도 표시 함수
-  const renderYearOptions = () => {
-    const selectedYears = room.years || [];
-
-    return (
-      <div className='mr-1 flex flex-col text-[10%]'>
-        {selectedYears.map(year => (
-          <span
-            key={year}
-            className='rounded px-0.5 font-medium text-purple-600'
-          >
-            {year}
-          </span>
-        ))}
-      </div>
-    );
   };
 
   return (
     <>
       <article
-        className='flex h-full w-full cursor-pointer flex-col'
+        className='flex w-full cursor-pointer flex-col'
         onClick={handleRoomClick}
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => setIsHovering(false)}
+        title={`방 제목 : ${room.title}`}
       >
         {/* 상단 */}
         <section className='relative w-full'>
@@ -95,8 +81,8 @@ export default function RoomItem({ room }: RoomItemProps) {
             }}
           >
             <Image
-              src='/lp.svg'
-              alt='CD'
+              src={lpImageSrc}
+              alt='LP 디스크'
               fill
               style={{
                 animation: isHovering
@@ -112,7 +98,7 @@ export default function RoomItem({ room }: RoomItemProps) {
           {/* CD 케이스 (CD 일부를 가림) */}
           <div className='relative z-10 flex aspect-square w-[60%] flex-col justify-between bg-white p-2 shadow-md'>
             {/* CD 케이스 상단 : 상태, 모드 */}
-            <div className='flex w-full items-center justify-between'>
+            <div className='mb-1 flex w-full items-center justify-between'>
               {/* 방 상태 표시 */}
               <span
                 className={`rounded-full px-1 py-0.5 text-xs ${statusDisplay.className}`}
@@ -120,7 +106,7 @@ export default function RoomItem({ room }: RoomItemProps) {
                 {statusDisplay.text}
               </span>
               {/* 게임 모드 뱃지 */}
-              <div className='ml-1 flex flex-wrap justify-end gap-0.5'>
+              <div className='ml-1 flex flex-wrap justify-end gap-1'>
                 {room.gameModes &&
                   Array.isArray(room.gameModes) &&
                   room.gameModes.map(mode => (
@@ -136,23 +122,51 @@ export default function RoomItem({ room }: RoomItemProps) {
             </div>
             {/* CD 케이스 하단 : 년도, 맵, 인원 수, 라운드 수 */}
             <div className='flex w-full flex-1'>
-              {/* CD 케이스 좌측 사이드 : 년도 */}
-              <div className='flex flex-col justify-end'>
-                {/* 모든 년도 표시 - 선택된 년도는 보라색으로 */}
-                <div>{renderYearOptions()}</div>
-              </div>
               {/* CD 케이스 우측 : 맵, 인원 현황, 라운드 설정 값*/}
               <div className='relative flex w-full flex-col justify-center'>
                 {/* 선택한 맵 - 맵 형식에 따라 다른 컴포넌트 렌더링 */}
-                <div className='relative h-3/5 w-full overflow-hidden rounded'>
+                <div className='mb-2 h-3/5 w-full overflow-hidden rounded'>
                   {room.format === 'GENERAL' ? (
                     <GeneralMapPreview />
                   ) : (
                     <BoardMapPreview />
                   )}
                 </div>
+                {/* CD 케이스 좌측 사이드 : 년도 */}
+                <div className='mb-1 flex w-full flex-wrap items-center'>
+                  {/* 년대 (2020년 미만) */}
+                  <div className='mb-0.5 flex w-full flex-wrap items-center justify-center'>
+                    {room.years &&
+                      Array.isArray(room.years) &&
+                      room.years
+                        .filter(year => year < 2020)
+                        .map(year => (
+                          <span
+                            key={year}
+                            className='mr-1 rounded-2xl bg-blue-600/60 px-1 text-[0.5rem] whitespace-nowrap text-white'
+                          >
+                            {`${year}s`}
+                          </span>
+                        ))}
+                  </div>
+                  {/* 년도 (2020년 이상) */}
+                  <div className='flex w-full flex-wrap items-center justify-center'>
+                    {room.years &&
+                      Array.isArray(room.years) &&
+                      room.years
+                        .filter(year => year >= 2020)
+                        .map(year => (
+                          <span
+                            key={year}
+                            className='mr-1 rounded-2xl bg-purple-600/60 px-1 text-[0.5rem] whitespace-nowrap text-white'
+                          >
+                            {`${year}`}
+                          </span>
+                        ))}
+                  </div>
+                </div>
                 {/* 방 인원 */}
-                <div className='absolute right-0 bottom-0 flex justify-end'>
+                <div className='absolute right-0 bottom-0 flex items-end justify-end'>
                   <span className='mr-0.5 text-[9px]'>👨‍👩‍👦</span>
                   <span
                     className={`${isFull ? 'text-red-600' : 'text-black'} text-xs font-medium`}
@@ -166,7 +180,7 @@ export default function RoomItem({ room }: RoomItemProps) {
         </section>
 
         {/* 하단 : 방 이름, 번호, 잠금 여부 */}
-        <section className='mt-2 flex items-center justify-between'>
+        <section className='mt-2 mb-6 flex items-center justify-between'>
           <div className='flex w-full items-center'>
             {/* 방 번호 */}
             <div className='text-md mr-2 rounded-md bg-gradient-to-b from-[#8352D1] to-[#5B3A91] px-1.5 py-0.5 text-white'>
@@ -185,8 +199,8 @@ export default function RoomItem({ room }: RoomItemProps) {
                 textShadow: `-1px -1px 0 #6548B9, 1px -1px 0 #6548B9, -1px 1px 0 #6548B9, 1px 1px 0 #6548B9`,
               }}
             >
-              {room.title.length > 10
-                ? `${room.title.slice(0, 10)}...`
+              {room.title.length > 8
+                ? `${room.title.slice(0, 8)}...`
                 : room.title}
             </h3>
           </div>

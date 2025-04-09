@@ -58,7 +58,15 @@ export function useAuth() {
       );
 
       if (!response.ok) {
-        toast.error('중복된 회원입니다.');
+        if (response.status === 409) {
+          toast.error('중복된 회원입니다.');
+        } else if (response.status === 500) {
+          toast.error(
+            '서버 내부 오류가 발생했습니다. 나중에 다시 시도해주세요.',
+          );
+        } else {
+          toast.error(`회원가입 오류: ${response.status}`);
+        }
         return null;
       }
 

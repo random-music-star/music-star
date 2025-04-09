@@ -374,7 +374,7 @@ export default function RoomForm({
                             />
                           </FormControl>
                           <FormLabel className='ml-1 cursor-pointer text-sm font-semibold text-white'>
-                            {year}년
+                            {year < 2020 ? `${year}년대` : `${year}년`}
                           </FormLabel>
                         </FormItem>
                       ))}
