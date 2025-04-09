@@ -26,10 +26,10 @@ export default function RoomList({
   const isLastPage = currentPage === totalPages - 1 || totalPages === 0;
 
   return (
-    <div className='flex h-full items-center justify-center overflow-y-auto'>
+    <div className='flex h-full items-center justify-center'>
       {isLoading ? (
         // 로딩 중
-        <div className='flex items-center justify-center py-12'>
+        <div className='flex items-center justify-center overflow-y-auto py-12'>
           <div
             className='mr-2 h-6 w-6 animate-spin rounded-full border-[3px] border-current border-t-transparent text-indigo-500'
             aria-hidden='true'
@@ -49,19 +49,19 @@ export default function RoomList({
         </div>
       ) : (
         // SSE 연결 완료 & 방 목록 내려받기 완료
-        <div className='flex flex-1'>
+        <div className='flex h-full w-full flex-1'>
           {/* 방 목록 표시 */}
-          <div className='flex flex-1 items-center justify-between'>
+          <div className='flex h-full w-full items-center justify-between'>
             {/* 이전 버튼 */}
             <button
               onClick={() => !isFirstPage && onPageChange(currentPage - 1)}
               disabled={isFirstPage}
-              className={`${isFirstPage ? 'opacity-10' : 'hover:cursor-pointer hover:text-[#82cdce]'} mr-3 text-4xl text-[#9FFCFE]`}
+              className={`${isFirstPage ? 'opacity-10' : 'hover:cursor-pointer hover:text-[#82cdce]'} mr-2 text-4xl text-[#9FFCFE]`}
             >
               ◀
             </button>
             {/* 방 목록 */}
-            <div className='mt-2 flex flex-1 flex-col justify-between'>
+            <div className='flex h-full w-full flex-col justify-between'>
               {!sseConnected && (
                 <Alert className='mb-4 border-amber-200 bg-amber-50'>
                   <AlertDescription className='text-sm text-amber-700'>
@@ -69,22 +69,19 @@ export default function RoomList({
                   </AlertDescription>
                 </Alert>
               )}
-              <div className='grid min-h-[500px] grid-cols-2 gap-4 lg:grid-cols-3'>
+              <div className='flex h-full flex-wrap'>
                 {rooms.map(room => (
-                  <RoomItem key={room.id} room={room} />
+                  <div key={room.id} className='w-1/3'>
+                    <RoomItem room={room} />
+                  </div>
                 ))}
-              </div>
-              <div className='text-center text-sm font-medium text-white'>
-                {totalPages > 0
-                  ? `${currentPage + 1} / ${totalPages}`
-                  : '0 / 0'}
               </div>
             </div>
             {/* 다음 버튼 */}
             <button
               onClick={() => !isLastPage && onPageChange(currentPage + 1)}
               disabled={isLastPage}
-              className={`${isLastPage ? 'opacity-10' : 'hover:cursor-pointer hover:text-[#82cdce]'} ml-3 text-4xl text-[#9FFCFE]`}
+              className={`${isLastPage ? 'opacity-10' : 'hover:cursor-pointer hover:text-[#82cdce]'} ml-2 text-4xl text-[#9FFCFE]`}
             >
               ▶
             </button>

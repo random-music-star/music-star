@@ -632,7 +632,10 @@ const LobbyPage = ({ userNickname, channelId }: LobbyServerProps) => {
       <main className='flex flex-1 overflow-hidden'>
         <section className='m-10 flex flex-1 flex-col rounded-2xl bg-gradient-to-r from-[#4F719C]/80 to-[#5F4EA0]/80 p-6'>
           <div className='mb-6 flex items-center justify-between'>
-            <h1 className='text-2xl font-bold text-white'>게임 방 목록</h1>
+            <div className='text-2xl font-bold text-white'>게임 방 목록</div>
+            <div className='mt-2 text-center text-sm font-medium text-white'>
+              {totalPages > 0 ? `${currentPage + 1} / ${totalPages}` : '0 / 0'}
+            </div>
             <div>
               <RoomSearchDialog />
               <CreateRoomButton />
@@ -649,7 +652,7 @@ const LobbyPage = ({ userNickname, channelId }: LobbyServerProps) => {
             />
           </div>
         </section>
-        <section className='flex w-1/4 flex-col pt-3 text-white'>
+        <section className='flex w-1/5 flex-col pt-3 text-white'>
           <Tabs
             value={activeTab}
             onValueChange={handleTabChange}

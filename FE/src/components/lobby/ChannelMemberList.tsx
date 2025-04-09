@@ -40,7 +40,7 @@ export default function ChannelMemberList({
           <p>참가자가 없습니다</p>
         </div>
       ) : (
-        <div className='space-y-2'>
+        <div className='neon-scrollbar max-h-[calc(100%-10px)] space-y-2 overflow-y-auto'>
           {!sseConnected && (
             <div className='mb-2 rounded bg-yellow-900/30 p-2 text-xs text-yellow-500'>
               ⚠️ 실시간 업데이트가 불가능합니다
