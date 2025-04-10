@@ -78,6 +78,7 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
     useParticipantInfoStore.getState().resetParticipantInfo();
     useSoundEventStore.getState().setSoundEvent(null);
     useGameRoundInfoStore.getState().resetRoundInfo();
+    useGameInfoStore.getState().setGameInfo(null);
 
     const newSubscriptions: Record<string, StompSubscription> = {};
 
@@ -162,8 +163,6 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
               const remainRound = maxRound - currentRound + 1;
 
               if (remainRound > 3) return;
-
-              soundEventStore.setSoundEvent('WARNING');
               if (remainRound === 1) {
                 gameChatStore.setGameChattings({
                   sender: 'system',

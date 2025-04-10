@@ -16,7 +16,7 @@ export type SelectedYearType =
 
 interface GameInfoStore {
   gameRoomInfo: GameInfoState | null;
-  setGameInfo: (newGameRoomInfo: GameInfoState) => void;
+  setGameInfo: (newGameRoomInfo: GameInfoState | null) => void;
 }
 
 interface GameInfoState {
@@ -33,7 +33,7 @@ interface GameInfoState {
 
 export const useGameInfoStore = create<GameInfoStore>(set => ({
   gameRoomInfo: null,
-  setGameInfo: (newGameRoomInfo: GameInfoState) => {
+  setGameInfo: (newGameRoomInfo: GameInfoState | null) => {
     set({ gameRoomInfo: newGameRoomInfo });
   },
 }));

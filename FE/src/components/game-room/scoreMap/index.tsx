@@ -3,9 +3,12 @@ import { useEffect } from 'react';
 import useSound from '@/hooks/useSound';
 import { useSoundEventStore } from '@/stores/useSoundEventStore';
 
+import GameExitButton from '../GameExitButton';
 import ScoreChatBox from '../ScoreChatBox';
 import ScoreboardTable from './ScoreBoardTable';
 import ScoreRoundInformation from './ScoreRoundInformation';
+
+// 실제 경로로 수정해주세요
 
 const ScoreMap = ({
   nickname,
@@ -20,8 +23,6 @@ const ScoreMap = ({
   const { play, stop } = useSound([
     { key: 'ROULETTE', url: '/audio/playsound/roulette.mp3' },
     { key: 'ROULETTE_RESULT', url: '/audio/playsound/roulette-result.mp3' },
-
-    { key: 'WARNING', url: '/audio/playsound/warning.mp3' },
     { key: 'CORRECT', url: '/audio/playsound/correct.mp3' },
     { key: 'WINNER', url: '/audio/playsound/winner.mp3' },
   ]);
@@ -40,8 +41,12 @@ const ScoreMap = ({
   }, [stop, setSoundEvent]);
 
   return (
-    <div className='flex h-full w-full'>
-      <div className='flex w-[70%] flex-col pt-10'>
+    <div className='relative flex h-full w-full'>
+      <div className='relative flex w-[70%] flex-col gap-6 pt-10'>
+        <div className='absolute top-2 right-4 z-10'>
+          <GameExitButton />
+        </div>
+
         <div className='mx-auto h-[300px] w-[60%]'>
           <ScoreRoundInformation />
         </div>
@@ -55,8 +60,7 @@ const ScoreMap = ({
         </div>
       </div>
 
-      {/* 우측 영역 (1/4) - ScoreboardTable */}
-      <div className='h-full w-[30%] overflow-auto p-4'>
+      <div className='relative h-full w-[30%] overflow-auto p-4'>
         <ScoreboardTable />
       </div>
     </div>
