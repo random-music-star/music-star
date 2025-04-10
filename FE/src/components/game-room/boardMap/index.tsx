@@ -22,7 +22,6 @@ const BoardMap = () => {
       key: 'ROULETTE_123_RESULT',
       url: '/audio/playsound/roulette-123-result.mp3',
     },
-    { key: 'WARNING', url: '/audio/playsound/warning.mp3' },
     { key: 'CORRECT', url: '/audio/playsound/correct.mp3' },
     { key: 'WINNER', url: '/audio/playsound/winner.mp3' },
   ]);

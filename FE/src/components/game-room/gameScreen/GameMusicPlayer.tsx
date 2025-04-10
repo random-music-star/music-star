@@ -48,7 +48,7 @@ const GameMusicPlayer = ({ gameState }: MusicPlayerProps) => {
           {gameState === 'GAME_RESULT' ? (
             <span>{"다음 문제: '.' 입력"}</span>
           ) : (
-            <span>{"정답/스킵: '.' 입력"}</span>
+            <span>{'채팅창에 . 입력시 SKIP'}</span>
           )}
         </div>
       </div>
@@ -60,6 +60,9 @@ const GameMusicPlayer = ({ gameState }: MusicPlayerProps) => {
           <RoundResultContent />
         )}
       </div>
+      <span className='mt-4 text-center text-cyan-200'>
+        {'과반수 이상 스킵할 경우 다음라운드로 넘어갑니다.'}
+      </span>
     </div>
   );
 };

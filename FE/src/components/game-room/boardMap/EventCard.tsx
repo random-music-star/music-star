@@ -49,15 +49,18 @@ const EventCard = ({ eventType }: { eventType: EventType }) => {
   const emojiUrl = `/eventemoji/${(eventType || 'NOTHING').toLowerCase()}.svg`;
 
   return (
-    <div className='event-card flex items-center justify-center rounded-2xl bg-white p-4 pr-10 shadow-xl shadow-white/70'>
-      <Image
-        src={emojiUrl}
-        width={210}
-        height={210}
-        alt='event'
-        className='event-emoji object-contain'
-        style={{ objectFit: 'contain' }}
-      />
+    <div className='event-card flex items-center justify-center gap-10 rounded-2xl bg-white p-[80px] shadow-xl shadow-white/70'>
+      <div className='flex h-40 w-40 items-center justify-center'>
+        <Image
+          src={emojiUrl}
+          width={210}
+          height={210}
+          alt='event'
+          className='event-emoji object-contain'
+          style={{ objectFit: 'contain' }}
+        />
+      </div>
+
       <div className='flex max-w-[170px] min-w-[100px] flex-col flex-wrap items-center justify-center gap-5'>
         <h3 className='text-3xl font-bold text-purple-900/80'>
           {EventCentent[eventType].title}
