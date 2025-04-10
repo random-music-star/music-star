@@ -17,7 +17,7 @@ export const AVAILABLE_MODES = ['FULL', 'DUAL', 'TTS'] as const;
 export const AVAILABLE_YEARS = [
   1970, 1980, 1990, 2000, 2010, 2020, 2021, 2022, 2023, 2024,
 ] as const;
-export const AVAILABLE_ROUNDS = [10, 20, 30] as const;
+export const AVAILABLE_ROUNDS = [5, 10, 20] as const;
 
 export type GameMode = (typeof AVAILABLE_MODES)[number];
 

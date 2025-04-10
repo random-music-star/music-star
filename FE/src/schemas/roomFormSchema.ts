@@ -11,7 +11,7 @@ export const createRoomFormSchema = z
     years: z.array(z.number()).min(1, '연도를 선택해주세요'),
     hasPassword: z.boolean().default(false),
     password: z.string(),
-    maxGameRound: z.number().refine(value => [10, 20, 30].includes(value), {
+    maxGameRound: z.number().refine(value => [5, 10, 20].includes(value), {
       message: '라운드는 10, 20, 30 중 하나를 선택해주세요',
     }),
     maxPlayer: z.number(),

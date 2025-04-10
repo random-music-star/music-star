@@ -32,7 +32,7 @@ export function useRoomForm({ initialData }: UseRoomFormProps = {}) {
       years: [],
       hasPassword: false,
       password: '',
-      maxGameRound: 20,
+      maxGameRound: 10,
       maxPlayer: 6, // BOARD 형식의 최대값으로 설정
     },
   });
@@ -53,7 +53,7 @@ export function useRoomForm({ initialData }: UseRoomFormProps = {}) {
         years: initialData.selectedYear || [],
         hasPassword: initialData.hasPassword || false,
         password: '',
-        maxGameRound: initialData.maxGameRound || 20,
+        maxGameRound: initialData.maxGameRound || 10,
         maxPlayer: maxPlayerValue,
       });
     }
