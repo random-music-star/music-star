@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 
 import { getCookie } from 'cookies-next';
 import { motion } from 'framer-motion';
+import { ThumbsUp } from 'lucide-react';
 import { GetServerSideProps } from 'next';
 
 import SEO from '@/components/SEO';
@@ -84,12 +85,18 @@ export default function Home({ userNickname }: HomeServerProps) {
         ) : (
           <div className='my-4 flex items-center justify-center gap-6'>
             <AccountFormDialog />
-            <Button
-              className='rounded-2xl bg-purple-700/90 hover:bg-purple-700/70'
-              onClick={guestLogin}
-            >
-              비회원 로그인
-            </Button>
+            <div className='relative'>
+              <Button
+                className='rounded-2xl bg-purple-700/90 hover:bg-purple-700/70'
+                onClick={guestLogin}
+              >
+                비회원 로그인
+              </Button>
+              <div className='absolute -top-3 -right-10 flex rotate-12 transform items-center gap-1 rounded-full border-2 border-white bg-red-500 px-2 py-1 shadow-lg'>
+                <ThumbsUp size={14} className='text-white' />
+                <span className='text-xs font-bold text-white'>추천!</span>
+              </div>
+            </div>
           </div>
         )}
 
