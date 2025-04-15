@@ -120,6 +120,7 @@ const YoutubePlayer = () => {
       if (
         roundState === 'ROUND_INFO' ||
         roundState === 'ROUND_OPEN' ||
+        roundState === 'SCORE_UPDATE' ||
         roomInfo === 'WAITING'
       ) {
         pauseVideo();
@@ -134,6 +135,7 @@ const YoutubePlayer = () => {
       if (
         roundState === 'ROUND_INFO' ||
         roundState === 'ROUND_OPEN' ||
+        roundState === 'SCORE_UPDATE' ||
         roomInfo === 'WAITING'
       ) {
         pauseVideo2();
@@ -187,6 +189,7 @@ const YoutubePlayer = () => {
     if (
       roundState === 'ROUND_INFO' ||
       roundState === 'ROUND_OPEN' ||
+      roundState === 'SCORE_UPDATE' ||
       roomInfo === 'WAITING'
     ) {
       pauseVideo();
@@ -217,6 +220,7 @@ const YoutubePlayer = () => {
     if (
       roundState === 'ROUND_INFO' ||
       roundState === 'ROUND_OPEN' ||
+      roundState === 'SCORE_UPDATE' ||
       roomInfo === 'WAITING'
     ) {
       pauseVideo();
@@ -239,6 +243,7 @@ const YoutubePlayer = () => {
     if (
       roundState === 'ROUND_INFO' ||
       roundState === 'ROUND_OPEN' ||
+      roundState === 'SCORE_UPDATE' ||
       roomInfo === 'WAITING'
     ) {
       pauseVideo2();
@@ -255,6 +260,7 @@ const YoutubePlayer = () => {
     if (
       roundState === 'ROUND_INFO' ||
       roundState === 'ROUND_OPEN' ||
+      roundState === 'SCORE_UPDATE' ||
       roomInfo === 'WAITING'
     ) {
       return;
@@ -285,6 +291,7 @@ const YoutubePlayer = () => {
     if (
       roundState === 'ROUND_INFO' ||
       roundState === 'ROUND_OPEN' ||
+      roundState === 'SCORE_UPDATE' ||
       roomInfo === 'WAITING'
     ) {
       return;
