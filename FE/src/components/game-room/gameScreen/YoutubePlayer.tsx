@@ -269,7 +269,7 @@ const YoutubePlayer = () => {
         '*',
       );
       iframeRef.current.contentWindow.postMessage(
-        '{"event":"command","func":"setVolume","args":[100]}',
+        '{"event":"command","func":"setVolume","args":[50]}',
         '*',
       );
       iframeRef.current.contentWindow.postMessage(
@@ -299,7 +299,7 @@ const YoutubePlayer = () => {
         '*',
       );
       iframe2Ref.current.contentWindow.postMessage(
-        '{"event":"command","func":"setVolume","args":[100]}',
+        '{"event":"command","func":"setVolume","args":[50]}',
         '*',
       );
       iframe2Ref.current.contentWindow.postMessage(
