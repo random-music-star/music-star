@@ -19,7 +19,7 @@ const useSound = (soundFiles: SoundFile[]): SoundControls => {
     if (!sounds.current[key]) {
       const audio = new Audio(url);
       audio.preload = 'auto';
-      audio.volume = 0.05;
+      audio.volume = 0.3;
       sounds.current[key] = audio;
     }
   });
