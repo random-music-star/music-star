@@ -4,6 +4,7 @@ import { Toaster } from 'sonner';
 
 import MobileWarning from '@/components/MobileWarning';
 import SocketLayout from '@/components/layouts/SocketLayout';
+import GoogleAnalytics from '@/lib/GoogleAnalytics';
 import '@/styles/globals.css';
 
 export default function App({ Component, pageProps }: AppProps) {
@@ -12,6 +13,7 @@ export default function App({ Component, pageProps }: AppProps) {
   if (router.pathname.startsWith('/game')) {
     return (
       <SocketLayout>
+        <GoogleAnalytics />
         <MobileWarning />
         <Component {...pageProps} />
         <Toaster />
@@ -21,6 +23,7 @@ export default function App({ Component, pageProps }: AppProps) {
 
   return (
     <>
+      <GoogleAnalytics />
       <MobileWarning />
       <Toaster />
       <Component {...pageProps} />
