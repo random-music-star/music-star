@@ -18,7 +18,7 @@ interface GameRoomInfo {
 /**
  * API 요청 데이터 인터페이스
  */
-interface ApiRequestData {
+export interface RoomApiRequestData {
   title: string;
   password: string;
   format?: string;
@@ -26,11 +26,10 @@ interface ApiRequestData {
   selectedYears: number[];
   maxGameRound?: number;
   maxPlayer?: number;
-  roomId?: string; // 방 수정하기 요청에서만 사용
-  channelId?: number; // 방 생성하기 요청에서만 사용
+  roomId?: string;
+  channelId?: number;
 }
 
-// 소켓 데이터를 폼 데이터로 변환 (GameInfoState -> FormValues)
 export function socketToFormData(
   gameRoomInfo: GameRoomInfo | null,
 ): Partial<RoomFormValues> | null {
@@ -54,7 +53,7 @@ export function socketToFormData(
 export function formToApiData(
   formData: RoomFormValues,
   roomId?: string,
-): ApiRequestData {
+): RoomApiRequestData {
   const password = formData.hasPassword ? formData.password : '';
   const currentChannelId = useChannelStore.getState().currentChannelId;
 

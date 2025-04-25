@@ -16,7 +16,7 @@ import SignupForm from './SignupForm';
 export default function AccountFormDialog() {
   const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('login');
-  const [signupUsername, setSignupUsername] = useState<string>('');
+  const [signupUsername, setSignupUsername] = useState('');
 
   useEffect(() => {
     if (!open) {
