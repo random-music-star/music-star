@@ -11,7 +11,7 @@ export const userNicknameAPI = (ctx?: ApiContext) =>
   api<{ username: string }>('/auth/me', { method: 'GET' }, ctx);
 
 export const getChannelUsersAPI = (channelId: string, ctx?: ApiContext) =>
-  api<{ users: Member[] }>(
+  api<{ userList: Member[] }>(
     `/member/${channelId}`,
     {
       method: 'GET',

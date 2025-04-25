@@ -187,7 +187,7 @@ const LobbyPage = ({ userNickname, channelId }: LobbyServerProps) => {
       const membersData: ChannelMember[] = [];
 
       if (success) {
-        data.users.forEach((user: Member) => {
+        data.userList.forEach((user: Member) => {
           membersData.push({
             username: user.username,
             memberType: user.memberType,

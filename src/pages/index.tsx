@@ -23,8 +23,6 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
 
   const result = await userNicknameAPI(ctx);
 
-  console.log('result:', result);
-
   return {
     props: {
       userNickname: result.data?.username || null,
