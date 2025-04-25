@@ -1,9 +1,10 @@
 import { Client, StompSubscription } from '@stomp/stompjs';
+import { getCookie } from 'cookies-next';
 import { create } from 'zustand';
 
+import { COOKIE_NAME } from '@/api/core';
 import { WebSocketState } from '@/types/websocket';
 
-import { useNicknameStore } from '../auth/useNicknameStore';
 import { useSoundEventStore } from '../useSoundEventStore';
 import { useGameBubbleStore } from './useGameBubbleStore';
 import { useGameChatStore } from './useGameChatStore';
@@ -29,7 +30,7 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
       webSocketFactory: () =>
         new WebSocket(`${process.env.NEXT_PUBLIC_WEBSOCKET_URL}`),
       connectHeaders: {
-        Authorization: useNicknameStore.getState().nickname,
+        Authorization: getCookie(COOKIE_NAME) as string,
       },
       reconnectDelay: 5000,
       heartbeatIncoming: 4000,
@@ -90,7 +91,7 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
           usePublicChatStore.getState().setPublicChattings(response);
         },
         {
-          Authorization: useNicknameStore.getState().nickname,
+          Authorization: getCookie(COOKIE_NAME) as string,
         },
       );
     }
@@ -119,7 +120,7 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
           }
         },
         {
-          Authorization: useNicknameStore.getState().nickname,
+          Authorization: getCookie(COOKIE_NAME) as string,
         },
       );
 
@@ -135,8 +136,6 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
               message: `곧 다음 라운드가 시작됩니다. `,
             });
 
-            // url, round, mode 설정 및 힌트는 null 처리 + songUrl2는 듀얼 모드에서만
-            // 임의로 songUrl2 설정해봄
             roundInfo.setRoundInfo(response);
             roundHint.updateGameHint(null);
             useGameRoundResultStore.getState().setGameRoundResult(null);
@@ -276,7 +275,7 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
           }
         },
         {
-          Authorization: useNicknameStore.getState().nickname,
+          Authorization: getCookie(COOKIE_NAME) as string,
         },
       );
     }
