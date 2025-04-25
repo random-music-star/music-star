@@ -30,7 +30,7 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
       webSocketFactory: () =>
         new WebSocket(`${process.env.NEXT_PUBLIC_WEBSOCKET_URL}`),
       connectHeaders: {
-        Authorization: getCookie(COOKIE_NAME) as string,
+        Authorization: `Bearer ${getCookie(COOKIE_NAME)}`,
       },
       reconnectDelay: 5000,
       heartbeatIncoming: 4000,
@@ -91,7 +91,7 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
           usePublicChatStore.getState().setPublicChattings(response);
         },
         {
-          Authorization: getCookie(COOKIE_NAME) as string,
+          Authorization: `Bearer ${getCookie(COOKIE_NAME)}`,
         },
       );
     }
@@ -120,7 +120,7 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
           }
         },
         {
-          Authorization: getCookie(COOKIE_NAME) as string,
+          Authorization: `Bearer ${getCookie(COOKIE_NAME)}`,
         },
       );
 
@@ -275,7 +275,7 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
           }
         },
         {
-          Authorization: getCookie(COOKIE_NAME) as string,
+          Authorization: `Bearer ${getCookie(COOKIE_NAME)}`,
         },
       );
     }
