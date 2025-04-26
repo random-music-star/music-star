@@ -3,6 +3,8 @@ import { useRouter } from 'next/router';
 import { toast } from 'sonner';
 
 import { guestLoginAPI, userLoginAPI, userSignupAPI } from '@/api/auth';
+import { userNicknameAPI } from '@/api/member';
+import { useNicknameStore } from '@/stores/auth/useNicknameStore';
 
 export interface UserCredentials {
   username: string;
@@ -20,6 +22,13 @@ export function useAuth() {
         path: '/',
       });
       toast.success('비회원으로 로그인했습니다.');
+
+      const { success: nicknameSuccess, data: nicknameData } =
+        await userNicknameAPI();
+
+      if (nicknameSuccess) {
+        useNicknameStore.getState().setNickname(nicknameData.username);
+      }
     } else {
       toast.error(error);
     }
@@ -49,6 +58,13 @@ export function useAuth() {
       toast.success('로그인 성공', {
         description: '환영합니다!',
       });
+
+      const { success: nicknameSuccess, data: nicknameData } =
+        await userNicknameAPI();
+
+      if (nicknameSuccess) {
+        useNicknameStore.getState().setNickname(nicknameData.username);
+      }
     } else {
       toast.error(error);
     }
@@ -56,9 +72,10 @@ export function useAuth() {
 
   const logout = () => {
     try {
-      deleteCookie('userNickname', { path: '/' });
+      deleteCookie('accessToken', { path: '/' });
       toast.success('로그아웃 되었습니다.');
       router.push('/');
+      useNicknameStore.getState().setNickname('');
     } catch {
       toast.error('로그아웃 중 오류가 발생했습니다.');
     }
