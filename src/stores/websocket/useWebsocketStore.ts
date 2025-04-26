@@ -84,11 +84,27 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
     const newSubscriptions: Record<string, StompSubscription> = {};
 
     if (subscriptionType === 'channel') {
+      const gameStateStore = useGameStateStore.getState();
+
       newSubscriptions['channel'] = client.subscribe(
         `/topic/channel/${channelId}`,
         message => {
           const { response } = JSON.parse(message.body);
           usePublicChatStore.getState().setPublicChattings(response);
+        },
+        {
+          Authorization: `Bearer ${getCookie(COOKIE_NAME)}`,
+        },
+      );
+
+      newSubscriptions['messageQueue'] = client.subscribe(
+        `/user/queue/system`,
+        message => {
+          const { type } = JSON.parse(message.body);
+
+          if (type === 'refuseEnter') {
+            gameStateStore.setGameState('REFUSED');
+          }
         },
         {
           Authorization: `Bearer ${getCookie(COOKIE_NAME)}`,
