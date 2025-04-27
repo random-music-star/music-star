@@ -1,5 +1,6 @@
 import { Client, StompSubscription } from '@stomp/stompjs';
 import { getCookie } from 'cookies-next';
+import { toast } from 'sonner';
 import { create } from 'zustand';
 
 import { COOKIE_NAME } from '@/api/core';
@@ -100,10 +101,11 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
       newSubscriptions['messageQueue'] = client.subscribe(
         `/user/queue/system`,
         message => {
-          const { type } = JSON.parse(message.body);
+          const { type, response } = JSON.parse(message.body);
 
           if (type === 'refuseEnter') {
             gameStateStore.setGameState('REFUSED');
+            toast.error(response.message || '알 수 없는 문제가 발생했습니다.');
           }
         },
         {
@@ -129,10 +131,11 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
       newSubscriptions['messageQueue'] = client.subscribe(
         `/user/queue/system`,
         message => {
-          const { type } = JSON.parse(message.body);
+          const { type, response } = JSON.parse(message.body);
 
           if (type === 'refuseEnter') {
             gameStateStore.setGameState('REFUSED');
+            toast.error(response.message || '알 수 없는 문제가 발생했습니다.');
           }
         },
         {
