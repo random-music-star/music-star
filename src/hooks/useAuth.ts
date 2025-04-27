@@ -31,7 +31,9 @@ export function useAuth() {
       }
     } else {
       toast.error(error);
+      return false;
     }
+    return true;
   };
 
   const signUp = async ({ username, password }: UserCredentials) => {
@@ -43,8 +45,10 @@ export function useAuth() {
       toast.success('회원가입 성공', {
         description: '환영합니다!',
       });
+      return true;
     } else {
       toast.error(error);
+      return false;
     }
   };
 
@@ -58,7 +62,6 @@ export function useAuth() {
       toast.success('로그인 성공', {
         description: '환영합니다!',
       });
-
       const { success: nicknameSuccess, data: nicknameData } =
         await userNicknameAPI();
 
@@ -67,7 +70,9 @@ export function useAuth() {
       }
     } else {
       toast.error(error);
+      return false;
     }
+    return true;
   };
 
   const logout = () => {
@@ -78,7 +83,9 @@ export function useAuth() {
       useNicknameStore.getState().setNickname('');
     } catch {
       toast.error('로그아웃 중 오류가 발생했습니다.');
+      return false;
     }
+    return true;
   };
 
   return { guestLogin, signUp, userLogin, logout };
