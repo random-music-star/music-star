@@ -306,6 +306,12 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
       return;
     }
 
-    client.publish({ destination, body: JSON.stringify(payload) });
+    client.publish({
+      destination,
+      body: JSON.stringify(payload),
+      headers: {
+        Authorization: `Bearer ${getCookie(COOKIE_NAME)}`,
+      },
+    });
   },
 }));
