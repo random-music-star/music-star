@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import axios from 'axios';
-import { getCookie } from 'cookies-next';
-import { GetServerSideProps } from 'next';
+import { GetServerSideProps, NextApiRequest, NextApiResponse } from 'next';
 import { useRouter } from 'next/router';
+import { toast } from 'sonner';
 
+import { ApiContext } from '@/api/core';
+import { Member, getChannelUsersAPI, userNicknameAPI } from '@/api/member';
+import { getRoomsAPI } from '@/api/room';
 import SEO from '@/components/SEO';
 import BackgroundMusic from '@/components/common/BackgroundMusic';
 import ChannelMemberList from '@/components/lobby/ChannelMemberList';
@@ -16,8 +18,6 @@ import RoomSearchDialog from '@/components/lobby/RoomSearchDialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useNicknameStore } from '@/stores/auth/useNicknameStore';
 import { useChannelStore } from '@/stores/lobby/useChannelStore';
-
-const API_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
 const SSE_EVENTS = {
   CONNECT: 'CONNECT',
@@ -33,6 +33,8 @@ const ACTION_TYPES = {
   UPDATED: 'UPDATED',
   FINISHED: 'FINISHED',
 } as const;
+
+const PAGE_SIZE = 6;
 
 export type Room = {
   id: string;
@@ -68,22 +70,15 @@ export const getServerSideProps: GetServerSideProps = async ({
   res,
   params,
 }) => {
-  const userNickname = (await getCookie('userNickname', { req, res })) || '';
   const { channelId } = params as { channelId: string };
+  const ctx: ApiContext = {
+    req: req as NextApiRequest,
+    res: res as NextApiResponse,
+  };
 
-  // 유효하지 않은 채널 ID 검증 (숫자가 아니거나 범위를 벗어난 경우)
-  if (
-    !channelId ||
-    !/^\d+$/.test(channelId) || // 숫자만 허용
-    parseInt(channelId) <= 0 || // 양수만 허용
-    parseInt(channelId) > 6
-  ) {
-    return {
-      notFound: true,
-    };
-  }
+  const { success, data } = await userNicknameAPI(ctx);
 
-  if (!userNickname) {
+  if (!success || !data) {
     return {
       redirect: {
         destination: '/',
@@ -92,9 +87,18 @@ export const getServerSideProps: GetServerSideProps = async ({
     };
   }
 
+  if (
+    !channelId ||
+    !/^\d+$/.test(channelId) ||
+    parseInt(channelId) <= 0 ||
+    parseInt(channelId) > 6
+  ) {
+    return { notFound: true };
+  }
+
   return {
     props: {
-      userNickname,
+      userNickname: data.username,
       channelId,
     },
   };
@@ -116,9 +120,7 @@ const LobbyPage = ({ userNickname, channelId }: LobbyServerProps) => {
   const [sseConnected, setSseConnected] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(0);
   const [totalPages, setTotalPages] = useState<number>(1);
-  const pageSize = 6;
 
-  // 채널 멤버 관련 상태
   const [members, setMembers] = useState<ChannelMember[]>([]);
   const [isMembersLoading, setIsMembersLoading] = useState<boolean>(true);
 
@@ -156,126 +158,105 @@ const LobbyPage = ({ userNickname, channelId }: LobbyServerProps) => {
     }
   }, [router.query, currentPage]);
 
-  // 컴포넌트 마운트 시에만 로딩 상태 설정
   useEffect(() => {
     setIsLoading(true);
 
     const fetchInitialData = async () => {
-      try {
-        const response = await axios.get(`${API_URL}/room`, {
-          params: {
-            channelId: channelId,
-            page: 0,
-            size: pageSize,
-          },
-        });
+      const { data, success } = await getRoomsAPI(channelId, 0);
 
-        const data = response.data;
-        setRooms(data.content || []);
-        setCurrentPage(data.number || 0);
-        setTotalPages(data.totalPages || 1);
+      if (!success || !data) {
         setIsLoading(false);
-      } catch (error) {
-        console.error('초기 데이터 로딩 오류:', error);
-        setIsLoading(false);
+        return;
       }
+
+      setRooms(data.content || []);
+      setCurrentPage(data.number || 0);
+      setTotalPages(data.totalPages || 1);
+      setIsLoading(false);
     };
 
     fetchInitialData();
-
-    // 이 useEffect는 컴포넌트가 마운트될 때 한 번만 실행됩니다
   }, []);
 
-  // 채널 멤버 목록 가져오기
   useEffect(() => {
     const fetchChannelMembers = async () => {
-      try {
-        setIsMembersLoading(true);
-        const response = await axios.get(`${API_URL}/member/${channelId}`);
-        let membersData = response.data || [];
+      setIsMembersLoading(true);
 
-        // 내 정보가 목록에 없는 경우 추가
-        const isCurrentUserInList = membersData.some(
-          (member: ChannelMember) => member.username === userNickname,
-        );
+      const { success, data } = await getChannelUsersAPI(channelId);
 
-        if (!isCurrentUserInList) {
-          // 기본적으로 내 정보를 로비에 있는 상태로 추가
-          membersData = [
-            ...membersData,
-            {
-              username: userNickname,
-              memberType: 'GUEST',
-              inLobby: true,
-              roomStatus: null,
-            },
-          ];
-        }
+      const membersData: ChannelMember[] = [];
 
-        setMembers(membersData);
-        setIsMembersLoading(false);
-      } catch (error) {
-        console.error('채널 멤버 목록 가져오기 오류:', error);
-        setIsMembersLoading(false);
+      if (success) {
+        data.userList.forEach((user: Member) => {
+          membersData.push({
+            username: user.username,
+            memberType: user.memberType,
+            inLobby: user.inLobby,
+            roomStatus: user.roomStatus,
+          });
+        });
       }
+
+      const isCurrentUserInList = membersData.some(
+        (member: ChannelMember) => member.username === userNickname,
+      );
+
+      if (!isCurrentUserInList) {
+        membersData.push({
+          username: userNickname,
+          memberType: 'GUEST',
+          inLobby: true,
+          roomStatus: null,
+        });
+      }
+
+      setMembers(membersData);
+      setIsMembersLoading(false);
     };
 
     fetchChannelMembers();
   }, [channelId, userNickname]);
 
-  // 페이지 전환 처리 함수
   const handlePageChange = async (newPage: number) => {
-    try {
-      await router.push(
-        {
-          pathname: router.pathname,
-          query: {
-            ...router.query,
-            page: newPage,
-          },
-        },
-        undefined,
-        { shallow: true },
-      );
-
-      const response = await axios.get(`${API_URL}/room`, {
-        params: {
-          channelId: channelId,
+    router.push(
+      {
+        pathname: router.pathname,
+        query: {
+          ...router.query,
           page: newPage,
-          size: pageSize,
         },
-      });
+      },
+      undefined,
+      { shallow: true },
+    );
 
-      const data = response.data;
-      setRooms(data.content || []);
-      setCurrentPage(data.pageable?.pageNumber || newPage);
-      setTotalPages(data.totalPages || 1);
-    } catch (error) {
-      console.error('방 목록 가져오기 오류:', error);
+    const { data, success } = await getRoomsAPI(channelId, newPage);
+
+    if (!success || !data) {
+      setIsLoading(false);
+      return;
     }
+
+    setRooms(data.content || []);
+    setCurrentPage(data.number || newPage);
+    setTotalPages(data.totalPages || 1);
   };
 
   const handleEventData = useCallback(
     (event: MessageEvent, eventName: string) => {
-      try {
-        let data;
+      let data;
 
-        if (eventName === SSE_EVENTS.CONNECT) {
-          data = event.data;
-          return data;
-        }
-
-        data = JSON.parse(event.data);
+      if (eventName === SSE_EVENTS.CONNECT) {
+        data = event.data;
         return data;
-      } catch (error) {
-        console.error(`${eventName} 이벤트 처리 오류:`, error);
-        return null;
       }
+
+      data = JSON.parse(event.data);
+      return data;
     },
     [],
   );
 
-  // SSE 연결 및 이벤트 처리
   useEffect(() => {
     let eventSource: EventSource | null = null;
 
@@ -299,7 +280,6 @@ const LobbyPage = ({ userNickname, channelId }: LobbyServerProps) => {
         setSseConnected(true);
       });
 
-      // ROOM_UPDATED 이벤트 처리
       eventSource.addEventListener(SSE_EVENTS.ROOM_UPDATED, event => {
         const data = handleEventData(event, SSE_EVENTS.ROOM_UPDATED);
 
@@ -340,100 +320,76 @@ const LobbyPage = ({ userNickname, channelId }: LobbyServerProps) => {
 
           // 페이지에 대한 GET 요청을 보내 새로운 목록을 받아옴
           const fetchUpdatedRooms = async () => {
-            try {
-              const response = await axios.get(`${API_URL}/room`, {
-                params: {
-                  channelId: channelId,
-                  page: pageNow,
-                  size: pageSize,
-                },
-              });
+            const { data, success } = await getRoomsAPI(channelId, pageNow);
 
-              const newRoomsData = response.data.content || [];
+            if (!success || !data) {
+              toast.error('방 목록 가져오기 오류');
+              setIsLoading(false);
+              return;
+            }
 
-              setRooms(currentRooms => {
-                // 방 목록 업데이트 로직
-                const finishedRoomIndex = currentRooms.findIndex(
-                  (room: Room) => room.id === roomId,
+            const newRoomsData = data.content || [];
+
+            setRooms(currentRooms => {
+              const finishedRoomIndex = currentRooms.findIndex(
+                (room: Room) => room.id === roomId,
+              );
+
+              if (finishedRoomIndex === -1) {
+                return currentRooms;
+              }
+
+              const remainingRooms = currentRooms.filter(
+                (room: Room) => room.id !== roomId,
+              );
+
+              if (newRoomsData.length === currentRooms.length) {
+                const newRoom = newRoomsData.find(
+                  (room: Room) =>
+                    !currentRooms.some(
+                      (existingRoom: Room) => existingRoom.id === room.id,
+                    ),
                 );
 
-                if (finishedRoomIndex === -1) {
-                  return currentRooms; // FINISHED 방이 이미 처리되었거나 없는 경우
+                if (newRoom) {
+                  const result = [...remainingRooms];
+                  result.splice(finishedRoomIndex, 0, newRoom);
+                  return result;
                 }
 
-                // 기존 방 목록에서 FINISHED 방을 제외한 나머지 방들
+                return currentRooms;
+              } else if (newRoomsData.length < currentRooms.length) {
+                return remainingRooms;
+              } else {
                 const remainingRooms = currentRooms.filter(
                   (room: Room) => room.id !== roomId,
                 );
 
-                // 결과 목록의 개수가 기존과 동일한 경우
-                if (newRoomsData.length === currentRooms.length) {
-                  // 기존 목록에 없는 새로운 방 찾기
-                  const newRoom = newRoomsData.find(
-                    (room: Room) =>
-                      !currentRooms.some(
-                        (existingRoom: Room) => existingRoom.id === room.id,
-                      ),
-                  );
+                const newRooms = newRoomsData.filter(
+                  (room: Room) =>
+                    !currentRooms.some(
+                      (existingRoom: Room) => existingRoom.id === room.id,
+                    ),
+                );
 
-                  if (newRoom) {
-                    // FINISHED된 방 위치에 새로운 방으로 대체
-                    const result = [...remainingRooms];
-                    result.splice(finishedRoomIndex, 0, newRoom);
-                    return result;
+                const result = [...remainingRooms];
+                if (newRooms.length > 0) {
+                  result.splice(finishedRoomIndex, 0, newRooms[0]);
+
+                  if (newRooms.length > 1) {
+                    result.push(...newRooms.slice(1));
                   }
-
-                  // 새로운 방을 찾지 못한 경우 기존 목록 유지 (FINISHED 방은 disabled 상태로)
-                  return currentRooms;
                 }
-                // 결과 목록의 개수가 기존보다 적은 경우
-                else if (newRoomsData.length < currentRooms.length) {
-                  // FINISHED된 방을 제외
-                  return remainingRooms;
-                }
-                // 결과 목록의 개수가 기존보다 많은 경우
-                else {
-                  // 1. FINISHED 방을 제외한 기존 방 목록 구성
-                  const remainingRooms = currentRooms.filter(
-                    (room: Room) => room.id !== roomId,
-                  );
 
-                  // 2. 기존에 없던 새로운 방들 찾기
-                  const newRooms = newRoomsData.filter(
-                    (room: Room) =>
-                      !currentRooms.some(
-                        (existingRoom: Room) => existingRoom.id === room.id,
-                      ),
-                  );
-
-                  // 3. FINISHED 방 위치에 새로운 방 중 하나를 배치
-                  const result = [...remainingRooms];
-                  if (newRooms.length > 0) {
-                    result.splice(finishedRoomIndex, 0, newRooms[0]);
-
-                    // 4. 나머지 새로운 방들은 배열 뒤에 추가
-                    if (newRooms.length > 1) {
-                      result.push(...newRooms.slice(1));
-                    }
-                  }
-
-                  // 5. 페이지 크기에 맞게 목록 조정
-                  return result.slice(0, pageSize);
-                }
-              });
-            } catch (error) {
-              console.error(
-                'FINISHED 상태 방 처리 중 방 목록 가져오기 오류:',
-                error,
-              );
-            }
+                return result.slice(0, PAGE_SIZE);
+              }
+            });
           };
 
           fetchUpdatedRooms();
           return;
         }
 
-        // CREATED 또는 UPDATED 상태인 방 처리 (room 객체가 있는 경우)
         if (
           (data.actionType === ACTION_TYPES.CREATED ||
             data.actionType === ACTION_TYPES.UPDATED) &&
@@ -441,9 +397,7 @@ const LobbyPage = ({ userNickname, channelId }: LobbyServerProps) => {
         ) {
           const updatedRoom = data.room;
 
-          // CREATED 액션 처리 - 주로 첫 페이지에 새 방을 추가
           if (data.actionType === ACTION_TYPES.CREATED) {
-            // 사용자가 첫페이지에 있을 경우에만 새 방 추가
             if (pageNow === 0) {
               setRooms(currentRooms => {
                 const roomIndex = currentRooms.findIndex(
@@ -451,15 +405,13 @@ const LobbyPage = ({ userNickname, channelId }: LobbyServerProps) => {
                 );
 
                 if (roomIndex !== -1) {
-                  // 이미 존재하는 방이면 업데이트
                   const newRooms = [...currentRooms];
                   newRooms[roomIndex] = updatedRoom;
                   return newRooms;
                 } else {
-                  // 새 방이면 맨 앞에 추가
                   const newRooms = [updatedRoom, ...currentRooms];
-                  if (newRooms.length > pageSize) {
-                    return newRooms.slice(0, pageSize);
+                  if (newRooms.length > PAGE_SIZE) {
+                    return newRooms.slice(0, PAGE_SIZE);
                   }
                   return newRooms;
                 }
@@ -601,7 +553,7 @@ const LobbyPage = ({ userNickname, channelId }: LobbyServerProps) => {
         eventSource.close();
       }
     };
-  }, [handleEventData, pageSize, SSE_ENDPOINT, channelId]);
+  }, [handleEventData, PAGE_SIZE, SSE_ENDPOINT, channelId]);
 
   // SSE 연결 끊겼을 때 처리
   useEffect(() => {
@@ -614,7 +566,7 @@ const LobbyPage = ({ userNickname, channelId }: LobbyServerProps) => {
   // 페이지 언로드 시 연결 해제 처리
   useEffect(() => {
     const handleUnload = () => {
-      navigator.sendBeacon(`${API_URL}/sse/disconnect`);
+      navigator.sendBeacon(`${process.env.NEXT_PUBLIC_SSE_URL}/disconnect`);
     };
 
     window.addEventListener('beforeunload', handleUnload);

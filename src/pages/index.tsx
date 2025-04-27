@@ -1,10 +1,11 @@
 import { useEffect } from 'react';
 
-import { getCookie } from 'cookies-next';
 import { motion } from 'framer-motion';
 import { ThumbsUp } from 'lucide-react';
-import { GetServerSideProps } from 'next';
+import { GetServerSideProps, NextApiRequest, NextApiResponse } from 'next';
 
+import { ApiContext } from '@/api/core';
+import { userNicknameAPI } from '@/api/member';
 import SEO from '@/components/SEO';
 import AccountFormDialog from '@/components/auth/AccountFormDialog';
 import BackgroundMusic from '@/components/common/BackgroundMusic';
@@ -15,11 +16,16 @@ import { useAuth } from '@/hooks/useAuth';
 import { useNicknameStore } from '@/stores/auth/useNicknameStore';
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
-  const userNickname = (await getCookie('userNickname', { req, res })) || '';
+  const ctx: ApiContext = {
+    req: req as NextApiRequest,
+    res: res as NextApiResponse,
+  };
+
+  const result = await userNicknameAPI(ctx);
 
   return {
     props: {
-      userNickname,
+      userNickname: result.data?.username || null,
     },
   };
 };

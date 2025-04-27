@@ -1,15 +1,7 @@
+import { RoomApiRequestData } from '@/components/room/utils/roomDataConverter';
 import { Mode } from '@/types/websocket';
 
 import { ApiContext, api } from './core';
-
-interface RoomForm {
-  channelId: number;
-  title: string;
-  password: string;
-  format: string;
-  gameModes: string[];
-  selectedYears: number[];
-}
 
 interface Room {
   id: string;
@@ -28,7 +20,7 @@ interface Room {
   years: number[];
 }
 
-export const createRoomAPI = (roomForm: RoomForm, ctx?: ApiContext) =>
+export const createRoomAPI = (roomForm: RoomApiRequestData, ctx?: ApiContext) =>
   api<{ roomId: string }>(
     '/room',
     {
@@ -39,18 +31,18 @@ export const createRoomAPI = (roomForm: RoomForm, ctx?: ApiContext) =>
   );
 
 export const getRoomsAPI = (
-  channelId: number,
+  channelId: string,
   page: number,
   ctx?: ApiContext,
 ) =>
-  api<{ content: Room[] }>(
+  api<{ content: Room[]; number: number; totalPages: number }>(
     `/room?channelId=${channelId}&page=${page}&size=6`,
     { method: 'GET' },
     ctx,
   );
 
-export const patchRoomAPI = (roomForm: RoomForm, ctx?: ApiContext) =>
-  api(
+export const patchRoomAPI = (roomForm: RoomApiRequestData, ctx?: ApiContext) =>
+  api<{ roomId: string }>(
     '/room',
     {
       method: 'PATCH',
@@ -64,7 +56,7 @@ export const enterRoomAPI = (
   password: string,
   ctx?: ApiContext,
 ) =>
-  api<{ roomId: string }>(
+  api<{ roomId: string; success: boolean }>(
     `/room/enter`,
     {
       method: 'POST',
@@ -82,7 +74,7 @@ export const searchRoomByTitleAPI = (
   channelId: string,
   ctx?: ApiContext,
 ) =>
-  api<{ content: Room[] }>(
+  api<{ content: Room[]; number: number; totalPages: number }>(
     `/room/search/title?title=${title}&channelId=${channelId}`,
     {
       method: 'GET',
@@ -90,13 +82,12 @@ export const searchRoomByTitleAPI = (
     ctx,
   );
 
-// 방 번호로 검색
 export const searchRoomByRoomNumberAPI = (
   roomNumber: number,
   channelId: string,
   ctx?: ApiContext,
 ) =>
-  api<{ content: Room[] }>(
+  api<{ content: Room[]; number: number; totalPages: number }>(
     `/room/search/number?roomNumber=${roomNumber}&channelId=${channelId}`,
     { method: 'GET' },
     ctx,

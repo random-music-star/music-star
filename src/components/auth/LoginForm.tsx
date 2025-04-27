@@ -11,8 +11,8 @@ import { Input } from '@/components/ui/input';
 import { useLoginForm } from '@/hooks/useLoginForm';
 
 interface LoginFormProps {
-  onSuccess?: () => void;
-  initialUsername?: string;
+  onSuccess: () => void;
+  initialUsername: string;
 }
 
 export default function LoginForm({

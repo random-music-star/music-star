@@ -58,27 +58,22 @@ export default function RoomForm({
       initialData,
     });
   // useRoomApi에서 error 상태도 가져옴
-  const { loading, error, submitForm } = useRoomApi({
+  const { error, submitForm } = useRoomApi({
     mode,
     roomId,
     onSuccess,
   });
-  // 폼 제출 에러를 관리하기 위한 상태
   const [formSubmitError, setFormSubmitError] = useState<string | null>(null);
 
   const onSubmit = async (data: RoomFormValues) => {
-    // 폼 제출 시 에러 상태 초기화
     setFormSubmitError(null);
 
     try {
-      // submitForm 결과가 false인 경우 에러 처리
       const success = await submitForm(data);
       if (!success) {
         setFormSubmitError('방 생성/수정 중 오류가 발생했습니다.');
       }
-    } catch (err) {
-      // 예상치 못한 에러 처리
-      console.error('Unexpected error:', err);
+    } catch {
       setFormSubmitError('예상치 못한 오류가 발생했습니다. 다시 시도해주세요.');
     }
   };
@@ -405,11 +400,10 @@ export default function RoomForm({
             </button>
             <button
               type='submit'
-              disabled={loading}
               onClick={form.handleSubmit(onSubmit)}
               className='relative flex h-[50px] w-[50px] cursor-pointer items-center justify-center overflow-hidden rounded-full border-3 border-white bg-gradient-to-br from-purple-400 to-purple-900 text-sm font-bold text-white shadow-lg transition-all duration-300 ease-in-out hover:translate-y-[-2px] hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-70'
             >
-              {loading ? '처리중' : mode === 'create' ? '생성' : '수정'}
+              {mode === 'create' ? '생성' : '수정'}
             </button>
           </div>
         </section>

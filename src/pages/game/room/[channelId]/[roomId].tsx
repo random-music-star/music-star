@@ -1,6 +1,7 @@
-import { getCookie } from 'cookies-next';
-import { GetServerSideProps } from 'next';
+import { GetServerSideProps, NextApiRequest, NextApiResponse } from 'next';
 
+import { ApiContext } from '@/api/core';
+import { userNicknameAPI } from '@/api/member';
 import SEO from '@/components/SEO';
 import GameRoomContainer from '@/components/room/RoomContainer';
 
@@ -9,10 +10,18 @@ export const getServerSideProps: GetServerSideProps = async ({
   res,
   params,
 }) => {
-  const userNickname = (await getCookie('userNickname', { req, res })) || '';
+  const ctx: ApiContext = {
+    req: req as NextApiRequest,
+    res: res as NextApiResponse,
+  };
+
+  const result = await userNicknameAPI(ctx);
+
+  const userNickname = result.data?.username || '';
+
   const { roomId, channelId } = params as { roomId: string; channelId: string };
 
-  if (!userNickname) {
+  if (!result.data?.username) {
     return {
       redirect: {
         destination: '/',

@@ -1,9 +1,11 @@
 import { Client, StompSubscription } from '@stomp/stompjs';
+import { getCookie } from 'cookies-next';
+import { toast } from 'sonner';
 import { create } from 'zustand';
 
+import { COOKIE_NAME } from '@/api/core';
 import { WebSocketState } from '@/types/websocket';
 
-import { useNicknameStore } from '../auth/useNicknameStore';
 import { useSoundEventStore } from '../useSoundEventStore';
 import { useGameBubbleStore } from './useGameBubbleStore';
 import { useGameChatStore } from './useGameChatStore';
@@ -29,7 +31,7 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
       webSocketFactory: () =>
         new WebSocket(`${process.env.NEXT_PUBLIC_WEBSOCKET_URL}`),
       connectHeaders: {
-        Authorization: useNicknameStore.getState().nickname,
+        Authorization: `Bearer ${getCookie(COOKIE_NAME)}`,
       },
       reconnectDelay: 5000,
       heartbeatIncoming: 4000,
@@ -83,6 +85,8 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
     const newSubscriptions: Record<string, StompSubscription> = {};
 
     if (subscriptionType === 'channel') {
+      const gameStateStore = useGameStateStore.getState();
+
       newSubscriptions['channel'] = client.subscribe(
         `/topic/channel/${channelId}`,
         message => {
@@ -90,7 +94,22 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
           usePublicChatStore.getState().setPublicChattings(response);
         },
         {
-          Authorization: useNicknameStore.getState().nickname,
+          Authorization: `Bearer ${getCookie(COOKIE_NAME)}`,
+        },
+      );
+
+      newSubscriptions['messageQueue'] = client.subscribe(
+        `/user/queue/system`,
+        message => {
+          const { type, response } = JSON.parse(message.body);
+
+          if (type === 'refuseEnter') {
+            gameStateStore.setGameState('REFUSED');
+            toast.error(response.message || '알 수 없는 문제가 발생했습니다.');
+          }
+        },
+        {
+          Authorization: `Bearer ${getCookie(COOKIE_NAME)}`,
         },
       );
     }
@@ -112,14 +131,15 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
       newSubscriptions['messageQueue'] = client.subscribe(
         `/user/queue/system`,
         message => {
-          const { type } = JSON.parse(message.body);
+          const { type, response } = JSON.parse(message.body);
 
           if (type === 'refuseEnter') {
             gameStateStore.setGameState('REFUSED');
+            toast.error(response.message || '알 수 없는 문제가 발생했습니다.');
           }
         },
         {
-          Authorization: useNicknameStore.getState().nickname,
+          Authorization: `Bearer ${getCookie(COOKIE_NAME)}`,
         },
       );
 
@@ -135,8 +155,6 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
               message: `곧 다음 라운드가 시작됩니다. `,
             });
 
-            // url, round, mode 설정 및 힌트는 null 처리 + songUrl2는 듀얼 모드에서만
-            // 임의로 songUrl2 설정해봄
             roundInfo.setRoundInfo(response);
             roundHint.updateGameHint(null);
             useGameRoundResultStore.getState().setGameRoundResult(null);
@@ -276,7 +294,7 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
           }
         },
         {
-          Authorization: useNicknameStore.getState().nickname,
+          Authorization: `Bearer ${getCookie(COOKIE_NAME)}`,
         },
       );
     }
@@ -291,6 +309,12 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
       return;
     }
 
-    client.publish({ destination, body: JSON.stringify(payload) });
+    client.publish({
+      destination,
+      body: JSON.stringify(payload),
+      headers: {
+        Authorization: `Bearer ${getCookie(COOKIE_NAME)}`,
+      },
+    });
   },
 }));

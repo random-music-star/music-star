@@ -3,8 +3,10 @@ import { useEffect, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/router';
 import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 import * as z from 'zod';
 
+import { enterRoomAPI } from '@/api/room';
 import {
   Dialog,
   DialogClose,
@@ -22,7 +24,6 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Room } from '@/pages/game/lobby/[channelId]';
-import { useNicknameStore } from '@/stores/auth/useNicknameStore';
 
 const passwordSchema = z.object({
   password: z
@@ -39,40 +40,25 @@ interface RoomDialogProps {
   onClose: () => void;
 }
 
-// API 응답 타입 정의
-interface EnterRoomResponse {
-  roomId: string;
-  success: boolean;
-}
-
-const API_URL = process.env.NEXT_PUBLIC_BASE_URL;
-
 export default function RoomDialog({ room, isOpen, onClose }: RoomDialogProps) {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const { nickname } = useNicknameStore();
 
   const currentPlayers = room.currentPlayers ?? 0;
   const maxPlayer = room.maxPlayer ?? 4;
   const isFull = currentPlayers >= maxPlayer;
 
-  // 창이 열릴 때마다 에러 메시지와 로딩 상태 초기화
   useEffect(() => {
     if (isOpen) {
       setError('');
-      setIsLoading(false);
     }
   }, [isOpen]);
 
-  // form 초기화 함수
   const resetForm = () => {
     setError('');
-    setIsLoading(false);
     form.reset();
   };
 
-  // onClose 함수 래핑하여 에러 메시지와 form 상태 초기화
   const handleClose = () => {
     resetForm();
     onClose();
@@ -86,52 +72,30 @@ export default function RoomDialog({ room, isOpen, onClose }: RoomDialogProps) {
   });
 
   const handleEnterRoom = async (password: string = '') => {
-    setIsLoading(true);
-    setError('');
+    const {
+      data,
+      error: apiResponseError,
+      success,
+    } = await enterRoomAPI(room.id, password);
 
-    try {
-      const response = await fetch(`${API_URL}/room/enter`, {
-        method: 'POST',
-        headers: {
-          Authorization: nickname,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          roomId: room.id,
-          password: password,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`서버 오류가 발생했습니다. (${response.status})`);
-      }
-
-      const data: EnterRoomResponse = await response.json();
-
-      if (!data.success) {
-        // 비밀번호 오류일 경우 form error로 설정
-        if (room.hasPassword) {
-          form.setError('password', {
-            type: 'manual',
-            message: '비밀번호가 틀렸습니다.',
-          });
-          return; // 함수 종료
-        } else {
-          throw new Error('방 입장에 실패했습니다.');
-        }
-      }
-
-      handleClose();
-
-      const currentChannelId = router.query.channelId || '1';
-      router.push(`/game/room/${currentChannelId}/${room.id}`);
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다.';
-      setError(errorMessage);
-    } finally {
-      setIsLoading(false);
+    if (!success) {
+      toast.error(apiResponseError);
     }
+
+    if (success && !data.success) {
+      setError('비밀번호가 틀렸습니다.');
+      if (room.hasPassword) {
+        form.setError('password', {
+          type: 'manual',
+          message: '비밀번호가 틀렸습니다.',
+        });
+        handleClose();
+        return;
+      }
+    }
+
+    const currentChannelId = router.query.channelId || '1';
+    router.push(`/game/room/${currentChannelId}/${room.id}`);
   };
 
   const onPasswordSubmit = async (values: PasswordFormValues) => {
@@ -218,7 +182,6 @@ export default function RoomDialog({ room, isOpen, onClose }: RoomDialogProps) {
             </Form>
           )}
 
-          {/* 4. 에러 메시지 영역 (비밀번호 오류가 아닌 다른 오류만 표시) */}
           {!isInProgress &&
             !isFull &&
             error &&
@@ -234,7 +197,6 @@ export default function RoomDialog({ room, isOpen, onClose }: RoomDialogProps) {
             {!isInProgress && !isFull && (
               <button
                 type={room.hasPassword ? 'submit' : 'button'}
-                disabled={isLoading}
                 className='relative flex h-[60px] w-[60px] cursor-pointer items-center justify-center overflow-hidden rounded-full border-3 border-white bg-gradient-to-br from-purple-400 to-purple-900 font-bold text-white shadow-lg transition-all duration-300 ease-in-out hover:translate-y-[-2px] hover:shadow-xl disabled:opacity-70'
                 onClick={
                   room.hasPassword
@@ -242,7 +204,7 @@ export default function RoomDialog({ room, isOpen, onClose }: RoomDialogProps) {
                     : () => handleEnterRoom()
                 }
               >
-                {isLoading ? '...' : '입장'}
+                입장
               </button>
             )}
             {/* DialogClose 버튼: 게임 진행 중일 때는 '확인', 아니면 '취소' */}

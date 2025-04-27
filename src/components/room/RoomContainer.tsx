@@ -18,20 +18,15 @@ import { useGameStateStore } from '@/stores/websocket/useGameStateStore';
 import { useWebSocketStore } from '@/stores/websocket/useWebsocketStore';
 
 export default function GameRoomContainer({
-  userNickname,
   roomId,
   channelId,
 }: GameRoomServerProps) {
   const router = useRouter();
 
-  const { setNickname, nickname } = useNicknameStore();
+  const { nickname } = useNicknameStore();
   const { isConnected, updateSubscription, sendMessage } = useWebSocketStore();
   const { gameRoomInfo } = useGameInfoStore();
   const { gameState } = useGameStateStore();
-
-  useEffect(() => {
-    setNickname(userNickname);
-  }, [userNickname]);
 
   useEffect(() => {
     if (isConnected) {
