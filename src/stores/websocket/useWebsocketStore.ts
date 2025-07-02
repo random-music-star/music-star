@@ -73,14 +73,19 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
 
     Object.values(subscriptions).forEach(sub => sub?.unsubscribe());
 
+    useGameBubbleStore.getState().resetGameChatStore();
     useGameChatStore.getState().resetGameChatStore();
-    useGameStateStore.getState().resetGameState();
-    usePublicChatStore.getState().resetPublicChatStore();
-    useGameWinnerStore.getState().resetWinnerStore();
+    useGameDiceStore.getState().resetDice();
     useParticipantInfoStore.getState().resetParticipantInfo();
-    useSoundEventStore.getState().setSoundEvent(null);
-    useGameRoundInfoStore.getState().resetRoundInfo();
     useGameInfoStore.getState().setGameInfo(null);
+    useGameRoundInfoStore.getState().resetRoundInfo();
+    useGameRoundResultStore.getState().setGameRoundResult(null);
+    useGameStateStore.getState().resetGameState();
+    useGameWinnerStore.getState().resetWinnerStore();
+    usePublicChatStore.getState().resetPublicChatStore();
+    useRoundHintStore.getState().updateGameHint(null);
+    useScoreStore.getState().resetScores();
+    useSoundEventStore.getState().setSoundEvent(null);
 
     const newSubscriptions: Record<string, StompSubscription> = {};
 
@@ -288,9 +293,7 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
           }
 
           if (type === 'eventEnd') {
-            gameBubbleStore.setEventType(null);
-            gameBubbleStore.setTargetUser(null);
-            gameBubbleStore.setTriggerUser(null);
+            gameBubbleStore.resetGameChatStore();
           }
         },
         {
