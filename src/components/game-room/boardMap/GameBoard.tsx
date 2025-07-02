@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
+import { footholderRatios } from '@/constants/boardMap/footholderRatios';
 import { useSoundEventStore } from '@/stores/useSoundEventStore';
 import { useGameBubbleStore } from '@/stores/websocket/useGameBubbleStore';
 import { useGameDiceStore } from '@/stores/websocket/useGameDiceStore';
@@ -7,9 +8,10 @@ import { useParticipantInfoStore } from '@/stores/websocket/useGameParticipantSt
 import { useScoreStore } from '@/stores/websocket/useScoreStore';
 
 import EventOverlay from './EventOverlay';
+import Footholders from './Footholders';
 import Bubble from './bubble';
 
-interface FootholderPosition {
+export interface FootholderPosition {
   xRatio: number;
   yRatio: number;
   size?: number;
@@ -27,31 +29,8 @@ export interface UserCharacter {
   moveStartTime: number;
 }
 
-const footholderRatios: FootholderPosition[] = [
-  { xRatio: 0.1, yRatio: 0.88, size: 2 }, // 0번 위치
-  { xRatio: 0.23, yRatio: 0.86, size: 1.5 }, // 1번 위치
-  { xRatio: 0.36, yRatio: 0.83, size: 1.5 }, // 2번 위치
-  { xRatio: 0.49, yRatio: 0.79, size: 1.5 }, // 3번 위치
-  { xRatio: 0.62, yRatio: 0.75, size: 1.5 }, // 4번 위치
-  { xRatio: 0.75, yRatio: 0.71, size: 1.5 }, // 5번 위치
-  { xRatio: 0.88, yRatio: 0.67, size: 1.5 }, // 6번 위치
-  { xRatio: 0.88, yRatio: 0.52, size: 1.5 }, // 7번 위치
-  { xRatio: 0.75, yRatio: 0.55, size: 1.5 }, // 8번 위치
-  { xRatio: 0.62, yRatio: 0.53, size: 1.5 }, // 9번 위치
-  { xRatio: 0.49, yRatio: 0.51, size: 1.5 }, // 10번 위치
-  { xRatio: 0.36, yRatio: 0.53, size: 1.5 }, // 11번 위치
-  { xRatio: 0.23, yRatio: 0.55, size: 1.5 }, // 12번 위치
-  { xRatio: 0.1, yRatio: 0.52, size: 1.5 }, // 13번 위치
-  { xRatio: 0.1, yRatio: 0.35, size: 1.5 }, // 14번 위치
-  { xRatio: 0.23, yRatio: 0.32, size: 1.5 }, // 15번 위치
-  { xRatio: 0.36, yRatio: 0.29, size: 1.5 }, // 16번 위치
-  { xRatio: 0.49, yRatio: 0.25, size: 1.5 }, // 17번 위치
-  { xRatio: 0.62, yRatio: 0.22, size: 1.5 }, // 18번 위치
-  { xRatio: 0.75, yRatio: 0.19, size: 1.5 }, // 19번 위치
-  { xRatio: 0.88, yRatio: 0.16, size: 2 }, // 20번 위치
-];
-
 const GameBoard = () => {
+  console.log(1);
   const { scores } = useScoreStore();
   const { targetUser, triggerUser, eventType } = useGameBubbleStore();
   const { participantInfo } = useParticipantInfoStore();
@@ -218,7 +197,6 @@ const GameBoard = () => {
 
   const renderKey = `${targetUser}-${triggerUser}-${eventType}`;
 
-  // 화면 테두리에 패딩 적용
   const padding = 50;
   const paddedWidth = windowSize.width - padding * 2;
   const paddedHeight = windowSize.height - padding * 2;
@@ -235,35 +213,19 @@ const GameBoard = () => {
         height: '100%',
       }}
     >
+      {/* 이벤트 */}
       {eventType && <EventOverlay eventType={eventType} />}
-      {footholderRatios.map((position, index) => {
-        const leftSectionWidth = paddedWidth * 0.75; // 패딩이 적용된 너비
-        const baseSize = Math.min(48, leftSectionWidth * 0.08);
-        const size = baseSize * (position.size || 1.5);
-        const x = padding + position.xRatio * leftSectionWidth;
-        const y = padding + position.yRatio * paddedHeight;
-        return (
-          <div
-            key={`footholder-${index}`}
-            className='footholder'
-            style={{
-              position: 'absolute',
-              left: `${x - size / 2}px`,
-              top: `${y - size / 2}px`,
-              width: `${size}px`,
-              height: `${size}px`,
-              backgroundImage: 'url(/footholder.svg)',
-              backgroundSize: 'contain',
-              backgroundRepeat: 'no-repeat',
-              backgroundPosition: 'center',
-            }}
-          />
-        );
-      })}
 
-      {/* 캐릭터 렌더링 */}
+      {/* 발판 */}
+      <Footholders
+        paddedWidth={paddedWidth}
+        paddedHeight={paddedHeight}
+        padding={padding}
+      />
+
+      {/* 캐릭터 */}
       {characters.map((character, index) => {
-        const leftSectionWidth = paddedWidth * 0.75; // 패딩이 적용된 너비
+        const leftSectionWidth = paddedWidth * 0.75;
         const baseSize = Math.min(48, leftSectionWidth * 0.08);
         const charWidth = baseSize * 1.5;
         const charHeight = charWidth * 1.25;
@@ -279,24 +241,24 @@ const GameBoard = () => {
               toPos,
               character.moveProgress,
               leftSectionWidth,
-              paddedHeight, // 패딩이 적용된 높이
+              paddedHeight,
             );
-            x = padding + pos.x; // 패딩 적용
-            y = padding + pos.y; // 패딩 적용
+            x = padding + pos.x;
+            y = padding + pos.y;
           }
         } else {
           const pos = footholderRatios[character.position];
           if (pos) {
-            x = padding + pos.xRatio * leftSectionWidth; // 패딩 적용
-            y = padding + pos.yRatio * paddedHeight; // 패딩 적용
+            x = padding + pos.xRatio * leftSectionWidth;
+            y = padding + pos.yRatio * paddedHeight;
           }
         }
 
-        // 원본 코드 계산 방식을 정확히 유지
-        const characterX = x - charWidth / 2 - 55; // 원본 계산 방식 유지
-        const characterY = y - charHeight - characterYOffset; // 원본 계산 방식 유지
+        // 캐릭터 위치
+        const characterX = x - charWidth / 2 - 55;
+        const characterY = y - charHeight - characterYOffset;
 
-        // 캐릭터 이름도 원본 계산 방식 유지
+        // 캐릭터 닉네임 위치
         const nameX = x - 10;
         const nameY = y - charHeight - 30 - characterYOffset;
 
