@@ -1,3 +1,4 @@
+import { bubbleRightMap } from '@/constants/boardMap/bubbleRightMap';
 import { useGameDiceStore } from '@/stores/websocket/useGameDiceStore';
 
 import { UserCharacter } from '../GameBoard';
@@ -10,20 +11,6 @@ interface BubbleProps {
   characterX: number;
   characterY: number;
 }
-
-const bubbleRightMap: Record<number, boolean> = {
-  0: true,
-  1: true,
-  2: true,
-  10: true,
-  11: true,
-  12: true,
-  13: true,
-  14: true,
-  15: true,
-  16: true,
-  17: true,
-};
 
 const Bubble = ({
   isActiveDice,
