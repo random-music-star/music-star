@@ -6,8 +6,8 @@ import { useGameDiceStore } from '@/stores/websocket/useGameDiceStore';
 import { useParticipantInfoStore } from '@/stores/websocket/useGameParticipantStore';
 import { useScoreStore } from '@/stores/websocket/useScoreStore';
 
-import BubbleContent from './BubbleContent';
 import EventOverlay from './EventOverlay';
+import Bubble from './bubble';
 
 interface FootholderPosition {
   xRatio: number;
@@ -15,7 +15,7 @@ interface FootholderPosition {
   size?: number;
 }
 
-interface UserCharacter {
+export interface UserCharacter {
   name: string;
   position: number;
   imageSrc: string;
@@ -51,27 +51,12 @@ const footholderRatios: FootholderPosition[] = [
   { xRatio: 0.88, yRatio: 0.16, size: 2 }, // 20번 위치
 ];
 
-// bubble.svg를 사용할 발판 번호 목록
-const bubbleRightMap: Record<number, boolean> = {
-  0: true,
-  1: true,
-  2: true,
-  10: true,
-  11: true,
-  12: true,
-  13: true,
-  14: true,
-  15: true,
-  16: true,
-  17: true,
-};
-
 const GameBoard = () => {
   const { scores } = useScoreStore();
   const { targetUser, triggerUser, eventType } = useGameBubbleStore();
   const { participantInfo } = useParticipantInfoStore();
   const { setSoundEvent } = useSoundEventStore();
-  const { isActiveDice, diceUsername } = useGameDiceStore();
+  const { isActiveDice } = useGameDiceStore();
   const [isLoading, setIsLoading] = useState(true);
   const [characters, setCharacters] = useState<UserCharacter[]>([]);
   const [windowSize, setWindowSize] = useState({
@@ -317,44 +302,19 @@ const GameBoard = () => {
 
         const characterRenderKey = `char-${index}-${character.name}`;
 
-        const isLeftSide = bubbleRightMap[character.position] || false;
-        const bubbleImage = isLeftSide ? '/bubble.svg' : '/bubble_left.svg';
-
-        const bubbleSize = charWidth * 2;
-
-        // 말풍선 위치 조정 - 원본 접근법 유지
-        const bubbleX = characterX - bubbleSize + 20;
-        const bubbleY = characterY - bubbleSize + 20 + character.position / 2;
-
-        const isCurrentPlayer = character.name === diceUsername;
-
         return (
           <div
             key={characterRenderKey}
             className='character'
             style={{ transform: `translateY(${character.animationOffset}px)` }}
           >
-            {/* 말풍선 표시 */}
-            <div
-              className='bubble'
-              style={{
-                position: 'absolute',
-                left: isLeftSide ? `${bubbleX + 210}px` : `${bubbleX}px`,
-                top: `${bubbleY}px`,
-                width: `${bubbleSize}px`,
-                height: `${bubbleSize}px`,
-                backgroundImage: `url(${bubbleImage})`,
-                backgroundSize: 'contain',
-                backgroundRepeat: 'no-repeat',
-                backgroundPosition: 'center',
-                zIndex: 10,
-                opacity: isActiveDice && isCurrentPlayer ? 1 : 0,
-                transition: 'opacity 0.3s ease-in-out',
-              }}
-            >
-              {/* 말풍선 내부 이동 숫자 애니메이션 */}
-              <BubbleContent isActive={isActiveDice && isCurrentPlayer} />
-            </div>
+            <Bubble
+              isActiveDice={isActiveDice}
+              character={character}
+              charWidth={charWidth}
+              characterX={characterX}
+              characterY={characterY}
+            />
 
             <div
               className='character-name'
