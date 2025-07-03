@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { footholderRatios } from '@/constants/boardMap/footholderRatios';
+import { FOOTHOLDER_RATIOS } from '@/constants/boardMap/footholderRatios';
 
 interface Props {
   paddedWidth: number;
@@ -14,7 +14,7 @@ const Footholders = ({ paddedWidth, paddedHeight, padding }: Props) => {
 
   return (
     <>
-      {footholderRatios.map((position, index) => {
+      {FOOTHOLDER_RATIOS.map((position, index) => {
         const size = baseSize * (position.size || 1.5);
         const x = padding + position.xRatio * leftSectionWidth;
         const y = padding + position.yRatio * paddedHeight;

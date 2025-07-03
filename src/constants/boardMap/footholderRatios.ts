@@ -4,7 +4,7 @@ interface FootholderPosition {
   size?: number;
 }
 
-export const footholderRatios: FootholderPosition[] = [
+export const FOOTHOLDER_RATIOS: FootholderPosition[] = [
   { xRatio: 0.1, yRatio: 0.88, size: 2 },
   { xRatio: 0.23, yRatio: 0.86, size: 1.5 },
   { xRatio: 0.36, yRatio: 0.83, size: 1.5 },

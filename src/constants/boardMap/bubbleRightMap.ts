@@ -1,4 +1,4 @@
-export const bubbleRightMap: Record<number, boolean> = {
+export const BUBBLE_RIGHT_MAP: Record<number, boolean> = {
   0: true,
   1: true,
   2: true,

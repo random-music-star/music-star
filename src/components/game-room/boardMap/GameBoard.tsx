@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-import { footholderRatios } from '@/constants/boardMap/footholderRatios';
+import { FOOTHOLDER_RATIOS } from '@/constants/boardMap/footholderRatios';
 import { useWindowSize } from '@/hooks/useWindowSize';
 import { useSoundEventStore } from '@/stores/useSoundEventStore';
 import { useGameBubbleStore } from '@/stores/websocket/useGameBubbleStore';
@@ -169,8 +169,8 @@ const GameBoard = () => {
         let x = 0,
           y = 0;
         if (character.isMoving) {
-          const fromPos = footholderRatios[character.fromPosition];
-          const toPos = footholderRatios[character.toPosition];
+          const fromPos = FOOTHOLDER_RATIOS[character.fromPosition];
+          const toPos = FOOTHOLDER_RATIOS[character.toPosition];
           if (fromPos && toPos) {
             const pos = interpolatePosition(
               fromPos,
@@ -183,7 +183,7 @@ const GameBoard = () => {
             y = padding + pos.y;
           }
         } else {
-          const pos = footholderRatios[character.position];
+          const pos = FOOTHOLDER_RATIOS[character.position];
           if (pos) {
             x = padding + pos.xRatio * leftSectionWidth;
             y = padding + pos.yRatio * paddedHeight;

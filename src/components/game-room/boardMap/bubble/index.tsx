@@ -1,4 +1,4 @@
-import { bubbleRightMap } from '@/constants/boardMap/bubbleRightMap';
+import { BUBBLE_RIGHT_MAP } from '@/constants/boardMap/bubbleRightMap';
 import { useGameDiceStore } from '@/stores/websocket/useGameDiceStore';
 
 import { UserCharacter } from '../GameBoard';
@@ -21,7 +21,7 @@ const Bubble = ({
 }: BubbleProps) => {
   const { diceUsername } = useGameDiceStore();
 
-  const isLeftSide = bubbleRightMap[character.position] || false;
+  const isLeftSide = BUBBLE_RIGHT_MAP[character.position] || false;
   const bubbleSize = charWidth * 2;
 
   const bubbleImage = isLeftSide ? '/bubble.svg' : '/bubble_left.svg';
