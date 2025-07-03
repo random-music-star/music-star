@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { footholderRatios } from '@/constants/boardMap/footholderRatios';
+import { useWindowSize } from '@/hooks/useWindowSize';
 import { useSoundEventStore } from '@/stores/useSoundEventStore';
 import { useGameBubbleStore } from '@/stores/websocket/useGameBubbleStore';
 import { useGameDiceStore } from '@/stores/websocket/useGameDiceStore';
@@ -36,20 +37,11 @@ const GameBoard = () => {
   const { participantInfo } = useParticipantInfoStore();
   const { setSoundEvent } = useSoundEventStore();
   const { isActiveDice } = useGameDiceStore();
+
+  const { windowSize } = useWindowSize();
+
   const [isLoading, setIsLoading] = useState(true);
   const [characters, setCharacters] = useState<UserCharacter[]>([]);
-  const [windowSize, setWindowSize] = useState({
-    width: typeof window !== 'undefined' ? window.innerWidth : 1920,
-    height: typeof window !== 'undefined' ? window.innerHeight : 1080,
-  });
-
-  const currentTargetUserRef = useRef(targetUser);
-  const currentTriggerUserRef = useRef(triggerUser);
-
-  useEffect(() => {
-    currentTargetUserRef.current = targetUser;
-    currentTriggerUserRef.current = triggerUser;
-  }, [targetUser, triggerUser]);
 
   const [animationTime, setAnimationTime] = useState(0);
   const animationSpeed = 5;
@@ -59,18 +51,27 @@ const GameBoard = () => {
   const animationInProgressRef = useRef(false);
   const prevBoardInfoRef = useRef<Record<string, number>>({});
 
+  // 플레이어 초기화
   useEffect(() => {
-    const handleResize = () => {
-      setWindowSize({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      });
-    };
-    window.addEventListener('resize', handleResize);
-    handleResize();
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+    if (participantInfo.length > 0) {
+      const now = performance.now();
+      const initialCharacters = participantInfo.map(participant => ({
+        name: participant.userName,
+        position: 0,
+        imageSrc: participant.character,
+        animationOffset: 0,
+        isMoving: false,
+        fromPosition: 0,
+        toPosition: 0,
+        moveProgress: 0,
+        moveStartTime: now,
+      }));
+      setCharacters(initialCharacters);
+      setIsLoading(false);
+    }
+  }, [participantInfo]);
 
+  // 실시간 이동 여부 체크
   useEffect(() => {
     if (Object.keys(scores).length === 0) return;
     const isSameBoardInfo = Object.entries(scores).every(
@@ -109,25 +110,7 @@ const GameBoard = () => {
     );
   }, [scores]);
 
-  useEffect(() => {
-    if (participantInfo.length > 0) {
-      const now = performance.now();
-      const initialCharacters = participantInfo.map(participant => ({
-        name: participant.userName,
-        position: 0,
-        imageSrc: participant.character,
-        animationOffset: 0,
-        isMoving: false,
-        fromPosition: 0,
-        toPosition: 0,
-        moveProgress: 0,
-        moveStartTime: now,
-      }));
-      setCharacters(initialCharacters);
-      setIsLoading(false);
-    }
-  }, [participantInfo]);
-
+  // 애니메이션 구현
   useEffect(() => {
     let animationId: number;
     let lastTimestamp = 0;
