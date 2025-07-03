@@ -6,6 +6,7 @@ import { useGameBubbleStore } from '@/stores/websocket/useGameBubbleStore';
 import { useGameDiceStore } from '@/stores/websocket/useGameDiceStore';
 import { useParticipantInfoStore } from '@/stores/websocket/useGameParticipantStore';
 import { useScoreStore } from '@/stores/websocket/useScoreStore';
+import { interpolatePosition } from '@/utils/boardMap/interpolatePosition';
 
 import EventOverlay from './EventOverlay';
 import Footholders from './Footholders';
@@ -30,7 +31,6 @@ export interface UserCharacter {
 }
 
 const GameBoard = () => {
-  console.log(1);
   const { scores } = useScoreStore();
   const { targetUser, triggerUser, eventType } = useGameBubbleStore();
   const { participantInfo } = useParticipantInfoStore();
@@ -168,28 +168,6 @@ const GameBoard = () => {
     animationId = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animationId);
   }, [animationTime]);
-
-  const interpolatePosition = (
-    fromPos: FootholderPosition,
-    toPos: FootholderPosition,
-    progress: number,
-    leftSectionWidth: number,
-    windowHeight: number,
-  ) => {
-    const easedT =
-      progress < 0.5
-        ? 2 * progress * progress
-        : 1 - Math.pow(-2 * progress + 2, 2) / 2;
-    const fromX = fromPos.xRatio * leftSectionWidth;
-    const fromY = fromPos.yRatio * windowHeight;
-    const toX = toPos.xRatio * leftSectionWidth;
-    const toY = toPos.yRatio * windowHeight;
-    const x = fromX + (toX - fromX) * easedT;
-    let y = fromY + (toY - fromY) * easedT;
-    const jumpHeight = 30 * Math.sin(Math.PI * easedT);
-    y -= jumpHeight;
-    return { x, y };
-  };
 
   if (isLoading) {
     return <div className='loading-screen'>로딩 중...</div>;
