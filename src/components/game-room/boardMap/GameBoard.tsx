@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { footholderRatios } from '@/constants/boardMap/footholderRatios';
 import { useWindowSize } from '@/hooks/useWindowSize';
@@ -42,22 +42,23 @@ const GameBoard = () => {
   const { windowSize } = useWindowSize();
 
   const [isLoading, setIsLoading] = useState(true);
-  const [characters, setCharacters] = useState<UserCharacter[]>([]);
+  const [, forceUpdate] = useState(0);
 
-  const [animationTime, setAnimationTime] = useState(0);
   const animationSpeed = 5;
   const animationRange = 5;
   const moveAnimationDuration = 200;
 
-  const animationInProgressRef = useRef(false);
+  const charactersRef = useRef<UserCharacter[]>([]);
+  const characterDOMRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const animationTimeRef = useRef(0);
+  const prevTimestampRef = useRef(0);
   const prevBoardInfoRef = useRef<Record<string, number>>({});
 
   // 플레이어 초기화
   useEffect(() => {
     if (participantInfo.length > 0) {
-      const initialCharacters = createInitialCharacters(participantInfo);
+      charactersRef.current = createInitialCharacters(participantInfo);
 
-      setCharacters(initialCharacters);
       setIsLoading(false);
     }
   }, [participantInfo]);
@@ -71,77 +72,66 @@ const GameBoard = () => {
     if (isSameBoardInfo) return;
     prevBoardInfoRef.current = { ...scores };
     const now = performance.now();
-    setCharacters(prevChars =>
-      prevChars.map(character => {
-        setSoundEvent('JUMP');
-        const toPosition = scores[character.name];
-        if (toPosition !== undefined && character.position !== toPosition) {
-          if (character.isMoving) {
-            return {
-              ...character,
-              position: toPosition,
-              fromPosition: toPosition,
-              toPosition: toPosition,
-              isMoving: false,
-              moveProgress: 1,
-            };
-          } else {
-            return {
-              ...character,
-              fromPosition: character.position,
-              toPosition,
-              isMoving: true,
-              moveProgress: 0,
-              moveStartTime: now,
-            };
-          }
-        }
-        return character;
-      }),
-    );
+
+    charactersRef.current = charactersRef.current.map(character => {
+      setSoundEvent('JUMP');
+      const toPosition = scores[character.name];
+      if (toPosition !== undefined) {
+        return {
+          ...character,
+          fromPosition: character.position,
+          toPosition,
+          isMoving: character.position !== toPosition,
+          moveProgress: 0,
+          moveStartTime: now,
+        };
+      }
+      return character;
+    });
   }, [scores]);
 
   // 애니메이션 구현
   useEffect(() => {
     let animationId: number;
-    let lastTimestamp = 0;
+
     const animate = (timestamp: number) => {
-      if (!lastTimestamp) lastTimestamp = timestamp;
-      const deltaTime = timestamp - lastTimestamp;
-      lastTimestamp = timestamp;
-      setAnimationTime(prev => prev + deltaTime);
-      setCharacters(prevChars => {
-        let anyMoving = false;
-        const updated = prevChars.map((char, index) => {
-          const phaseOffset = index * 0.5;
-          const newOffset =
-            Math.sin((animationTime / 1000) * animationSpeed + phaseOffset) *
-            animationRange;
-          let updatedChar = { ...char, animationOffset: newOffset };
-          if (char.isMoving) {
-            const moveElapsed = timestamp - char.moveStartTime;
-            const progress = Math.min(moveElapsed / moveAnimationDuration, 1);
-            anyMoving = anyMoving || progress < 1;
-            updatedChar = { ...updatedChar, moveProgress: progress };
-            if (progress >= 1) {
-              updatedChar = {
-                ...updatedChar,
-                isMoving: false,
-                position: updatedChar.toPosition,
-                fromPosition: updatedChar.toPosition,
-              };
-            }
+      const deltaTime = timestamp - prevTimestampRef.current;
+      prevTimestampRef.current = timestamp;
+      animationTimeRef.current += deltaTime;
+
+      let isAnyCharacterMoving = false;
+      charactersRef.current.forEach((char, index) => {
+        const el = characterDOMRefs.current[char.name];
+
+        if (!el) return;
+
+        const phaseOffset = index * 0.5;
+        const newOffset =
+          Math.sin(
+            (animationTimeRef.current / 1000) * animationSpeed + phaseOffset,
+          ) * animationRange;
+        char.animationOffset = newOffset;
+        el.style.transform = `translateY(${newOffset}px)`;
+
+        if (char.isMoving) {
+          const moveElapsed = timestamp - char.moveStartTime;
+          const progress = Math.min(moveElapsed / moveAnimationDuration, 1);
+          char.moveProgress = progress;
+          if (progress >= 1) {
+            char.isMoving = false;
+            char.position = char.toPosition;
+            char.fromPosition = char.toPosition;
           }
-          return updatedChar;
-        });
-        animationInProgressRef.current = anyMoving;
-        return updated;
+          isAnyCharacterMoving = true;
+        }
       });
+
+      if (isAnyCharacterMoving) forceUpdate(n => n + 1);
       animationId = requestAnimationFrame(animate);
     };
     animationId = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animationId);
-  }, [animationTime]);
+  }, []);
 
   if (isLoading) {
     return <div className='loading-screen'>로딩 중...</div>;
@@ -176,7 +166,7 @@ const GameBoard = () => {
       />
 
       {/* 캐릭터 */}
-      {characters.map((character, index) => {
+      {charactersRef.current.map((character, index) => {
         const leftSectionWidth = paddedWidth * 0.75;
         const baseSize = Math.min(48, leftSectionWidth * 0.08);
         const charWidth = baseSize * 1.5;
@@ -214,13 +204,13 @@ const GameBoard = () => {
         const nameX = x - 10;
         const nameY = y - charHeight - 30 - characterYOffset;
 
-        const characterRenderKey = `char-${index}-${character.name}`;
-
         return (
           <div
-            key={characterRenderKey}
+            key={`char-${index}-${character.name}`}
             className='character'
-            style={{ transform: `translateY(${character.animationOffset}px)` }}
+            ref={el => {
+              if (el) characterDOMRefs.current[character.name] = el;
+            }}
           >
             <Bubble
               isActiveDice={isActiveDice}
