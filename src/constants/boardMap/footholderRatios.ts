@@ -1,4 +1,4 @@
-interface FootholderPosition {
+export interface FootholderPosition {
   xRatio: number;
   yRatio: number;
   size?: number;

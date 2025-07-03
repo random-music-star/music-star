@@ -6,6 +6,12 @@ import { cn } from '@/lib/utils';
 import { useSoundEventStore } from '@/stores/useSoundEventStore';
 import { useGameDiceStore } from '@/stores/websocket/useGameDiceStore';
 
+const IMAGE_PATHS = [
+  '/eventemoji/move_1.png',
+  '/eventemoji/move_2.png',
+  '/eventemoji/move_3.png',
+];
+
 interface BubbleContentProps {
   isActive: boolean;
 }
@@ -15,12 +21,6 @@ const BubbleContent = ({ isActive }: BubbleContentProps) => {
   const { diceTotalmovement } = useGameDiceStore();
   const animationRef = useRef<NodeJS.Timeout | null>(null);
   const { setSoundEvent } = useSoundEventStore();
-
-  const imagePaths = [
-    '/eventemoji/move_1.png',
-    '/eventemoji/move_2.png',
-    '/eventemoji/move_3.png',
-  ];
 
   useEffect(() => {
     if (isActive && !isAnimating) {
@@ -69,7 +69,7 @@ const BubbleContent = ({ isActive }: BubbleContentProps) => {
 
   return (
     <div className='relative flex h-full w-full items-center justify-center'>
-      {imagePaths.map((path, index) => (
+      {IMAGE_PATHS.map((path, index) => (
         <Image
           key={index}
           className={cn(

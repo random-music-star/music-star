@@ -1,8 +1,4 @@
-interface FootholderPosition {
-  xRatio: number;
-  yRatio: number;
-  size?: number;
-}
+import { FootholderPosition } from '@/constants/boardMap/footholderRatios';
 
 export function interpolatePosition(
   fromPos: FootholderPosition,
