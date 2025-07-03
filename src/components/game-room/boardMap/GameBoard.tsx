@@ -7,6 +7,7 @@ import { useGameBubbleStore } from '@/stores/websocket/useGameBubbleStore';
 import { useGameDiceStore } from '@/stores/websocket/useGameDiceStore';
 import { useParticipantInfoStore } from '@/stores/websocket/useGameParticipantStore';
 import { useScoreStore } from '@/stores/websocket/useScoreStore';
+import { createInitialCharacters } from '@/utils/boardMap/createInitialCharacters';
 import { interpolatePosition } from '@/utils/boardMap/interpolatePosition';
 
 import EventOverlay from './EventOverlay';
@@ -54,18 +55,8 @@ const GameBoard = () => {
   // 플레이어 초기화
   useEffect(() => {
     if (participantInfo.length > 0) {
-      const now = performance.now();
-      const initialCharacters = participantInfo.map(participant => ({
-        name: participant.userName,
-        position: 0,
-        imageSrc: participant.character,
-        animationOffset: 0,
-        isMoving: false,
-        fromPosition: 0,
-        toPosition: 0,
-        moveProgress: 0,
-        moveStartTime: now,
-      }));
+      const initialCharacters = createInitialCharacters(participantInfo);
+
       setCharacters(initialCharacters);
       setIsLoading(false);
     }
