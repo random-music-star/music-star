@@ -2,13 +2,17 @@ import React from 'react';
 
 import { FOOTHOLDER_RATIOS } from '@/constants/boardMap/footholderRatios';
 
-interface Props {
+interface FootholdersProps {
   paddedWidth: number;
   paddedHeight: number;
   padding: number;
 }
 
-const Footholders = ({ paddedWidth, paddedHeight, padding }: Props) => {
+const Footholders = ({
+  paddedWidth,
+  paddedHeight,
+  padding,
+}: FootholdersProps) => {
   const leftSectionWidth = paddedWidth * 0.75;
   const baseSize = Math.min(48, leftSectionWidth * 0.08);
 

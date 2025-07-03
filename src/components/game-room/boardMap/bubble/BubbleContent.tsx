@@ -6,7 +6,10 @@ import { cn } from '@/lib/utils';
 import { useSoundEventStore } from '@/stores/useSoundEventStore';
 import { useGameDiceStore } from '@/stores/websocket/useGameDiceStore';
 
-const BubbleContent = ({ isActive }: { isActive: boolean }) => {
+interface BubbleContentProps {
+  isActive: boolean;
+}
+const BubbleContent = ({ isActive }: BubbleContentProps) => {
   const [currentImage, setCurrentImage] = useState(1);
   const [isAnimating, setIsAnimating] = useState(false);
   const { diceTotalmovement } = useGameDiceStore();
