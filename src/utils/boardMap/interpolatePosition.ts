@@ -1,4 +1,8 @@
-import { FootholderPosition } from '@/components/game-room/boardMap/GameBoard';
+interface FootholderPosition {
+  xRatio: number;
+  yRatio: number;
+  size?: number;
+}
 
 export function interpolatePosition(
   fromPos: FootholderPosition,

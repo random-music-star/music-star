@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { footholderRatios } from '@/constants/boardMap/footholderRatios';
 import { useWindowSize } from '@/hooks/useWindowSize';
@@ -13,12 +13,6 @@ import { interpolatePosition } from '@/utils/boardMap/interpolatePosition';
 import EventOverlay from './EventOverlay';
 import Footholders from './Footholders';
 import Bubble from './bubble';
-
-export interface FootholderPosition {
-  xRatio: number;
-  yRatio: number;
-  size?: number;
-}
 
 export interface UserCharacter {
   name: string;

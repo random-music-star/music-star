@@ -1,4 +1,8 @@
-import { FootholderPosition } from '@/components/game-room/boardMap/GameBoard';
+interface FootholderPosition {
+  xRatio: number;
+  yRatio: number;
+  size?: number;
+}
 
 export const footholderRatios: FootholderPosition[] = [
   { xRatio: 0.1, yRatio: 0.88, size: 2 },
