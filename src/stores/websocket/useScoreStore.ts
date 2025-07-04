@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-type PlayingGameScore = Record<string, number>;
+export type PlayingGameScore = Record<string, number>;
 
 export interface ScoreStore {
   scores: PlayingGameScore;
