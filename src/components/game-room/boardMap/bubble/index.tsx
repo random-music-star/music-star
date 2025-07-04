@@ -8,25 +8,17 @@ interface BubbleProps {
   isActiveDice: boolean;
   character: UserCharacter;
   charWidth: number;
-  characterX: number;
-  characterY: number;
 }
 
-const Bubble = ({
-  isActiveDice,
-  character,
-  charWidth,
-  characterX,
-  characterY,
-}: BubbleProps) => {
+const Bubble = ({ isActiveDice, character, charWidth }: BubbleProps) => {
   const { diceUsername } = useGameDiceStore();
 
   const isLeftSide = BUBBLE_RIGHT_MAP[character.position] || false;
   const bubbleSize = charWidth * 2;
 
   const bubbleImage = isLeftSide ? '/bubble.svg' : '/bubble_left.svg';
-  const bubbleX = characterX - bubbleSize + 20;
-  const bubbleY = characterY - bubbleSize + 20 + character.position / 2;
+  const bubbleX = character.x - bubbleSize + 20;
+  const bubbleY = character.y - bubbleSize + 20 + character.position / 2;
   const isCurrentPlayer = character.name === diceUsername;
 
   return (

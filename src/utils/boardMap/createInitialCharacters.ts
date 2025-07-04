@@ -4,6 +4,10 @@ export function createInitialCharacters(
   return participantInfo.map(participant => ({
     name: participant.userName,
     position: 0,
+    x: 0,
+    y: 0,
+    nameX: 0,
+    nameY: 0,
     imageSrc: participant.character,
     animationOffset: 0,
     isMoving: false,
