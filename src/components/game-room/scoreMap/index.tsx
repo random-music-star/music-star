@@ -1,5 +1,7 @@
 import { useEffect } from 'react';
 
+import { useShallow } from 'zustand/shallow';
+
 import { SCORE_MAP_SOUNDS } from '@/constants/config/soundConfig';
 import useSound from '@/hooks/useSound';
 import { useSoundEventStore } from '@/stores/useSoundEventStore';
@@ -18,7 +20,12 @@ const ScoreMap = ({
   roomId: string;
   channelId: string;
 }) => {
-  const { soundEvent, setSoundEvent } = useSoundEventStore();
+  const { soundEvent, setSoundEvent } = useSoundEventStore(
+    useShallow(state => ({
+      soundEvent: state.soundEvent,
+      setSoundEvent: state.setSoundEvent,
+    })),
+  );
   const { play, stop } = useSound(SCORE_MAP_SOUNDS);
 
   useEffect(() => {

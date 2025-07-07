@@ -30,9 +30,12 @@ const ScoreWaitingPanel = ({
   channelId,
 }: ScoreWaitingPanelProps) => {
   const router = useRouter();
-  const { gameRoomInfo } = useGameInfoStore();
-  const { participantInfo, hostNickname } = useParticipantInfoStore();
-  const { nickname: currentNickname } = useNicknameStore();
+  const gameRoomInfo = useGameInfoStore(state => state.gameRoomInfo);
+  const participantInfo = useParticipantInfoStore(
+    state => state.participantInfo,
+  );
+  const hostNickname = useParticipantInfoStore(state => state.hostNickname);
+  const currentNickname = useNicknameStore(state => state.nickname);
 
   const isHost = currentUserId === hostNickname;
 

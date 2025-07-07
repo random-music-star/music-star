@@ -10,7 +10,8 @@ interface MusicPlayerProps {
 }
 
 const GameMusicPlayer = ({ gameState }: MusicPlayerProps) => {
-  const { roundInfo } = useGameRoundInfoStore();
+  const roundInfo = useGameRoundInfoStore(state => state.roundInfo);
+
   if (!roundInfo) return null;
   const { round: currentRound, mode } = roundInfo;
   const isDualMode = mode === 'DUAL';

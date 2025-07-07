@@ -10,9 +10,10 @@ import {
 import { useGameStateStore } from '@/stores/websocket/useGameStateStore';
 
 const RoundRolling = () => {
-  const { gameRoomInfo } = useGameInfoStore();
-  const { gameState } = useGameStateStore();
-  const { roundInfo } = useGameRoundInfoStore();
+  const gameRoomInfo = useGameInfoStore(state => state.gameRoomInfo);
+  const gameState = useGameStateStore(state => state.gameState);
+  const roundInfo = useGameRoundInfoStore(state => state.roundInfo);
+
   const [isRolling, setIsRolling] = useState(true);
 
   useEffect(() => {

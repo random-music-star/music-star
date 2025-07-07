@@ -16,11 +16,13 @@ import RoundInformation from './RoundInfomation';
 import SpeechBubble from './SpeechBubble';
 
 const GamePlaySection = () => {
-  const { participantInfo } = useParticipantInfoStore();
-  const { gameRoomInfo } = useGameInfoStore();
-  const { gameChattings } = useGameChatStore();
-  const { gameState } = useGameStateStore();
-  const { winner } = useGameWinnerStore();
+  const participantInfo = useParticipantInfoStore(
+    state => state.participantInfo,
+  );
+  const gameRoomInfo = useGameInfoStore(state => state.gameRoomInfo);
+  const gameChattings = useGameChatStore(state => state.gameChattings);
+  const gameState = useGameStateStore(state => state.gameState);
+  const winner = useGameWinnerStore(state => state.winner);
 
   const [chattingMap, setChattingMap] = useState<
     Record<string, { message: string; timestamp: number }>

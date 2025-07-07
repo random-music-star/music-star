@@ -8,7 +8,7 @@ import RoundRolling from '../gameScreen/RoundRolling';
 import YoutubePlayer from '../gameScreen/YoutubePlayer';
 
 const ScoreRoundInformation = () => {
-  const { gameState } = useGameStateStore();
+  const gameState = useGameStateStore(state => state.gameState);
 
   const containerVariants = {
     hidden: { opacity: 0 },

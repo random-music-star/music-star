@@ -13,8 +13,8 @@ export interface GameHint {
 }
 
 const RoundPlayContent = () => {
-  const { roundHint } = useRoundHintStore();
-  const { roundInfo } = useGameRoundInfoStore();
+  const roundHint = useRoundHintStore(state => state.roundHint);
+  const roundInfo = useGameRoundInfoStore(state => state.roundInfo);
 
   const { mode } = roundInfo;
   const isDualMode = mode === 'DUAL';

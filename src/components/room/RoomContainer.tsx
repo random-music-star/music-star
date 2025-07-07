@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 
 import { useRouter } from 'next/router';
+import { useShallow } from 'zustand/shallow';
 
 import BackgroundMusic from '@/components/common/BackgroundMusic';
 import ChatBox from '@/components/game-room/ChatBox';
@@ -23,10 +24,16 @@ export default function GameRoomContainer({
 }: GameRoomServerProps) {
   const router = useRouter();
 
-  const { nickname } = useNicknameStore();
-  const { isConnected, updateSubscription, sendMessage } = useWebSocketStore();
-  const { gameRoomInfo } = useGameInfoStore();
-  const { gameState } = useGameStateStore();
+  const nickname = useNicknameStore(state => state.nickname);
+  const { isConnected, updateSubscription, sendMessage } = useWebSocketStore(
+    useShallow(state => ({
+      isConnected: state.isConnected,
+      updateSubscription: state.updateSubscription,
+      sendMessage: state.sendMessage,
+    })),
+  );
+  const gameRoomInfo = useGameInfoStore(state => state.gameRoomInfo);
+  const gameState = useGameStateStore(state => state.gameState);
 
   useEffect(() => {
     if (isConnected) {

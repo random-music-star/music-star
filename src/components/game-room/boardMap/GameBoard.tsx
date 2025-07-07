@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
+import { useShallow } from 'zustand/shallow';
+
 import { useBoardAnimation } from '@/hooks/useBoardAnimation';
 import { useBoardLayoutSize } from '@/hooks/useBoardLayoutSize';
 import { useWindowSize } from '@/hooks/useWindowSize';
@@ -44,11 +46,19 @@ const ANIMATION_CONFIG = {
 };
 
 const GameBoard = () => {
-  const { scores } = useScoreStore();
-  const { targetUser, triggerUser, eventType } = useGameBubbleStore();
-  const { participantInfo } = useParticipantInfoStore();
-  const { setSoundEvent } = useSoundEventStore();
-  const { isActiveDice } = useGameDiceStore();
+  const scores = useScoreStore(state => state.scores);
+  const { targetUser, triggerUser, eventType } = useGameBubbleStore(
+    useShallow(state => ({
+      targetUser: state.targetUser,
+      triggerUser: state.triggerUser,
+      eventType: state.eventType,
+    })),
+  );
+  const participantInfo = useParticipantInfoStore(
+    state => state.participantInfo,
+  );
+  const setSoundEvent = useSoundEventStore(state => state.setSoundEvent);
+  const isActiveDice = useGameDiceStore(state => state.isActiveDice);
 
   const { windowSize } = useWindowSize();
   const { layoutSize } = useBoardLayoutSize(windowSize, BOARD_CONFIG);

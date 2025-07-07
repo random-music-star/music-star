@@ -11,7 +11,7 @@ interface BubbleProps {
 }
 
 const Bubble = ({ isActiveDice, character, charWidth }: BubbleProps) => {
-  const { diceUsername } = useGameDiceStore();
+  const diceUsername = useGameDiceStore(state => state.diceUsername);
 
   const isLeftSide = BUBBLE_RIGHT_MAP[character.position] || false;
   const bubbleSize = charWidth * 2;

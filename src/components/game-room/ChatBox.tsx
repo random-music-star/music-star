@@ -13,11 +13,11 @@ interface ChatBoxProps {
 }
 
 const ChatBox = ({ currentUserId, roomId, channelId }: ChatBoxProps) => {
+  const gameChattings = useGameChatStore(state => state.gameChattings);
+  const sendMessage = useWebSocketStore(state => state.sendMessage);
+
   const [inputValue, setInputValue] = useState('');
   const chatContainerRef = useRef<HTMLDivElement>(null);
-
-  const { gameChattings } = useGameChatStore();
-  const { sendMessage } = useWebSocketStore();
 
   useEffect(() => {
     if (chatContainerRef.current) {

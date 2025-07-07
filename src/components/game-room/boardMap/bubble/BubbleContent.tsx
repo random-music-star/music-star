@@ -16,11 +16,13 @@ interface BubbleContentProps {
   isActive: boolean;
 }
 const BubbleContent = ({ isActive }: BubbleContentProps) => {
+  const diceTotalmovement = useGameDiceStore(state => state.diceTotalmovement);
+  const setSoundEvent = useSoundEventStore(state => state.setSoundEvent);
+
   const [currentImage, setCurrentImage] = useState(1);
   const [isAnimating, setIsAnimating] = useState(false);
-  const { diceTotalmovement } = useGameDiceStore();
+
   const animationRef = useRef<NodeJS.Timeout | null>(null);
-  const { setSoundEvent } = useSoundEventStore();
 
   useEffect(() => {
     if (isActive && !isAnimating) {

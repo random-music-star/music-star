@@ -1,5 +1,7 @@
 import { useEffect } from 'react';
 
+import { useShallow } from 'zustand/shallow';
+
 import { BOARD_MAP_SOUNDS } from '@/constants/config/soundConfig';
 import useSound from '@/hooks/useSound';
 import { cn } from '@/lib/utils';
@@ -10,8 +12,13 @@ import GamePlaySection from '../gamePlaySection';
 import GameBoard from './GameBoard';
 
 const BoardMap = () => {
-  const { gameState } = useGameStateStore();
-  const { soundEvent, setSoundEvent } = useSoundEventStore();
+  const gameState = useGameStateStore(state => state.gameState);
+  const { soundEvent, setSoundEvent } = useSoundEventStore(
+    useShallow(state => ({
+      soundEvent: state.soundEvent,
+      setSoundEvent: state.setSoundEvent,
+    })),
+  );
 
   const { play, stop } = useSound(BOARD_MAP_SOUNDS);
 

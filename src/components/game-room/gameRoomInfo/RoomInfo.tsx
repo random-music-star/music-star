@@ -25,8 +25,10 @@ const yearMap: SelectedYearType[] = [
 ];
 
 const GameRoomInfo = () => {
-  const { gameRoomInfo } = useGameInfoStore();
-  const { participantInfo } = useParticipantInfoStore();
+  const gameRoomInfo = useGameInfoStore(state => state.gameRoomInfo);
+  const participantInfo = useParticipantInfoStore(
+    state => state.participantInfo,
+  );
 
   if (!gameRoomInfo) return null;
 

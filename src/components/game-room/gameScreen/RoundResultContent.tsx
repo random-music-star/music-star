@@ -6,8 +6,11 @@ import { useGameRoundInfoStore } from '@/stores/websocket/useGameRoundInfoStore'
 import { useGameRoundResultStore } from '@/stores/websocket/useGameRoundResultStore';
 
 const RoundResultContent = () => {
-  const { gameRoundResult } = useGameRoundResultStore();
-  const { roundInfo } = useGameRoundInfoStore();
+  const gameRoundResult = useGameRoundResultStore(
+    state => state.gameRoundResult,
+  );
+  const roundInfo = useGameRoundInfoStore(state => state.roundInfo);
+
   const { mode } = roundInfo;
   const isDualMode = mode === 'DUAL';
 
