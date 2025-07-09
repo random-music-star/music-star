@@ -28,9 +28,9 @@ export default function EditRoomButton({
     }
   }, [router.isReady, router.asPath]);
 
-  const { gameRoomInfo } = useGameInfoStore();
-  const { hostNickname } = useParticipantInfoStore();
-  const { nickname } = useNicknameStore();
+  const gameRoomInfo = useGameInfoStore(state => state.gameRoomInfo);
+  const hostNickname = useParticipantInfoStore(state => state.hostNickname);
+  const nickname = useNicknameStore(state => state.nickname);
 
   // 방장인지 확인
   const isRoomOwner = (hostNickname && hostNickname === nickname) || false;

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 
 import { motion } from 'framer-motion';
 import Image from 'next/image';
+import { useShallow } from 'zustand/shallow';
 
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -26,11 +27,16 @@ const ReadyPanel = ({
   roomId,
   channelId,
 }: ReadyPanelProps) => {
-  const { participantInfo, isAllReady, hostNickname } =
-    useParticipantInfoStore();
-  const { gameRoomInfo } = useGameInfoStore();
-  const { gameChattings } = useGameChatStore();
-  const { sendMessage } = useWebSocketStore();
+  const { participantInfo, isAllReady, hostNickname } = useParticipantInfoStore(
+    useShallow(state => ({
+      participantInfo: state.participantInfo,
+      isAllReady: state.isAllReady,
+      hostNickname: state.hostNickname,
+    })),
+  );
+  const gameRoomInfo = useGameInfoStore(state => state.gameRoomInfo);
+  const gameChattings = useGameChatStore(state => state.gameChattings);
+  const sendMessage = useWebSocketStore(state => state.sendMessage);
 
   const [chattingMap, setChattingMap] = useState<
     Record<string, { message: string; timestamp: number }>

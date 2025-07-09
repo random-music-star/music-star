@@ -17,9 +17,11 @@ interface Participant {
 
 const ScoreboardTable = () => {
   // 실제 데이터 사용
-  const { scores } = useScoreStore();
-  const { participantInfo } = useParticipantInfoStore();
-  const { nickname: currentUser } = useNicknameStore();
+  const scores = useScoreStore(state => state.scores);
+  const participantInfo = useParticipantInfoStore(
+    state => state.participantInfo,
+  );
+  const currentUser = useNicknameStore(state => state.nickname);
 
   const [isLoading, setIsLoading] = useState(true);
   const [allPlayers, setAllPlayers] = useState<Participant[]>([]);

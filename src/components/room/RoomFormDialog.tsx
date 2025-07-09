@@ -40,13 +40,15 @@ export default function RoomFormDialog({
   buttonClassName = 'bg-[#9FFCFE] text-black hover:bg-opacity-80 rounded-full px-6',
   onDialogClose,
 }: RoomFormDialogProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const { gameRoomInfo } = useGameInfoStore();
   const router = useRouter();
+  const { channelId } = router.query;
+
+  const gameRoomInfo = useGameInfoStore(state => state.gameRoomInfo);
+
+  const [isOpen, setIsOpen] = useState(false);
 
   // 대화상자가 열릴 때마다 새로 설정할 초기 데이터 상태
   const [initialData, setInitialData] = useState<InitialDataType | null>(null);
-  const { channelId } = router.query;
 
   // isOpen이 true로 바뀔 때에만 initialData 설정
   useEffect(() => {

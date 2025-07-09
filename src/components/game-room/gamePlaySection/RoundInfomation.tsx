@@ -6,7 +6,7 @@ import RoundRolling from '../gameScreen/RoundRolling';
 import YoutubePlayer from '../gameScreen/YoutubePlayer';
 
 const RoundInformation = () => {
-  const { gameState } = useGameStateStore();
+  const gameState = useGameStateStore(state => state.gameState);
 
   return (
     <div className='flex h-[300px] min-w-[60%] flex-col items-center justify-center rounded-2xl bg-black/80 p-4'>

@@ -96,7 +96,7 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
         `/topic/channel/${channelId}`,
         message => {
           const { response } = JSON.parse(message.body);
-          usePublicChatStore.getState().setPublicChattings(response);
+          usePublicChatStore.getState().addPublicChattings(response);
         },
         {
           Authorization: `Bearer ${getCookie(COOKIE_NAME)}`,

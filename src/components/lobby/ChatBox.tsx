@@ -1,5 +1,7 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
 
+import { useShallow } from 'zustand/shallow';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useNicknameStore } from '@/stores/auth/useNicknameStore';
@@ -8,13 +10,22 @@ import { useWebSocketStore } from '@/stores/websocket/useWebsocketStore';
 import { Chatting } from '@/types/websocket';
 
 export default function ChatBox({ channelId }: { channelId: string }) {
-  const { nickname } = useNicknameStore();
-  const [newMessage, setNewMessage] = useState<string>('');
-  const chatContainerRef = useRef<HTMLDivElement>(null);
+  const nickname = useNicknameStore(state => state.nickname);
 
   const { sendMessage, updateSubscription, isConnected, checkSubscription } =
-    useWebSocketStore();
-  const { publicChattings } = usePublicChatStore();
+    useWebSocketStore(
+      useShallow(state => ({
+        sendMessage: state.sendMessage,
+        updateSubscription: state.updateSubscription,
+        isConnected: state.isConnected,
+        checkSubscription: state.checkSubscription,
+      })),
+    );
+  const publicChattings = usePublicChatStore(state => state.publicChattings);
+
+  const [newMessage, setNewMessage] = useState<string>('');
+
+  const chatContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (isConnected && !checkSubscription('channel')) {

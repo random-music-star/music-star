@@ -1,5 +1,8 @@
 import { useEffect } from 'react';
 
+import { useShallow } from 'zustand/shallow';
+
+import { SCORE_MAP_SOUNDS } from '@/constants/config/soundConfig';
 import useSound from '@/hooks/useSound';
 import { useSoundEventStore } from '@/stores/useSoundEventStore';
 
@@ -7,8 +10,6 @@ import GameExitButton from '../GameExitButton';
 import ScoreChatBox from '../ScoreChatBox';
 import ScoreboardTable from './ScoreBoardTable';
 import ScoreRoundInformation from './ScoreRoundInformation';
-
-// 실제 경로로 수정해주세요
 
 const ScoreMap = ({
   nickname,
@@ -19,13 +20,13 @@ const ScoreMap = ({
   roomId: string;
   channelId: string;
 }) => {
-  const { soundEvent, setSoundEvent } = useSoundEventStore();
-  const { play, stop } = useSound([
-    { key: 'ROULETTE', url: '/audio/playsound/roulette.mp3' },
-    { key: 'ROULETTE_RESULT', url: '/audio/playsound/roulette-result.mp3' },
-    { key: 'CORRECT', url: '/audio/playsound/correct.mp3' },
-    { key: 'WINNER', url: '/audio/playsound/winner.mp3' },
-  ]);
+  const { soundEvent, setSoundEvent } = useSoundEventStore(
+    useShallow(state => ({
+      soundEvent: state.soundEvent,
+      setSoundEvent: state.setSoundEvent,
+    })),
+  );
+  const { play, stop } = useSound(SCORE_MAP_SOUNDS);
 
   useEffect(() => {
     if (soundEvent) play(soundEvent);

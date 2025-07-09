@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { useGameWinnerStore } from '@/stores/websocket/useGameWinnerStore';
 
 const GameResultContent = () => {
-  const { winner } = useGameWinnerStore();
+  const winner = useGameWinnerStore(state => state.winner);
 
   return (
     <div className='flex w-full flex-col items-center justify-center py-6'>

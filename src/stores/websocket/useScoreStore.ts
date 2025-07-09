@@ -15,12 +15,18 @@ export const useScoreStore = create<ScoreStore>(set => ({
   setScores: initialScores => set({ scores: initialScores }),
 
   updateScore: (username, score) =>
-    set(state => ({
-      scores: {
-        ...state.scores,
-        [username]: score,
-      },
-    })),
+    set(state => {
+      const current = state.scores[username];
+      if (current === score) {
+        return {};
+      }
+      return {
+        scores: {
+          ...state.scores,
+          [username]: score,
+        },
+      };
+    }),
 
   resetScores: () => set({ scores: {} }),
 }));

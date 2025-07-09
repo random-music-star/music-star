@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { useGameStateStore } from '@/stores/websocket/useGameStateStore';
 
 const RotatingLP = () => {
-  const { gameState } = useGameStateStore();
+  const gameState = useGameStateStore(state => state.gameState);
   const controls = useAnimation();
 
   useEffect(() => {

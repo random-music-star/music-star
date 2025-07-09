@@ -19,8 +19,8 @@ export const useGameDiceStore = create<GameDiceStore>(set => ({
   isActiveDice: false,
   diceUsername: '',
   diceTotalmovement: null,
-  setIsActiveDice: (isActiceDice: boolean) => {
-    set({ isActiveDice: isActiceDice });
+  setIsActiveDice: (isActiveDice: boolean) => {
+    set({ isActiveDice });
   },
   setDice: (movement: MovementInfo) => {
     set({
